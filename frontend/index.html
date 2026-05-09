@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сервіс створення резюме</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
+    <link rel="icon" href="/frontend/favicon/fav.png">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+
+<body>
+
+    <!-- Навігація -->
+    <nav class="navbar">
+        <div class="nav-logo" onclick="navigate('landing')">
+            <div class="nav-logo-mark">
+                <svg viewBox="0 0 14 14" fill="none">
+                    <rect x="1" y="1" width="12" height="12" rx="2" stroke="white" stroke-width="1.5" />
+                    <path d="M3.5 4.5H10.5M3.5 7H8M3.5 9.5H6.5" stroke="white" stroke-width="1.2"
+                        stroke-linecap="round" />
+                </svg>
+            </div>
+            Автоматизоване Резюме
+        </div>
+
+        <button class="nav-hamburger" id="hamburger" onclick="toggleMenu()">
+            <span></span><span></span><span></span>
+        </button>
+
+        <div class="nav-links" id="navLinks">
+            <button class="nav-link" data-page="dashboard">Мої резюме</button>
+            <button class="nav-link" data-page="templates" onclick="syncTemplateSelection()">Шаблони</button>
+            <button class="nav-link" data-page="analysis">Аналіз</button>
+        </div>
+
+        <div class="nav-right">
+            <span class="nav-user hidden" id="navUser"></span>
+            <button class="btn btn-ghost btn-sm" id="btnLogin" onclick="openModal('mLogin')">Увійти</button>
+            <button class="btn btn-primary btn-sm" id="btnReg" onclick="openModal('mRegister')">Реєстрація</button>
+            <button class="btn btn-ghost btn-sm hidden" id="btnLogout" onclick="logout()">Вийти</button>
+        </div>
+    </nav>
+
+    <!-- Головна сторінка -->
+    <div class="page active" id="page-landing">
+        <section class="hero">
+            <div>
+                <div class="hero-eyebrow">Автоматизоване створення резюме</div>
+                <h1>Резюме, що<br><em>справді</em><br>відкриває двері</h1>
+                <p class="hero-desc">Заповни дані, обери шаблон, отримай ATS-сумісне PDF за хвилини.</p>
+                <div class="hero-actions">
+                    <button class="btn btn-copper btn-lg" onclick="startResumeCreation()">Створити резюме</button>
+                    <button class="btn btn-ghost btn-lg" onclick="navigate('templates')">Шаблони</button>
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="hero-resume-float">
+                    <div class="hrf-card">
+                        <div class="hrf-head">
+                            <div class="hrf-head-info">
+                                <div class="hrf-name">Іван Коваленко</div>
+                                <div class="hrf-role">Full-Stack Developer</div>
+                                <div class="hrf-contacts-row">
+                                    <span class="hrf-contact-item">📧 ivan@email.com</span>
+                                    <span class="hrf-contact-item">📍 Київ, Україна</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="hrf-body">
+                            <div class="hrf-left">
+                                <div class="hrf-block">
+                                    <div class="hrf-block-title">Навички</div>
+                                    <div class="hrf-tags">
+                                        <span class="hrf-tag">React</span>
+                                        <span class="hrf-tag">Node.js</span>
+                                        <span class="hrf-tag">TypeScript</span>
+                                        <span class="hrf-tag">PostgreSQL</span>
+                                        <span class="hrf-tag">Docker</span>
+                                        <span class="hrf-tag">AWS</span>
+                                    </div>
+                                </div>
+
+                                <div class="hrf-block">
+                                    <div class="hrf-block-title">Мови</div>
+                                    <div class="hrf-lang-row">
+                                        <span class="hrf-lang-name">Англійська</span>
+                                        <span class="hrf-lang-lvl">B2</span>
+                                    </div>
+                                    <div class="hrf-lang-row">
+                                        <span class="hrf-lang-name">Українська</span>
+                                        <span class="hrf-lang-lvl">Рідна</span>
+                                    </div>
+                                </div>
+
+                                <div class="hrf-block">
+                                    <div class="hrf-block-title">Контакти</div>
+                                    <div class="hrf-link">linkedin.com/in/ivan</div>
+                                    <div class="hrf-link">github.com/ikovalenko</div>
+                                </div>
+                            </div>
+
+                            <div class="hrf-right">
+                                <div class="hrf-block">
+                                    <div class="hrf-block-title">Профіль</div>
+                                    <p class="hrf-about">
+                                        Досвідчений розробник із 5+ роками досвіду. Спеціалізуюсь на побудові
+                                        масштабованих веб-застосунків та мікросервісній архітектурі.
+                                    </p>
+                                </div>
+
+                                <div class="hrf-block">
+                                    <div class="hrf-block-title">Досвід роботи</div>
+
+                                    <div class="hrf-exp-item">
+                                        <div class="hrf-exp-head">
+                                            <span class="hrf-exp-title">Senior Full-Stack Developer</span>
+                                            <span class="hrf-exp-date">2022 — теп. час</span>
+                                        </div>
+                                        <div class="hrf-exp-company">TechCorp Ukraine</div>
+                                        <ul class="hrf-exp-list">
+                                            <li>Керівництво командою з 4 розробників</li>
+                                            <li>Розробка мікросервісної архітектури</li>
+                                            <li>Оптимізація продуктивності на 40%</li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="hrf-exp-item">
+                                        <div class="hrf-exp-head">
+                                            <span class="hrf-exp-title">Frontend Developer</span>
+                                            <span class="hrf-exp-date">2020 — 2022</span>
+                                        </div>
+                                        <div class="hrf-exp-company">StartupHub</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="hrf-badge hrf-badge-top">
+                        <span class="hrf-badge-dot"></span>
+                        ATS-сумісне
+                    </div>
+                    <div class="hrf-badge hrf-badge-bot">
+                        <div class="hrf-badge-score">
+                            <span class="hrf-score-num">87%</span>
+                            <span class="hrf-score-sub">відповідність вакансії</span>
+                        </div>
+                        <div class="hrf-score-bar">
+                            <div class="hrf-score-fill" style="width:87%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="features-wrap">
+                <div class="features-head">
+                    <div class="label">Можливості</div>
+                    <h2>Все необхідне — в одному місці</h2>
+                </div>
+                <div class="features-grid"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Дашборд -->
+    <div class="page" id="page-dashboard">
+        <div class="dash-wrap">
+            <div class="dash-top">
+                <div>
+                    <div class="dash-greeting">Вітаємо, <span id="greetName">—</span></div>
+                    <div class="dash-title">Мої резюме</div>
+                </div>
+                <button class="btn btn-copper" onclick="navigate('templates')">+ Нове резюме</button>
+            </div>
+            <div class="resume-grid" id="resumeGrid"></div>
+        </div>
+    </div>
+
+    <!-- Редактор -->
+    <div class="page" id="page-editor">
+        <div class="editor-shell">
+            <div class="editor-sidebar">
+                <div class="sidebar-bar">
+                    <input class="resume-title-input" id="resumeTitle" placeholder="Назва резюме"
+                        oninput="scheduleAutosave()">
+                    <span class="save-status" id="saveStatus">збережено</span>
+                    <span class="tmpl-label" id="currentTmplLabel" onclick="navigate('templates')">Класичний ▾</span>
+                    <button class="btn btn-copper btn-sm" id="pdfBtn" onclick="downloadPDF()">PDF</button>
+                </div>
+
+                <div class="progress-block">
+                    <svg class="ring" viewBox="0 0 44 44">
+                        <circle class="ring-bg" cx="22" cy="22" r="18" />
+                        <circle class="ring-fill" cx="22" cy="22" r="18" id="ringFill" />
+                        <text class="ring-pct" x="22" y="22" id="ringPct">0%</text>
+                    </svg>
+                    <div class="ring-info">
+                        <div class="ring-title">Заповненість</div>
+                        <div class="ring-sub" id="ringSub"></div>
+                    </div>
+                </div>
+
+                <div class="sec-nav"></div>
+
+                <div class="form-area">
+                    <div class="form-sec active" id="form-personal">
+                        <div class="form-row">
+                            <div class="fg"><label>Ім'я</label><input id="f-firstName" placeholder="Іван"
+                                    oninput="onFormInput()"></div>
+                            <div class="fg"><label>Прізвище</label><input id="f-lastName" placeholder="Іваненко"
+                                    oninput="onFormInput()"></div>
+                        </div>
+                        <div class="fg"><label>Посада</label><input id="f-jobTitle" placeholder="Junior Developer"
+                                oninput="onFormInput()">
+                        </div>
+                        <div class="form-row">
+                            <div class="fg"><label>Email</label><input id="f-email" type="email"
+                                    placeholder="you@email.com" oninput="onFormInput()"></div>
+                            <div class="fg"><label>Телефон</label><input id="f-phone" placeholder="+38 099 000 0000"
+                                    oninput="onFormInput()">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="fg"><label>Місто</label><input id="f-city" placeholder="Київ"
+                                    oninput="onFormInput()"></div>
+                            <div class="fg"><label>LinkedIn</label><input id="f-linkedin"
+                                    placeholder="linkedin.com/in/name" oninput="onFormInput()"></div>
+                        </div>
+                        <div class="fg" id="photoField">
+                            <label>Фото</label>
+                            <div style="display:flex;gap:8px;align-items:center">
+                                <input type="file" id="f-photo" accept="image/*" onchange="previewPhoto(event)"
+                                    style="flex:1">
+                                <button type="button" class="btn btn-danger btn-sm" id="removePhotoBtn"
+                                    onclick="removePhoto()" style="display:none">✕</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-sec" id="form-summary">
+                        <div class="fg"><label>Про себе</label><textarea id="f-summary" rows="4"
+                                placeholder="Розкажіть про свій досвід..." oninput="onFormInput()"></textarea></div>
+                    </div>
+
+                    <div class="form-sec" id="form-experience">
+                        <div id="expList"></div>
+                        <button class="add-entry-btn" onclick="addExp()">+ Додати</button>
+                    </div>
+
+                    <div class="form-sec" id="form-education">
+                        <div id="eduList"></div>
+                        <button class="add-entry-btn" onclick="addEdu()">+ Додати</button>
+                    </div>
+
+                    <div class="form-sec" id="form-skills">
+                        <div class="fg"><label>Навичка (Enter)</label><input id="skillInput" placeholder="Docker"
+                                onkeydown="addSkillTag(event)"></div>
+                        <div class="tags-wrap" id="skillTags"></div>
+                    </div>
+
+                    <div class="form-sec" id="form-languages">
+                        <div id="langList"></div>
+                        <button class="add-entry-btn" onclick="addLang()">+ Додати</button>
+                    </div>
+
+                    <div class="form-sec" id="form-projects">
+                        <div id="projList"></div>
+                        <button class="add-entry-btn" onclick="addProj()">+ Додати</button>
+                    </div>
+
+                    <div class="form-sec" id="form-links">
+                        <div class="fg"><label>GitHub</label><input id="f-github" placeholder="github.com/username"
+                                oninput="onFormInput()"></div>
+                        <div class="fg"><label>Портфоліо</label><input id="f-website" placeholder="yoursite.ua"
+                                oninput="onFormInput()"></div>
+                        <div class="fg"><label>Telegram</label><input id="f-telegram" placeholder="@username"
+                                oninput="onFormInput()"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Прев'ю -->
+            <div class="preview-pane">
+                <div class="a4 tmpl-classic" id="a4Preview">
+                    <div class="a4-head" id="a4Head">
+                        <img class="a4-photo" id="pvPhoto" src="" alt="Фото" style="display:none">
+                        <div>
+                            <div class="a4-name" id="pvName">Ім'я Прізвище</div>
+                            <div class="a4-role" id="pvRole">Посада</div>
+                            <div class="a4-contacts" id="pvContacts"></div>
+                        </div>
+                    </div>
+                    <div class="a4-body">
+                        <div class="a4-left">
+                            <div id="pvSkillsSec">
+                                <div class="a4-sec-title">Навички</div>
+                                <div id="pvSkills"></div>
+                            </div>
+                            <div id="pvLangsSec">
+                                <div class="a4-sec-title">Мови</div>
+                                <div id="pvLangs"></div>
+                            </div>
+                            <div id="pvLinksSec">
+                                <div class="a4-sec-title">Посилання</div>
+                                <div id="pvLinks" class="pv-links"></div>
+                            </div>
+                            <div class="a4-left-spacer"></div>
+                        </div>
+                        <div class="a4-right">
+                            <div id="pvAboutSec">
+                                <div class="a4-sec-title">Профіль</div>
+                                <div class="a4-about" id="pvAbout"></div>
+                            </div>
+                            <div id="pvEduSec">
+                                <div class="a4-sec-title">Освіта</div>
+                                <div id="pvEdu"></div>
+                            </div>
+                            <div id="pvExpSec">
+                                <div class="a4-sec-title">Досвід роботи</div>
+                                <div id="pvExp"></div>
+                            </div>
+                            <div id="pvProjSec">
+                                <div class="a4-sec-title">Проєкти</div>
+                                <div id="pvProjects"></div>
+                            </div>
+                            <div id="pvRightExtra"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Шаблони -->
+    <div class="page" id="page-templates">
+        <div class="templates-wrap">
+            <div class="templates-head">
+                <div class="label">Шаблони</div>
+                <h2>Оберіть стиль оформлення</h2>
+            </div>
+            <div class="tmpl-grid"></div>
+            <div class="templates-action">
+                <button class="btn btn-copper btn-lg" onclick="applyTemplate()">Застосувати шаблон →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Аналіз -->
+    <div class="page" id="page-analysis">
+        <div class="analysis-wrap">
+            <div class="analysis-head">
+                <div class="label">Аналіз</div>
+                <h2>Відповідність резюме вакансії</h2>
+                <p class="analysis-subtitle">Вставте текст вакансії — отримаєте відсоток збігів та рекомендації</p>
+            </div>
+            <div class="analysis-input-card">
+                <label>Текст вакансії</label>
+                <textarea class="analysis-ta" id="jobText" placeholder="Вставте опис вакансії..."></textarea>
+                <div class="analysis-row">
+                    <div class="resume-select-wrap">
+                        <span>Резюме:</span>
+                        <select id="analyzeResumeSelect">
+                            <option value="">— оберіть —</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-copper" id="analyzeBtn" onclick="runAnalysis()">Проаналізувати</button>
+                </div>
+            </div>
+            <div id="analysisResults">
+                <div class="analysis-placeholder">
+                    <div class="big-icon">🎯</div>
+                    <p>Оберіть резюме та вставте текст вакансії</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальні вікна -->
+    <div class="overlay" id="mLogin">
+        <div class="modal">
+            <div class="modal-title">З поверненням</div>
+            <div class="modal-sub">Введіть дані для входу</div>
+            <div class="modal-error" id="loginError"></div>
+            <div class="fg"><label>Email</label><input id="loginEmail" type="email" placeholder="your@email.com"
+                    onkeydown="if(event.key==='Enter')doLogin()"></div>
+            <div class="fg"><label>Пароль</label><input id="loginPass" type="password" placeholder="••••••••"
+                    onkeydown="if(event.key==='Enter')doLogin()"></div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('mLogin')">Скасувати</button>
+                <button class="btn btn-primary" id="loginBtn2" onclick="doLogin()">Увійти</button>
+            </div>
+            <div class="modal-switch">Немає акаунту? <a
+                    onclick="closeModal('mLogin');openModal('mRegister')">Зареєструватись</a></div>
+        </div>
+    </div>
+
+    <div class="overlay" id="mRegister">
+        <div class="modal">
+            <div class="modal-title">Створити акаунт</div>
+            <div class="modal-sub">Почніть роботу прямо зараз</div>
+            <div class="modal-error" id="regError"></div>
+            <div class="form-row">
+                <div class="fg"><label>Ім'я</label><input id="regFirst" placeholder="Іван"></div>
+                <div class="fg"><label>Прізвище</label><input id="regLast" placeholder="Іваненко"></div>
+            </div>
+            <div class="fg"><label>Email</label><input id="regEmail" type="email" placeholder="your@email.com"></div>
+            <div class="fg"><label>Пароль (мін. 8 символів)</label><input id="regPass" type="password"
+                    placeholder="••••••••" onkeydown="if(event.key==='Enter')doRegister()"></div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeModal('mRegister')">Скасувати</button>
+                <button class="btn btn-copper" id="regBtn2" onclick="doRegister()">Зареєструватись</button>
+            </div>
+            <div class="modal-switch">Вже є акаунт? <a onclick="closeModal('mRegister');openModal('mLogin')">Увійти</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="overlay" id="mConfirm">
+        <div class="modal modal-sm">
+            <div class="modal-icon">🗑️</div>
+            <div class="modal-title" id="confirmTitle">Видалити резюме?</div>
+            <div class="modal-sub" id="confirmText">Цю дію неможливо буде скасувати.</div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" onclick="closeConfirm()">Скасувати</button>
+                <button class="btn btn-danger" id="confirmOk">Видалити</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toasts" id="toasts"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="js/render.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/pages.js"></script>
+</body>
+
+</html>
