@@ -1,0 +1,15 @@
+// Фундамент
+@import 'variables';
+@import 'base';
+@import 'utilities';
+
+// Компоненти
+@import 'components';
+
+// Сторінки
+@import './pages/editor';
+@import './pages/templates';
+@import './pages/preview';
+@import './pages/landing';
+@import './pages/dashboard';
+@import './pages/analysis';

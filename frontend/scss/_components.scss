@@ -1,0 +1,367 @@
+// Навігаційна панель
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  background: rgba($paper, .92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid $line;
+  height: $navbar-h;
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  gap: 8px;
+
+  @media (max-width: 768px) {
+    padding: 0 16px;
+  }
+}
+
+.nav-logo {
+  @include font-display($fs-lg);
+  color: $ink;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.nav-logo-mark {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: $ink;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.nav-links {
+  display: none;
+  flex: 1;
+  gap: 2px;
+  margin-left: 20px;
+
+  &.visible {
+    display: flex;
+  }
+}
+
+.nav-link {
+  padding: 6px 12px;
+  border-radius: $r-sm;
+  @include font-body($fs-base, 500);
+  color: $ink-2;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all $transition;
+  white-space: nowrap;
+
+  &:hover {
+    background: $line-2;
+    color: $ink;
+  }
+
+  &.active {
+    background: $copper-lt;
+    color: $copper-dk;
+  }
+}
+
+.nav-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-user {
+  @include font-body($fs-base, 500);
+  color: $ink-2;
+  padding: 5px 12px;
+  background: $line-2;
+  border-radius: $r-full;
+  display: none;
+
+  &.visible {
+    display: block !important;
+  }
+}
+
+
+
+// Кнопки
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 20px;
+  border-radius: $r;
+  @include font-body($fs-base, 500);
+  cursor: pointer;
+  border: none;
+  transition: all $transition-slow;
+  text-decoration: none;
+  white-space: nowrap;
+  line-height: 1;
+
+  &:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+}
+
+.btn-primary {
+  background: $ink;
+  color: #fff;
+
+  &:hover {
+    background: $ink-2;
+    transform: translateY(-1px);
+    box-shadow: $shadow;
+  }
+}
+
+.btn-copper {
+  background: $copper;
+  color: #fff;
+
+  &:hover {
+    background: $copper-dk;
+    transform: translateY(-1px);
+    box-shadow: $shadow-copper;
+  }
+}
+
+.btn-ghost {
+  background: transparent;
+  color: $ink-2;
+  border: 1.5px solid $line;
+
+  &:hover {
+    background: $line-2;
+    color: $ink;
+    border-color: $ink-3;
+  }
+}
+
+.btn-danger {
+  background: $red-lt;
+  color: $red;
+  border: 1.5px solid $red-border;
+
+  &:hover {
+    background: #fbd5d5;
+  }
+}
+
+.btn-teal {
+  background: $teal;
+  color: #fff;
+
+  &:hover {
+    background: #155553;
+  }
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: $r-sm;
+}
+
+.btn-lg {
+  padding: 13px 30px;
+  font-size: 15px;
+  border-radius: $r-lg;
+}
+
+.btn-icon {
+  padding: 7px;
+  border-radius: $r-sm;
+  aspect-ratio: 1;
+}
+
+
+// Модальні вікна
+.overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba($ink, .5);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(6px);
+  animation: fadeIn .2s $ease;
+
+  &.open {
+    display: flex;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background: $surface;
+  border-radius: $r-xl;
+  padding: 34px;
+  width: 430px;
+  max-width: 95vw;
+  box-shadow: $shadow-lg;
+  animation: slideUp .25s $spring;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(18px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.modal-title {
+  @include font-display(26px);
+  margin-bottom: 4px;
+}
+
+.modal-sub {
+  @include font-body($fs-base, 400);
+  color: $ink-3;
+  margin-bottom: 22px;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+.modal-switch {
+  text-align: center;
+  font-size: 13px;
+  color: $ink-3;
+  margin-top: 14px;
+
+  a {
+    color: $copper;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.modal-error {
+  background: $red-lt;
+  border: 1px solid $red-border;
+  border-radius: $r-sm;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: $red;
+  margin-bottom: 14px;
+  display: none;
+}
+
+.modal-sm {
+    width: 380px;
+    text-align: center;
+}
+
+.modal-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+}
+
+// Тости
+.toasts {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 999;
+  pointer-events: none;
+}
+
+.toast {
+  background: $ink;
+  color: #fff;
+  padding: 11px 16px;
+  border-radius: $r;
+  font-size: 13px;
+  font-weight: 500;
+  box-shadow: $shadow-lg;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  animation: toastIn .3s $spring;
+  pointer-events: auto;
+
+  &.ok {
+    background: $green;
+  }
+
+  &.warn {
+    background: $copper-dk;
+  }
+
+  &.bad {
+    background: $red;
+  }
+}
+
+@keyframes toastIn {
+  from {
+    transform: translateX(36px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+// Спінер
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid rgba(#fff, .3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

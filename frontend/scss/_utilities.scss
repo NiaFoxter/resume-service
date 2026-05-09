@@ -1,0 +1,25 @@
+.page {
+    display: none;
+
+    &.active {
+        display: block;
+    }
+}
+
+.hidden {
+    display: none !important;
+}
+
+.label {
+    font-size: $fs-sm;
+    font-weight: 600;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: $ink-3;
+}
+
+.error-msg {
+    color: $red;
+    font-size: 12px;
+    margin-top: 4px;
+}

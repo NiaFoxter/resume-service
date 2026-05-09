@@ -1,0 +1,899 @@
+// Шаблони //
+
+// Сторінка вибору
+.templates-wrap {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 36px 32px;
+
+  @media (max-width: 768px) {
+    padding: 24px 16px;
+  }
+}
+
+.templates-head {
+  margin-bottom: 28px;
+
+  h2 {
+    @include font-display($fs-xl);
+    margin-top: 8px;
+  }
+}
+
+.tmpl-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tmpl-card {
+  background: $surface;
+  border: 2px solid $line;
+  border-radius: $r-lg;
+  overflow: hidden;
+  cursor: pointer;
+  @include hover-lift;
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+
+  &.selected {
+    border-color: $copper;
+    box-shadow: 0 0 0 3px rgba($copper, .15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid $copper;
+    outline-offset: 2px;
+  }
+}
+
+.tmpl-thumb {
+  height: 148px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.tmpl-badge {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: $copper;
+  color: #fff;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+
+  .tmpl-card.selected & {
+    display: flex;
+  }
+}
+
+.tmpl-info {
+  padding: 13px;
+}
+
+.tmpl-name {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.tmpl-desc {
+  font-size: 12px;
+  color: $ink-3;
+  line-height: 1.4;
+}
+
+.templates-action {
+  margin-top: 26px;
+  display: flex;
+  justify-content: center;
+}
+
+// Кольори фону карток
+@each $name, $colors in $tmpl-colors {
+  .ct-#{$name} {
+    background: linear-gradient(135deg, nth($colors, 1), nth($colors, 2));
+  }
+}
+
+// Мініатюри
+.tmpl-mini {
+  width: 78px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
+  border-radius: 2px;
+  padding: 6px;
+  transition: transform .2s ease;
+
+  .tmpl-card:hover & {
+    transform: scale(1.05);
+  }
+}
+
+.t-line {
+  border-radius: 1px;
+  margin-bottom: 3px;
+}
+
+// Classic
+.t-line-1 {
+  height: 4.5px;
+  background: $tmpl-line-brightest;
+}
+
+.t-line-2 {
+  height: 2.5px;
+  background: $tmpl-line-medium;
+}
+
+.t-line-3 {
+  height: 1px;
+  background: $tmpl-line-subtle;
+  margin: 5px 0;
+}
+
+.t-line-4 {
+  height: 2.5px;
+  background: $tmpl-line-dim;
+}
+
+.t-line-5 {
+  height: 2.5px;
+  background: $tmpl-line-dim;
+  width: 65%;
+}
+
+// Modern
+.tmpl-mini-modern {
+  display: flex;
+  gap: 5px;
+  padding: 4px;
+
+  &::before {
+    content: '';
+    width: 22px;
+    background: $tmpl-line-subtle;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .t-line-1 {
+    height: 3px;
+    width: 100%;
+    background: $tmpl-line-bright;
+  }
+
+  .t-line-2 {
+    height: 2px;
+    width: 100%;
+    background: $tmpl-line-medium;
+  }
+
+  .t-line-3 {
+    display: none;
+  }
+
+  .t-line-4 {
+    height: 4px;
+    width: 100%;
+    background: $tmpl-line-brightest;
+  }
+
+  .t-line-5 {
+    height: 2px;
+    width: 100%;
+    background: $tmpl-line-medium;
+  }
+}
+
+// Minimalist
+.tmpl-mini-minimalist {
+  padding: 8px 6px 4px;
+
+  .t-line-1 {
+    display: none;
+  }
+
+  .t-line-2 {
+    height: 3px;
+    background: $tmpl-line-brightest;
+    width: 55%;
+    margin-bottom: 4px;
+  }
+
+  .t-line-3 {
+    height: 1px;
+    background: $tmpl-line-dim;
+    margin-bottom: 5px;
+  }
+
+  .t-line-4 {
+    height: 2px;
+    background: $tmpl-line-medium;
+    margin-bottom: 2px;
+  }
+
+  .t-line-5 {
+    height: 2px;
+    background: $tmpl-line-medium;
+    width: 70%;
+  }
+}
+
+// Creative
+.tmpl-mini-creative {
+  .t-line-1 {
+    height: 8px;
+    background: $creative-gradient;
+    margin-bottom: 6px;
+  }
+
+  .t-line-2 {
+    height: 6px;
+    background: rgba($creative-accent, .3);
+    width: 65%;
+    border-radius: 3px;
+    margin-bottom: 5px;
+  }
+
+  .t-line-3 {
+    display: none;
+  }
+
+  .t-line-4 {
+    height: 2px;
+    background: $tmpl-line-medium;
+  }
+
+  .t-line-5 {
+    height: 2px;
+    background: $tmpl-line-medium;
+    width: 40%;
+  }
+}
+
+// Professional
+.tmpl-mini-professional {
+  .t-line-1 {
+    height: 6px;
+    background: $tmpl-line-brightest;
+    margin-bottom: 2px;
+  }
+
+  .t-line-2 {
+    height: 2px;
+    background: $tmpl-line-medium;
+    margin-bottom: 5px;
+  }
+
+  .t-line-3 {
+    height: 1px;
+    background: $tmpl-line-subtle;
+    margin-bottom: 5px;
+  }
+
+  .t-line-4 {
+    height: 8px;
+    background: $tmpl-line-bright;
+    margin-bottom: 3px;
+  }
+
+  .t-line-5 {
+    height: 2px;
+    background: $tmpl-line-dim;
+    width: 70%;
+  }
+}
+
+// Compact
+.tmpl-mini-compact {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 5px;
+  padding: 4px;
+
+  &::before {
+    content: '';
+    background: $tmpl-line-subtle;
+    border-radius: 2px;
+  }
+
+  .t-line-1 {
+    display: none;
+  }
+
+  .t-line-2 {
+    display: none;
+  }
+
+  .t-line-3 {
+    display: none;
+  }
+
+  .t-line-4 {
+    height: 4px;
+    background: $tmpl-line-bright;
+    margin-bottom: 3px;
+  }
+
+  .t-line-5 {
+    height: 2px;
+    background: $tmpl-line-dim;
+    width: 65%;
+  }
+}
+
+// Elegant
+.tmpl-mini-elegant {
+  padding: 8px 6px 4px;
+
+  .t-line-1 {
+    height: 1px;
+    background: $tmpl-line-dim;
+    margin-bottom: 7px;
+  }
+
+  .t-line-2 {
+    height: 3px;
+    background: $tmpl-line-medium;
+    width: 50%;
+    margin-bottom: 5px;
+  }
+
+  .t-line-3 {
+    height: 1px;
+    background: $tmpl-line-subtle;
+    margin-bottom: 5px;
+  }
+
+  .t-line-4 {
+    height: 2px;
+    background: $tmpl-line-dim;
+    margin-bottom: 3px;
+  }
+
+  .t-line-5 {
+    height: 2px;
+    background: $tmpl-line-subtle;
+    width: 60%;
+  }
+}
+
+// IT-Special
+.tmpl-mini-it-special {
+  .t-line-1 {
+    height: 4px;
+    background: $tmpl-line-bright;
+    margin-bottom: 2px;
+  }
+
+  .t-line-2 {
+    height: 2px;
+    background: $tmpl-line-dim;
+    width: 40%;
+    margin-bottom: 6px;
+  }
+
+  .t-line-3 {
+    height: 10px;
+    background: repeating-linear-gradient(90deg,
+        $tmpl-line-dim 0px, $tmpl-line-dim 18px,
+        transparent 18px, transparent 24px,
+        $tmpl-line-subtle 24px, $tmpl-line-subtle 36px,
+        transparent 36px, transparent 42px);
+    border-radius: 2px;
+    margin-bottom: 5px;
+  }
+
+  .t-line-4 {
+    height: 2px;
+    background: $tmpl-line-dim;
+    width: 70%;
+  }
+
+  .t-line-5 {
+    display: none;
+  }
+}
+
+// Анімація
+@keyframes tmpl-pulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.03);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.tmpl-card-pulse {
+  animation: tmpl-pulse .4s ease;
+}
+
+.tmpl-card.selected .tmpl-info .tmpl-name::after {
+  content: ' ✓';
+  color: $copper;
+}
+
+// Варіації шаблонів для прев'ю
+// всі
+.a4-photo {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, .3);
+  display: none;
+  flex-shrink: 0;
+
+  .has-photo & {
+    display: block;
+  }
+}
+
+.a4-head.has-photo {
+  display: grid !important;
+  grid-template-columns: 85px 1fr !important;
+  gap: 16px !important;
+  align-items: center !important;
+}
+
+// Міксини
+@mixin tmpl-serif {
+  font-family: $font-serif !important;
+}
+
+@mixin tmpl-sans {
+  font-family: $font-body !important;
+}
+
+@mixin tmpl-mono-headings {
+
+  .a4-name,
+  .a4-sec-title {
+    font-family: $font-mono !important;
+  }
+}
+
+@mixin tmpl-thin {
+  font-weight: 300 !important;
+}
+
+@mixin tmpl-bold-headings {
+  .a4-sec-title {
+    font-weight: 800;
+    font-size: 11px;
+  }
+}
+
+// 1. Classic
+.a4.tmpl-classic {
+  @include tmpl-serif;
+
+  .a4-sec-title {
+    border-bottom: 1px solid $ink;
+    padding-bottom: 3px;
+  }
+}
+
+// 2. Modern
+.a4.tmpl-modern {
+  @include tmpl-sans;
+
+  .a4-head {
+    background: $surface;
+    color: $ink;
+    border-bottom: 3px solid $copper;
+    display: block;
+  }
+
+  .a4-name {
+    color: $ink;
+  }
+
+  .a4-role,
+  .a4-contact {
+    color: $ink-2;
+  }
+
+  .a4-body {
+    grid-template-columns: 1fr 178px;
+  }
+
+  .a4-left {
+    order: 2;
+    background: #f5f5f5;
+    border-right: none;
+    border-left: 1px solid $line;
+  }
+
+  .a4-right {
+    order: 1;
+  }
+
+  .a4-photo {
+    border-radius: 4px;
+    border-color: rgba($copper, .3);
+  }
+}
+
+// 3. Minimalist
+.a4.tmpl-minimalist {
+  @include tmpl-sans;
+
+  .a4-head {
+    background: #fff;
+    color: $ink;
+    border-bottom: 1px solid $line;
+    padding: 30px 40px;
+    display: block;
+  }
+
+  .a4-name {
+    color: $ink;
+    font-size: 24px;
+  }
+
+  .a4-role,
+  .a4-contact {
+    color: $ink-2;
+  }
+
+  .a4-body {
+    grid-template-columns: 1fr;
+  }
+
+  .a4-left {
+    display: none;
+  }
+
+  .a4-right {
+    padding: 30px 40px;
+  }
+
+  .a4-sec-title {
+    color: $ink;
+    border-bottom: none;
+    font-size: 10px;
+    letter-spacing: .15em;
+    margin-bottom: 12px;
+  }
+}
+
+// 4. Creative
+.a4.tmpl-creative {
+  @include tmpl-sans;
+
+  .a4-name,
+  .a4-role,
+  .a4-contact {
+    color: #fff;
+  }
+
+  .a4-body {
+    grid-template-columns: 1fr;
+  }
+
+  .a4-left {
+    display: none;
+  }
+
+  .a4-right {
+    padding: 24px 30px;
+  }
+
+  .a4-sec-title {
+    color: $creative-accent;
+    border-bottom-color: rgba($creative-accent, .2);
+  }
+
+  .a4-skill-pill {
+    display: inline-block;
+    background: #EEF0FF;
+    color: $creative-accent;
+    font-family: $font-body;
+    font-size: 9px;
+    padding: 3px 10px;
+    border-radius: $r-full;
+    margin: 2px 4px 2px 0;
+  }
+
+  .a4-lang {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 7px;
+  }
+
+  .a4-lang-name {
+    font-family: $font-body;
+    font-size: 9.5px;
+    color: $ink;
+    flex-shrink: 0;
+    width: 70px;
+  }
+
+  .a4-lang-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+  }
+
+  .a4-lang-bar {
+    flex: 1;
+    height: 5px;
+    background: #E8E8E4;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .a4-lang-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+
+  .a4-lang-lvl {
+    font-family: $font-body;
+    font-size: $fs-xs;
+    color: $ink-3;
+    flex-shrink: 0;
+  }
+
+  .a4-photo {
+    border-radius: 50%;
+    border-color: rgba(255, 255, 255, .5);
+  }
+}
+
+// 5. Professional
+.a4.tmpl-professional {
+  @include tmpl-serif;
+  @include tmpl-bold-headings;
+
+  .a4-head {
+    background: $ink;
+    color: #fff;
+    padding: 30px 35px;
+    display: grid;
+    grid-template-columns: 1fr;
+
+    &.has-photo {
+      grid-template-columns: 85px 1fr;
+      gap: 16px;
+    }
+  }
+
+  .a4-body {
+    grid-template-columns: 1fr;
+  }
+
+  .a4-left {
+    display: none;
+  }
+
+  .a4-right {
+    padding: 28px 35px;
+  }
+
+  .a4-sec-title {
+    color: $ink;
+    border-bottom: 2px solid $ink;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+  }
+
+  .a4-photo {
+    border-radius: 4px;
+  }
+}
+
+// 6. Compact
+.a4.tmpl-compact {
+  @include tmpl-sans;
+
+  .a4-head {
+    background: $ink;
+    padding: 16px 24px;
+    display: block;
+
+    &.has-photo {
+      grid-template-columns: 60px 1fr !important;
+      gap: 12px !important;
+    }
+  }
+
+  .a4-name {
+    font-size: 16px;
+  }
+
+  .a4-role {
+    font-size: 10px;
+  }
+
+  .a4-contact {
+    font-size: 8px;
+  }
+
+  .a4-body {
+    grid-template-columns: 1fr 1fr;
+    font-size: 8.5px;
+  }
+
+  .a4-left {
+    background: #f8f7f5;
+    padding: 12px 14px;
+    border-right: 1px solid $line;
+  }
+
+  .a4-right {
+    padding: 12px 16px;
+  }
+
+  .a4-skill-pill {
+    font-size: 7px;
+    padding: 2px 6px;
+    margin: 1px 2px 1px 0;
+  }
+
+  .a4-sec-title {
+    font-size: 7px;
+    margin-bottom: 6px;
+    padding-bottom: 2px;
+  }
+
+  .a4-exp {
+    margin-bottom: 8px;
+  }
+
+  .a4-exp-title {
+    font-size: 9px;
+  }
+
+  .a4-exp-company {
+    font-size: 8px;
+  }
+
+  .a4-photo {
+    width: 55px;
+    height: 55px;
+    border-radius: 4px;
+  }
+}
+
+// 7. Elegant
+.a4.tmpl-elegant {
+  @include tmpl-serif;
+  @include tmpl-thin;
+
+  .a4-head {
+    background: #fafaf8;
+    color: $ink;
+    border-bottom: 1px solid $line;
+    padding: 40px 50px 30px;
+    display: block;
+  }
+
+  .a4-name {
+    font-size: 28px;
+    font-weight: 300;
+    letter-spacing: .02em;
+  }
+
+  .a4-role {
+    font-size: 13px;
+    color: $copper;
+    font-weight: 400;
+  }
+
+  .a4-contact {
+    font-size: 10px;
+    color: $ink-3;
+  }
+
+  .a4-body {
+    grid-template-columns: 1fr;
+  }
+
+  .a4-left {
+    display: none;
+  }
+
+  .a4-right {
+    padding: 30px 50px;
+  }
+
+  .a4-sec-title {
+    font-weight: 400;
+    color: $copper;
+    border-bottom: 1px solid $copper-lt;
+    letter-spacing: .08em;
+  }
+
+  .a4-photo {
+    border-radius: 50%;
+    border-color: rgba($copper, .3);
+  }
+}
+
+// 8. IT-Special
+.a4.tmpl-it-special {
+  @include tmpl-sans;
+  @include tmpl-mono-headings;
+
+  .a4-head {
+    background: #1a1f2e;
+    color: #e0e0e0;
+    padding: 22px 28px;
+    display: block;
+    border-left: 4px solid $teal;
+  }
+
+  .a4-name {
+    font-family: $font-mono;
+    color: $teal-lt;
+  }
+
+  .a4-body {
+    grid-template-columns: 170px 1fr;
+  }
+
+  .a4-left {
+    background: $it-bg;
+    border-right: 1px solid $it-border;
+  }
+
+  .a4-skill-pill {
+    background: $it-tag-bg;
+    color: $it-tag-text;
+    font-family: $font-mono;
+    font-size: 8px;
+    padding: 2px 8px;
+    border: 1px solid $it-tag-border;
+    border-radius: 3px;
+  }
+
+  .a4-sec-title {
+    font-family: $font-mono;
+    color: $ink;
+    border-bottom: 1px solid $ink;
+    font-size: 9px;
+  }
+
+  .a4-photo {
+    border-radius: 3px;
+    border-color: rgba($teal, .3);
+  }
+}
+
+// Анімація зміни шаблону
+.a4.tmpl-switching {
+  opacity: 0;
+  transform: scale(0.98);
+}

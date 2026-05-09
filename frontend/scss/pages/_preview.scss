@@ -1,0 +1,352 @@
+// Прев'ю
+.preview-pane {
+    background: $preview-bg;
+    overflow-y: auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 24px;
+    height: 100%;
+
+    @media (max-width: 768px) {
+        display: none;
+    }
+}
+
+.a4 {
+    width: 595px;
+    min-height: 842px;
+    background: #fff;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, .2);
+    border-radius: 2px;
+    overflow: hidden;
+    font-family: Georgia, serif;
+    transition: opacity .18s ease, transform .18s ease;
+    opacity: 1;
+    transform: scale(1);
+
+    @media print {
+        box-shadow: none;
+        width: 100%;
+        min-height: auto;
+    }
+
+    &.tmpl-switching {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+}
+
+// Шапка
+.a4-head {
+    background: $ink;
+    color: #fff;
+    padding: 26px 30px;
+    display: block;
+}
+
+.a4-name {
+    font-family: $font-body;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1.2;
+    word-break: break-word;
+}
+
+.a4-role {
+    font-size: 11.5px;
+    color: rgba(#fff, .6);
+    margin-top: 3px;
+}
+
+.a4-contacts {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.a4-contact {
+    font-family: $font-body;
+    font-size: 9.5px;
+    color: rgba(#fff, .5);
+}
+
+// Тіло прев'ю
+.a4-body {
+    display: grid;
+    grid-template-columns: 178px 1fr;
+}
+
+.a4-left {
+    background: $preview-sidebar;
+    padding: 20px 16px;
+    border-right: 1px solid $preview-sidebar-border;
+    display: flex;
+    flex-direction: column;
+
+    &-spacer {
+        flex: 1;
+    }
+
+    > div:first-child .a4-sec-title {
+        margin-top: 0;
+    }
+}
+
+.a4-right {
+    padding: 20px 24px;
+
+    > div:first-child .a4-sec-title {
+        margin-top: 0;
+    }
+}
+
+.a4-sec-title {
+    @include section-title;
+}
+
+// Компоненти прев'ю
+.a4-about {
+    font-size: 9.5px;
+    color: $preview-text-body;
+    line-height: 1.7;
+}
+
+.a4-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.a4-chip {
+    font-family: $font-body;
+    font-size: $fs-xs;
+    background: #EEF6F5;
+    color: $teal;
+    padding: 2px 7px;
+    border-radius: 3px;
+}
+
+// Навички
+.a4-skill {
+    margin-bottom: 7px;
+
+    &-name {
+        font-family: $font-body;
+        font-size: 9.5px;
+        margin-bottom: 2px;
+    }
+
+    &-bar {
+        height: 3px;
+        background: #E8E8E4;
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    &-fill {
+        height: 100%;
+        background: $teal;
+        border-radius: 2px;
+        transition: width .3s ease;
+    }
+
+    &-pill {
+        display: inline-block;
+        background: #EEF6F5;
+        color: $teal;
+        font-family: $font-body;
+        font-size: 9px;
+        padding: 3px 10px;
+        border-radius: $r-full;
+        margin: 2px 4px 2px 0;
+    }
+}
+
+// Мови
+.a4-lang {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+
+    &-name {
+        font-family: $font-body;
+        font-size: 9.5px;
+    }
+
+    &-lvl {
+        font-size: $fs-xs;
+        color: $preview-text-muted;
+        background: #F0EFED;
+        padding: 1px 5px;
+        border-radius: 2px;
+    }
+}
+
+// Освіта
+.a4-edu {
+    margin-bottom: 10px;
+
+    &-deg {
+        font-family: $font-body;
+        font-size: 10px;
+        font-weight: 600;
+    }
+
+    &-school {
+        font-family: $font-body;
+        font-size: 9px;
+        color: $teal;
+    }
+
+    &-year {
+        font-size: $fs-xs;
+        color: $preview-text-muted;
+    }
+}
+
+// Досвід
+.a4-exp {
+    margin-bottom: 14px;
+    break-inside: avoid;
+
+    &-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 3px;
+    }
+
+    &-title {
+        font-family: $font-body;
+        font-size: 11.5px;
+        font-weight: 700;
+        flex: 1;
+    }
+
+    &-period {
+        font-family: $font-body;
+        font-size: $fs-xs;
+        color: $preview-text-muted;
+        background: #F0EFED;
+        padding: 2px 6px;
+        border-radius: 3px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    &-company {
+        font-family: $font-body;
+        font-size: 9.5px;
+        color: $teal;
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+
+    &-list {
+        list-style: none;
+        padding: 0;
+
+        li {
+            font-size: 9.5px;
+            color: $preview-text-body;
+            padding-left: 10px;
+            position: relative;
+            margin-bottom: 2px;
+            line-height: 1.5;
+
+            &::before {
+                content: '▸';
+                position: absolute;
+                left: 0;
+                color: $copper;
+                font-size: 8px;
+                top: 1px;
+            }
+        }
+    }
+}
+
+// Посилання
+.pv-links {
+    font-size: 9.5px;
+    font-family: $font-body;
+    line-height: 1.9;
+    color: #555;
+}
+
+.a4-link {
+    &-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+    }
+
+    &-key {
+        font-family: $font-body;
+        font-size: 9px;
+        color: $ink-3;
+        text-transform: capitalize;
+    }
+
+    &-val {
+        font-family: $font-body;
+        font-size: 9px;
+        color: $teal;
+        max-width: 120px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-decoration: none;
+    }
+
+    &[href] {
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+// Проєкти
+.a4-proj {
+    margin-bottom: 8px;
+    break-inside: avoid;
+
+    &-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 8px;
+    }
+
+    &-name {
+        font-family: $font-body;
+        font-size: 10px;
+        font-weight: 600;
+        flex: 1;
+    }
+
+    &-url {
+        font-family: $font-body;
+        font-size: 8px;
+        color: $teal;
+        text-decoration: none;
+        flex-shrink: 0;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+
+    &-desc {
+        font-family: $font-body;
+        font-size: 9px;
+        color: #555;
+        margin-top: 2px;
+        line-height: 1.5;
+    }
+}

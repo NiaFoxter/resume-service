@@ -1,0 +1,366 @@
+//Редактор
+.editor {
+  &-shell {
+    display: grid;
+    grid-template-columns: $sidebar-w 1fr;
+    height: calc(100vh - $navbar-h);
+    overflow: hidden;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      height: auto;
+    }
+  }
+
+  &-sidebar {
+    @media (max-width: 768px) {
+      min-width: 100%;
+      max-height: 50vh;
+      overflow-y: auto;
+      border-right: none;
+      border-bottom: 1px solid $line;
+    }
+  }
+}
+
+// Бічна панель
+.sidebar {
+  &-bar {
+    padding: 10px 12px;
+    border-bottom: 1px solid $line;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    flex-wrap: nowrap;
+  }
+
+  &-resizer {
+    position: absolute;
+    top: 0;
+    right: -3px;
+    width: 6px;
+    height: 100%;
+    cursor: col-resize;
+    z-index: 10;
+    background: transparent;
+
+    &:hover,
+    &.active {
+      background: rgba($copper, .3);
+    }
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+}
+
+.resume-title-input {
+  flex: 1;
+  min-width: 80px;
+  @include font-body(13px, 600);
+  border: none;
+  background: transparent;
+  color: $ink;
+  outline: none;
+  padding: 4px 6px;
+  border-radius: $r-sm;
+  transition: background $transition;
+
+  &:hover,
+  &:focus {
+    background: $line-2;
+  }
+}
+
+// Прогрес бар
+.progress-block {
+  margin: 10px;
+  padding: 11px 13px;
+  background: $line-2;
+  border-radius: $r;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.ring {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+
+  &-bg {
+    fill: none;
+    stroke: $line;
+    stroke-width: 3.5;
+  }
+
+  &-fill {
+    fill: none;
+    stroke: $green;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    stroke-dasharray: 113.1;
+    stroke-dashoffset: 113.1;
+    transform: rotate(-90deg);
+    transform-origin: 50% 50%;
+    transition: stroke-dashoffset .5s $ease;
+  }
+
+  &-pct {
+    font-size: 10px;
+    font-weight: 700;
+    fill: $ink;
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+
+  &-info {
+    flex: 1;
+  }
+
+  &-title {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  &-sub {
+    font-size: 11px;
+    color: $ink-3;
+    margin-top: 1px;
+  }
+}
+
+// Навігація по секціям
+.sec {
+  &-nav {
+    overflow-y: auto;
+    padding: 6px;
+    flex: 0 0 auto;
+    max-height: 280px;
+  }
+
+  &-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: $r;
+    cursor: pointer;
+    margin-bottom: 1px;
+    transition: all .12s;
+    border: 1px solid transparent;
+
+    &:hover {
+      background: $line-2;
+    }
+
+    &.active {
+      background: $copper-lt;
+      border-color: rgba($copper, .2);
+
+      .sec-label {
+        color: $copper-dk;
+      }
+    }
+  }
+
+  &-label {
+    @include font-body(13px, 500);
+    flex: 1;
+    color: $ink-2;
+  }
+
+  &-check {
+    font-size: 12px;
+    color: $green;
+  }
+}
+
+// Форми
+.form {
+  &-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 14px;
+    background: $paper;
+    border-top: 1px solid $line;
+  }
+
+  &-sec {
+    display: none;
+
+    &.active {
+      display: block;
+    }
+  }
+
+  &-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+.fg {
+  margin-bottom: 12px;
+
+  label {
+    display: block;
+    font-size: $fs-sm;
+    font-weight: 600;
+    color: $ink-3;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 4px;
+  }
+
+  input,
+  textarea,
+  select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1.5px solid $line;
+    border-radius: $r-sm;
+    @include font-body(13px, 400);
+    color: $ink;
+    background: $surface;
+    outline: none;
+    transition: border-color $transition, box-shadow $transition;
+
+    &:focus {
+      border-color: $copper;
+      box-shadow: 0 0 0 3px rgba($copper, .12);
+    }
+
+    &.invalid {
+      border-color: $red;
+    }
+  }
+
+  textarea {
+    min-height: 70px;
+    resize: vertical;
+  }
+
+  select {
+    appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2372727A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    padding-right: 30px;
+  }
+}
+
+// Навички
+.tags-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  min-height: 28px;
+}
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: $teal-lt;
+  color: $teal;
+  padding: 4px 9px;
+  border-radius: $r-full;
+  font-size: 12px;
+  font-weight: 500;
+
+  &-remove {
+    cursor: pointer;
+    opacity: .6;
+    font-size: 14px;
+    line-height: 1;
+    transition: opacity .1s;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+// Картки
+.entry-card {
+  background: $surface;
+  border: 1px solid $line;
+  border-radius: $r;
+  padding: 12px;
+  margin-bottom: 10px;
+  position: relative;
+
+  &-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  &-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: $ink-2;
+  }
+}
+
+.add-entry-btn {
+  width: 100%;
+  padding: 8px;
+  border: 1.5px dashed $line;
+  border-radius: $r-sm;
+  background: none;
+  cursor: pointer;
+  @include font-body(13px, 400);
+  color: $ink-3;
+  transition: all $transition;
+
+  &:hover {
+    border-color: $copper;
+    color: $copper;
+    background: $copper-lt;
+  }
+}
+
+// Індикатор автозбереження
+.save-status {
+  font-size: 10px;
+  color: $ink-3;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: opacity .3s;
+
+  &.saved {
+    color: $green;
+  }
+}
+
+// Кнопка PDF
+#pdfBtn {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.tmpl-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: $copper;
+  background: $copper-lt;
+  border-radius: $r-full;
+  padding: 2px 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background $transition;
+
+  &:hover {
+    background: darken($copper-lt, 5%);
+  }
+}

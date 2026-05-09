@@ -1,0 +1,198 @@
+// КОЛЬОРИ //
+
+// Нейтральні
+$ink : #0D0D0F;
+$ink-2 : #3A3A3F;
+$ink-3 : #72727A;
+$paper : #FAFAF8;
+$surface : #FFFFFF;
+$line : #E8E8E4;
+$line-2 : #F0F0EC;
+
+// Акцентні
+$copper : #C47B3A;
+$copper-dk : #A36228;
+$copper-lt : #F5EAD8;
+$teal : #1D6B68;
+$teal-lt : #D4EDEC;
+
+// Семантичні
+$red : #C94040;
+$red-lt : #FDEAEA;
+$red-border: #f5c5c5;
+$green : #2A7A5E;
+$green-lt : #D4EDE5;
+$yellow-lt : #FFFBEB;
+$yellow-dk : #D97706;
+
+
+// РАДІУСИ //
+
+$r : 10px;
+$r-sm : 6px;
+$r-lg : 16px;
+$r-xl : 24px;
+$r-full : 99px;
+
+
+// ТІНІ //
+
+$shadow-sm : 0 1px 3px rgba(0, 0, 0, .06);
+$shadow : 0 4px 16px rgba(0, 0, 0, .08);
+$shadow-lg : 0 12px 40px rgba(0, 0, 0, .12);
+$shadow-copper : 0 4px 16px rgba($copper, .35);
+$shadow-green : 0 4px 14px rgba($green, .4);
+
+
+// АНІМАЦІЇ //
+
+$ease : cubic-bezier(.25, .1, .25, 1);
+$spring : cubic-bezier(.34, 1.56, .64, 1);
+$transition : .15s;
+$transition-slow : .18s $ease;
+
+
+// ТИПОГРАФІКА //
+
+$font-display : 'Playfair Display',
+Georgia,
+serif;
+$font-body : 'Instrument Sans',
+system-ui,
+sans-serif;
+$font-serif : 'Merriweather',
+Georgia,
+'Times New Roman',
+serif;
+$font-mono : 'JetBrains Mono',
+'Fira Code',
+'Courier New',
+monospace;
+
+$fs-xs : 8.5px;
+$fs-sm : 11px;
+$fs-base : 14px;
+$fs-md : 17px;
+$fs-lg : 20px;
+$fs-xl : 30px;
+$fs-xxl : 34px;
+$fs-hero : clamp(38px, 4.5vw, 56px);
+
+
+// ПРЕВ'Ю //
+
+$preview-bg: #DEDAD4;
+$preview-sidebar: #F8F7F5;
+$preview-sidebar-border: #EEEDE9;
+$preview-text-muted: #999;
+$preview-text-body: #444;
+
+
+// РОЗМІРИ //
+
+$navbar-h : 58px;
+$sidebar-w : 340px;
+
+
+// КОЛЬОРИ ШАБЛОНІВ //
+
+$tmpl-colors: (
+  'classic': (#1D2B3A, #2E4460),
+  'modern': (#1D6B68, #2E9490),
+  'minimalist': (#4A4A4A, #6B6B6B),
+  'creative': (#2563EB, #1D4ED8),
+  'professional': (#1A1A2E, #2D2D44),
+  'compact': (#2A3E55, #3D5A7A),
+  'elegant': (#8B7355, #A0927B),
+  'it-special': (#0F1F2F, #1A3040)
+);
+
+// ЛІНІЇ МІНІАТЮР //
+
+$tmpl-line-brightest: rgba(#fff, .75);
+$tmpl-line-bright: rgba(#fff, .6);
+$tmpl-line-medium: rgba(#fff, .4);
+$tmpl-line-dim: rgba(#fff, .25);
+$tmpl-line-subtle: rgba(#fff, .15);
+
+
+// КОЛЬОРИ ПРЕВ'Ю ШАБЛОНІВ //
+
+$creative-gradient: linear-gradient(135deg, #2563EB, #1D4ED8);
+$creative-accent: #2563EB;
+
+$dark-bg: #1a1a2e;
+$dark-head: #16213e;
+$dark-sidebar: #0f3460;
+$dark-text: #e0e0e0;
+
+$it-bg: #f0f4f8;
+$it-border: #dde4ed;
+$it-tag-bg: #e8f0fe;
+$it-tag-text: #1a56db;
+$it-tag-border: #d0dffc;
+
+
+// МІКСИНИ //
+
+@mixin font-display($size, $weight: 700) {
+  font-family: $font-display;
+  font-size: $size;
+  font-weight: $weight;
+  letter-spacing: -.02em;
+}
+
+@mixin font-body($size, $weight: 500) {
+  font-family: $font-body;
+  font-size: $size;
+  font-weight: $weight;
+}
+
+@mixin section-title {
+  font-family: $font-body;
+  font-size: $fs-xs;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: $copper;
+  border-bottom: 1.5px solid $copper-lt;
+  padding-bottom: 4px;
+  margin-bottom: 9px;
+  margin-top: 16px;
+}
+
+@mixin hover-lift {
+  transition: transform $transition-slow, box-shadow $transition-slow;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow;
+  }
+}
+
+@mixin tmpl-serif {
+  font-family: $font-serif !important;
+}
+
+@mixin tmpl-sans {
+  font-family: $font-body !important;
+}
+
+@mixin tmpl-mono-headings {
+
+  .a4-name,
+  .a4-sec-title {
+    font-family: $font-mono !important;
+  }
+}
+
+@mixin tmpl-thin {
+  font-weight: 300 !important;
+}
+
+@mixin tmpl-bold-headings {
+  .a4-sec-title {
+    font-weight: 800;
+    font-size: 11px;
+  }
+}

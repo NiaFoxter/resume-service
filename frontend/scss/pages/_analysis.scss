@@ -1,0 +1,464 @@
+// Аналіз
+.analysis {
+    &-wrap {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 36px 32px;
+
+        @media (max-width: 480px) {
+            padding: 24px 16px;
+        }
+    }
+
+    &-head h2 {
+        @include font-display($fs-xl);
+        margin-top: 8px;
+
+        @media (max-width: 480px) {
+            font-size: 24px;
+        }
+    }
+
+    &-subtitle {
+        color: $ink-3;
+        margin-top: 6px;
+        font-size: $fs-base;
+    }
+
+    &-input-card {
+        background: $surface;
+        border: 1px solid $line;
+        border-radius: $r-lg;
+        padding: 22px;
+        margin-bottom: 22px;
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+    }
+
+    &-ta {
+        width: 100%;
+        min-height: 110px;
+        padding: 11px 13px;
+        border: 1.5px solid $line;
+        border-radius: $r;
+        @include font-body(13px, 400);
+        color: $ink;
+        background: $paper;
+        outline: none;
+        resize: vertical;
+        transition: border-color $transition;
+
+        &:focus {
+            border-color: $copper;
+        }
+    }
+
+    &-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+        flex-direction: column;
+        align-items: stretch;
+
+        @media (max-width: 480px) {
+            .btn {
+                width: 100%;
+            }
+        }
+    }
+
+    &-dashboard {
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    &-loading {
+        text-align: center;
+        padding: 48px 20px;
+
+        p {
+            margin-top: 16px;
+            color: $ink-2;
+            font-size: 15px;
+        }
+
+        small {
+            display: block;
+            margin-top: 8px;
+            color: $ink-3;
+            font-size: 12px;
+        }
+    }
+
+    &-error {
+        text-align: center;
+        padding: 32px 20px;
+        background: $red-lt;
+        border: 1px solid $red-border;
+        border-radius: $r;
+        margin-top: 16px;
+
+        .err-icon {
+            font-size: 32px;
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        p {
+            color: $red;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+    }
+
+    &-placeholder {
+        text-align: center;
+        padding: 48px 20px;
+        color: $ink-3;
+
+        .big-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            font-size: 14px;
+        }
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Попередження
+.model-loading-notice {
+    background: linear-gradient(135deg, #FFF8E1, #FFF3CD);
+    border: 1px solid #FFD54F;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    &-icon {
+        font-size: 22px;
+        flex-shrink: 0;
+    }
+
+    &-text {
+        strong {
+            display: block;
+            font-size: 13px;
+            color: #795548;
+            margin-bottom: 2px;
+        }
+
+        span {
+            font-size: 12px;
+            color: #8D6E63;
+        }
+    }
+}
+
+.resume-select-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+
+    select {
+        padding: 6px 28px 6px 10px;
+        border: 1.5px solid $line;
+        border-radius: $r-sm;
+        @include font-body(13px, 400);
+        background: $surface url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2372727A' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 8px center;
+        appearance: none;
+        outline: none;
+        cursor: pointer;
+    }
+}
+
+// Головна секція з діаграмою
+.score {
+    &-hero {
+        background: #FFFFFF;
+        border: 1px solid #E8E8E4;
+        border-radius: 16px;
+        padding: 32px;
+        display: flex;
+        align-items: center;
+        gap: 40px;
+        margin-bottom: 20px;
+
+        @media (max-width: 600px) {
+            flex-direction: column;
+            text-align: center;
+            padding: 20px;
+        }
+    }
+
+    &-visual {
+        flex-shrink: 0;
+    }
+
+    &-info {
+        flex: 1;
+    }
+
+    &-verdict {
+        font-family: 'Playfair Display', Georgia, serif;
+        font-size: 22px;
+        font-weight: 700;
+        color: #0D0D0F;
+        margin-bottom: 8px;
+    }
+
+    &-meta {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+}
+
+.meta-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 99px;
+    background: #F0F0EC;
+    color: #3A3A3F;
+}
+
+// Статистика
+.stats-mini-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+
+    @media (max-width: 600px) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.mini-stat {
+    background: #FFFFFF;
+    border: 1px solid #E8E8E4;
+    border-radius: 12px;
+    padding: 16px;
+    text-align: center;
+    border-left: 3px solid;
+
+    &-num {
+        display: block;
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+
+    &-lbl {
+        font-size: 11px;
+        color: #72727A;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-weight: 500;
+    }
+}
+
+.mini-found {
+    border-left-color: #2A7A5E;
+
+    .mini-stat-num {
+        color: #2A7A5E;
+    }
+}
+
+.mini-tech {
+    border-left-color: #2563EB;
+
+    .mini-stat-num {
+        color: #2563EB;
+    }
+}
+
+.mini-soft {
+    border-left-color: #8B5CF6;
+
+    .mini-stat-num {
+        color: #8B5CF6;
+    }
+}
+
+.mini-miss {
+    border-left-color: #C47B3A;
+
+    .mini-stat-num {
+        color: #C47B3A;
+    }
+}
+
+// Навички
+.skills-analysis {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+
+    @media (max-width: 600px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.skills-col {
+    background: #FFFFFF;
+    border: 1px solid #E8E8E4;
+    border-radius: 12px;
+    padding: 18px;
+
+    h3 {
+        font-size: 13px;
+        font-weight: 600;
+        color: #3A3A3F;
+        margin-bottom: 12px;
+    }
+}
+
+.skills-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 36px;
+    align-items: center;
+}
+
+.skill-tag {
+    padding: 5px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: transform 0.15s ease;
+
+    &:hover {
+        transform: scale(1.05);
+    }
+}
+
+.skill-found {
+    background: #D4EDE5;
+    color: #2A7A5E;
+}
+
+.skill-missing {
+    background: #FDEAEA;
+    color: #C94040;
+}
+
+.empty-hint {
+    font-size: 12px;
+    color: #72727A;
+    font-style: italic;
+}
+
+// Рекомендації
+.advice-section {
+    background: #FFFFFF;
+    border: 1px solid #E8E8E4;
+    border-radius: 12px;
+    padding: 18px;
+
+    h3 {
+        font-size: 13px;
+        font-weight: 600;
+        color: #3A3A3F;
+        margin-bottom: 14px;
+    }
+}
+
+.advice-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.advice-card {
+    display: flex;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    transition: transform 0.15s ease;
+
+    &:hover {
+        transform: translateX(4px);
+    }
+}
+
+.advice-red {
+    background: #FDEAEA;
+    border-left: 3px solid #C94040;
+}
+
+.advice-yellow {
+    background: #FFFBEB;
+    border-left: 3px solid #D97706;
+}
+
+.advice-green {
+    background: #D4EDE5;
+    border-left: 3px solid #2A7A5E;
+}
+
+.advice-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.advice-body {
+    flex: 1;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #3A3A3F;
+
+    p {
+        margin: 0;
+    }
+}
+
+.advice-keyword {
+    display: inline-block;
+    background: rgba(0, 0, 0, 0.06);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 6px;
+    font-family: monospace;
+}
+
+.spinner-large {
+    width: 48px;
+    height: 48px;
+    border: 4px solid $line;
+    border-top-color: $copper;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
