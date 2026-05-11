@@ -2,27 +2,37 @@ import json, os, re, sqlite3
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 from collections import Counter
+
 from dotenv import load_dotenv
+load_dotenv()
 
 import jwt
 import numpy as np
-from flask import Flask, request, jsonify, g
+from flask import Flask, request, jsonify, g, send_from_directory
 from flask.wrappers import Response
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from nlp_data import STOPWORDS_ALL, SYNONYMS, TECH_SKILLS, SOFT_SKILLS, BUSINESS_SKILLS
 
-load_dotenv()
 
 # App config
 app = Flask(__name__)
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-change-in-prod')
 app.config['JWT_EXPIRE_HOURS'] = 24
 DB_PATH = os.path.join(os.path.dirname(__file__), 'resume.db')
 
+# Шлях до фронтенду
+FRONTEND_DIR = os.path.join(os.path.dirname(__file__), '..', 'frontend')
+
 # Gemini config
-GEMINI_KEY = os.environ.get('GEMINI_KEY')
-GEMINI_URL = f'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={GEMINI_KEY}' if GEMINI_KEY else ''
+GEMINI_KEY = os.environ.get('GEMINI_KEY', '')
+GEMINI_MODELS = [
+    'gemini-2.5-flash',
+    'gemini-2.5-flash-lite',
+    'gemini-3.1-flash-lite',
+    'gemini-3-flash',
+]
+GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 # Sentence-transformers model
 _model = None
@@ -47,6 +57,28 @@ def get_semantic_model():
             return None
     return _model
 
+# 
+
+@app.route('/')
+def serve_index():
+    return send_from_directory(FRONTEND_DIR, 'index.html')
+
+@app.route('/css/<path:filename>')
+def serve_css(filename):
+    return send_from_directory(os.path.join(FRONTEND_DIR, 'css'), filename)
+
+@app.route('/js/<path:filename>')
+def serve_js(filename):
+    return send_from_directory(os.path.join(FRONTEND_DIR, 'js'), filename)
+
+@app.route('/<path:path>')
+def serve_static(path):
+    """Віддає інші статичні файли (favicon, зображення тощо)"""
+    file_path = os.path.join(FRONTEND_DIR, path)
+    if os.path.exists(file_path) and os.path.isfile(file_path):
+        return send_from_directory(FRONTEND_DIR, path)
+    return jsonify({'error': 'Not found'}), 404
+
 # CORS
 @app.after_request
 def add_cors(r: Response):
@@ -55,8 +87,8 @@ def add_cors(r: Response):
     r.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,PATCH,DELETE,OPTIONS'
     return r
 
-@app.route('/', defaults={'path': ''}, methods=['OPTIONS'])
-@app.route('/<path:path>', methods=['OPTIONS'])
+@app.route('/api', defaults={'path': ''}, methods=['OPTIONS'])
+@app.route('/api/<path:path>', methods=['OPTIONS'])
 def options_h(path=''): return jsonify({}), 200
 
 # Database
@@ -120,7 +152,7 @@ def require_auth(f):
 
         except jwt.ExpiredSignatureError:
             return jsonify({'error': 'Токен прострочено'}), 401
-        except jwt.InvalidTokenError as e:
+        except jwt.InvalidTokenError:
             return jsonify({'error': 'Недійсний токен'}), 401
         return f(*a, **kw)
     return d
@@ -286,7 +318,7 @@ def get_verdict(score):
     elif score >= 35: return 'Низька відповідність'
     else: return 'Потребує доопрацювання'
 
-# Аналіз (Локальний)
+# Аналіз
 @app.route('/resumes/<int:rid>/analyze', methods=['POST'])
 @require_auth
 def analyze_resume(rid):
@@ -361,7 +393,6 @@ def analyze_resume(rid):
         else:
             missing.append({'word': kw})
 
-    # Категорії навичок
     found_categorized = {
         'tech': [f for f in found if f['word'] in TECH_SKILLS],
         'soft': [f for f in found if f['word'] in SOFT_SKILLS],
@@ -374,7 +405,6 @@ def analyze_resume(rid):
         'business': [m for m in missing if m['word'] in BUSINESS_SKILLS],
     }
 
-    # Рекомендації
     recs = []
     
     for m in missing_categorized['tech'][:3]:
@@ -407,15 +437,15 @@ def analyze_resume(rid):
         })
     
     if score >= 80:
-        recs.append({'level': 'green', 'word': '', 'text': '🎯 Ваше резюме ідеально підходить під цю вакансію!'})
+        recs.append({'level': 'green', 'word': '', 'text': '🎯 Ваше резюме ідеально підходить!'})
     elif score >= 65:
-        recs.append({'level': 'green', 'word': '', 'text': '👍 Хороша відповідність — можете відгукуватись на вакансію'})
+        recs.append({'level': 'green', 'word': '', 'text': '👍 Хороша відповідність — можете відгукуватись'})
     elif score >= 50:
-        recs.append({'level': 'yellow', 'word': '', 'text': '📝 Додайте більше ключових навичок з опису вакансії'})
+        recs.append({'level': 'yellow', 'word': '', 'text': '📝 Додайте більше ключових навичок'})
     elif score >= 35:
-        recs.append({'level': 'yellow', 'word': '', 'text': '⚠️ Адаптуйте резюме під конкретні вимоги вакансії'})
+        recs.append({'level': 'yellow', 'word': '', 'text': '⚠️ Адаптуйте резюме під вимоги вакансії'})
     else:
-        recs.append({'level': 'red', 'word': '', 'text': '❌ Резюме потребує значного доопрацювання під цю позицію'})
+        recs.append({'level': 'red', 'word': '', 'text': '❌ Резюме потребує значного доопрацювання'})
 
     return ok({
         'score': score,
@@ -436,7 +466,72 @@ def analyze_resume(rid):
         }
     })
 
-# Аналіз (Gemini)
+# Аналіз ШІ
+def call_gemini_api(prompt):
+    import requests
+    
+    for model in GEMINI_MODELS:
+        url = f'{GEMINI_BASE_URL}/{model}:generateContent?key={GEMINI_KEY}'
+        
+        try:
+            print(f"🔄 Спроба моделі: {model}...")
+            response = requests.post(
+                url,
+                json={
+                    'contents': [{'parts': [{'text': prompt}]}],
+                    'generationConfig': {
+                        'temperature': 0.2,
+                        'maxOutputTokens': 4096,
+                        'topP': 0.95
+                    }
+                },
+                timeout=30
+            )
+            
+            if response.status_code == 429:
+                print(f"⚠️  {model}: ліміт вичерпано")
+                continue
+            
+            if response.status_code == 404:
+                print(f"⚠️  {model}: модель недоступна")
+                continue
+            
+            if response.ok:
+                print(f"✅ Використано модель: {model}")
+                return response.json(), model
+                
+        except Exception as e:
+            print(f"⚠️  {model}: {e}")
+            continue
+    
+    return None, None
+
+def parse_gemini_response(data):
+    """Парсить відповідь Gemini"""
+    text = data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
+    
+    if not text:
+        raise ValueError('Gemini повернув порожню відповідь')
+    
+    json_str = text
+    md_match = re.search(r'```(?:json)?\s*(\{[\s\S]*?\})\s*```', text)
+    if md_match:
+        json_str = md_match.group(1)
+    
+    json_match = re.search(r'\{[\s\S]*\}', json_str)
+    if not json_match:
+        raise ValueError('Gemini повернув некоректну відповідь')
+    
+    result = json.loads(json_match.group(0))
+    
+    result['score'] = max(0, min(100, round(result.get('score', 0))))
+    result['verdict'] = result.get('verdict', 'OK')
+    result['found'] = (result.get('found') or [])[:10]
+    result['missing'] = (result.get('missing') or [])[:8]
+    result['recommendations'] = result.get('recommendations') or []
+    
+    return result
+
 @app.route('/resumes/<int:rid>/analyze/gemini', methods=['POST'])
 @require_auth
 def analyze_resume_gemini(rid):
@@ -493,56 +588,22 @@ def analyze_resume_gemini(rid):
         - recommendations: 3-6 конкретних порад (red=критично, yellow=бажано, green=добре)
         - НЕ вигадуй навички, яких немає в резюме
         - Відповідай ТІЛЬКИ валідним JSON, без коментарів"""
-
+    
+    data, used_model = call_gemini_api(prompt)
+    
+    if not data:
+        return err('Усі моделі Gemini недоступні. Спробуйте локальний аналіз.', 503)
+    
     try:
-        import requests
-        
-        response = requests.post(
-            GEMINI_URL,
-            json={
-                'contents': [{'parts': [{'text': prompt}]}],
-                'generationConfig': {
-                    'temperature': 0.2,
-                    'maxOutputTokens': 4096
-                }
-            },
-            timeout=30
-        )
-        
-        if response.status_code == 429:
-            return err('Перевищено ліміт запитів до Gemini. Спробуйте локальний аналіз.', 429)
-        
-        if not response.ok:
-            return err(f'Помилка Gemini API: {response.status_code}', 502)
-        
-        data = response.json()
-        text = data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
-        
-        json_str = text
-        
-        md_match = re.search(r'```(?:json)?\s*(\{[\s\S]*?\})\s*```', text)
-        if md_match:
-            json_str = md_match.group(1)
-        
-        json_match = re.search(r'\{[\s\S]*\}', json_str)
-        if not json_match:
-            return err('Gemini повернув некоректну відповідь', 502)
-        
-        result = json.loads(json_match.group(0))
-        
-        result['score'] = max(0, min(100, round(result.get('score', 0))))
-        result['verdict'] = result.get('verdict', 'OK')
-        result['found'] = (result.get('found') or [])[:10]
-        result['missing'] = (result.get('missing') or [])[:8]
-        result['recommendations'] = result.get('recommendations') or []
-        result['method'] = 'gemini'
-        
-        return ok(result)
-        
-    except Exception as e:
-        if 'requests' in str(e).lower() and 'timeout' in str(e).lower():
-            return err('Час очікування Gemini вичерпано. Спробуйте локальний аналіз.', 504)
-        return err(f'Помилка Gemini: {str(e)}', 502)
+        result = parse_gemini_response(data)
+    except ValueError as e:
+        return err(str(e), 502)
+    except json.JSONDecodeError:
+        return err('Gemini повернув невалідний JSON', 502)
+    
+    result['method'] = f'gemini-{used_model}' if used_model else 'gemini'
+    
+    return ok(result)
 
 
 if __name__ == '__main__':
