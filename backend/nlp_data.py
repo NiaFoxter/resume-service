@@ -1,7 +1,5 @@
 """
 Лінгвістичні дані для NLP аналізу резюме.
-Універсальний набір для будь-яких професій.
-Без російської мови.
 """
 
 import re
@@ -20,7 +18,7 @@ STOPWORDS_UK = {
     'тільки', 'зараз', 'потім', 'тут', 'там', 'куди', 'звідки',
     'кожен', 'кожна', 'кожне', 'кожні', 'весь', 'вся', 'все', 'всі',
     'інший', 'інша', 'інше', 'інші', 'самий', 'сама', 'саме', 'самі',
-    'можна', 'треба', 'варто', 'слід', 'мабуть', 'напевно',
+    'можна', 'варто', 'слід', 'мабуть', 'напевно',
     'тобто', 'наприклад', 'зокрема', 'особливо',
     'б', 'би', 'ж', 'же', 'от', 'то', 'чи', 'хіба', 'невже',
     'поки', 'доки', 'щойно', 'ледве', 'тільки-но',
@@ -28,14 +26,28 @@ STOPWORDS_UK = {
     'досить', 'доволі', 'надто', 'занадто',
     'всередині', 'навколо', 'поруч', 'поблизу',
     'протягом', 'впродовж', 'наприкінці', 'спочатку',
-    'необхідно', 'обов\'язково', 'бажано',
-    'комерційний', 'комерційна', 'комерційне', 'комерційні',
-    'глибокий', 'глибока', 'глибоке', 'глибокі',
-    'широкий', 'широка', 'широке', 'широкі',
-    'великий', 'велика', 'велике', 'великі',
+    'досвід', 'досвіду', 'досвідом', 'досвіді',
+    'знання', 'знань', 'знаннями', 'знаннях',
+    'навички', 'навичок', 'навичками', 'навичках',
+    'вміння', 'вмінь', 'вміннями',
+    'вимоги', 'вимог', 'вимогами',
+    'необхідні', 'необхідний', 'необхідна', 'необхідне', 'необхідних',
+    'обов\'язкові', 'обов\'язковий', 'обов\'язкова',
+    'бажані', 'бажаний', 'бажана',
     'років', 'роки', 'рік', 'місяців', 'місяць', 'місяці',
-    'вища', 'середня', 'спеціальна',
-    'повний', 'повна', 'повне', 'повні',
+    'комерційний', 'комерційна', 'комерційне', 'комерційні', 'комерційного',
+    'глибокі', 'глибокий', 'глибока', 'глибоке', 'глибоких',
+    'широкі', 'широкий',
+    'великий', 'велика', 'велике', 'великі',
+    'буде', 'плюсом', 'перевагою',
+    'пропонуємо', 'пропонує', 'пропонують',
+    'кандидат', 'кандидата', 'претендент',
+    'спеціаліст', 'спеціаліста', 'фахівець', 'фахівця',
+    'посада', 'посади', 'вакансія', 'вакансії',
+    'компанія', 'компанії', 'відділ', 'відділу',
+    'офіс', 'дистанційно', 'гібридний',
+    'зарплата', 'оклад', 'страхування', 'відпустка',
+    'розгляду', 'приймаємо', 'запрошуємо',
 }
 
 STOPWORDS_EN = {
@@ -43,7 +55,7 @@ STOPWORDS_EN = {
     'of', 'with', 'by', 'from', 'up', 'about', 'into', 'through',
     'is', 'are', 'was', 'were', 'be', 'been', 'have', 'has', 'had',
     'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might',
-    'can', 'shall', 'must', 'need', 'dare', 'ought',
+    'can', 'shall', 'must', 'need',
     'not', 'no', 'nor', 'so', 'yet', 'both', 'either', 'neither',
     'we', 'you', 'he', 'she', 'it', 'they', 'our', 'your', 'their', 'its',
     'this', 'that', 'these', 'those', 'which', 'who', 'whom',
@@ -56,293 +68,240 @@ STOPWORDS_EN = {
     'although', 'though', 'because', 'since', 'unless', 'until',
     'already', 'always', 'usually', 'often', 'sometimes', 'never',
     'really', 'quite', 'almost', 'perhaps', 'maybe', 'probably',
-    'still', 'yet', 'already', 'even', 'ever', 'never',
-    'looking', 'seeking', 'candidate', 'position', 'company', 'role',
-    'experience', 'work', 'team', 'good', 'strong',
-    'able', 'ability', 'must', 'plus', 'bonus',
-    'new', 'using', 'working', 'within',
-    'years', 'year', 'months', 'month',
-    'required', 'requirements', 'qualifications',
-    'deep', 'broad', 'extensive',
+    'still', 'yet', 'even', 'ever', 'never',
+    'experience', 'experienced', 'experiences',
+    'knowledge', 'knowledges',
+    'skill', 'skills', 'skilled',
+    'required', 'requirement', 'requirements', 'require',
+    'years', 'year', 'yearly',
+    'months', 'month', 'monthly',
+    'looking', 'seeking',
+    'must', 'should', 'need', 'needed',
+    'plus', 'bonus', 'advantage',
+    'good', 'great', 'strong', 'excellent',
+    'deep', 'broad', 'extensive', 'solid',
+    'proficient', 'familiar',
+    'understanding', 'ability',
+    'work', 'working', 'team', 'company',
+    'position', 'role', 'job', 'candidate', 'applicant',
+    'office', 'remote', 'hybrid',
+    'salary', 'compensation', 'benefit',
+    'insurance', 'vacation', 'culture',
+    'join', 'hiring', 'apply',
+    'ideally', 'preferably', 'nice',
+    'passion', 'passionate', 'motivated', 'talented', 'driven',
+    'responsible', 'responsibilities',
 }
 
 STOPWORDS_ALL = STOPWORDS_UK | STOPWORDS_EN
 
 SYNONYMS = {
-    # Загальні скорочення
-    'it': 'information technology',
-    'hr': 'human resources',
-    'pr': 'public relations',
-    'r&d': 'research and development',
-    'b2b': 'business to business',
-    'b2c': 'business to consumer',
-    'ceo': 'chief executive officer',
-    'cto': 'chief technology officer',
-    'cfo': 'chief financial officer',
-    'coo': 'chief operating officer',
-    'cmo': 'chief marketing officer',
-    'vp': 'vice president',
-    'pm': 'project manager',
-    'po': 'product owner',
-    'qa': 'quality assurance',
-    'ui': 'user interface',
-    'ux': 'user experience',
-    'kpi': 'key performance indicator',
-    'okr': 'objectives and key results',
-    'sla': 'service level agreement',
-    'nda': 'non disclosure agreement',
-
-    # Освіта
-    'phd': 'doctor of philosophy',
-    'ph.d': 'doctor of philosophy',
-    'mba': 'master of business administration',
-    'msc': 'master of science',
-    'ma': 'master of arts',
-    'ba': 'bachelor of arts',
-    'bs': 'bachelor of science',
-    'bsc': 'bachelor of science',
-    'md': 'doctor of medicine',
-    'jd': 'juris doctor',
-    'cpa': 'certified public accountant',
-    'cfa': 'chartered financial analyst',
-    'pmp': 'project management professional',
-    'csm': 'certified scrum master',
-
-    # Мови
-    'eng': 'english',
-    'англ': 'english',
-    'укр': 'ukrainian',
-    'de': 'german',
-    'нім': 'german',
-    'fr': 'french',
-    'фр': 'french',
-    'esp': 'spanish',
-    'ісп': 'spanish',
-    'pl': 'polish',
-    'пол': 'polish',
-    'італ': 'italian',
-
-    # Загальні терміни
-    'комунікація': 'communication',
-    'спілкування': 'communication',
-    'переговори': 'negotiation',
-    'презентація': 'presentation',
-    'звітність': 'reporting',
-    'документація': 'documentation',
-    'управління': 'management',
-    'менеджмент': 'management',
-    'керування': 'management',
-    'адміністрування': 'administration',
-    'координація': 'coordination',
-    'організація': 'organization',
-    'планування': 'planning',
-    'бюджетування': 'budgeting',
-    'аналіз': 'analysis',
-    'аналітика': 'analytics',
-    'дослідження': 'research',
-    'розробка': 'development',
-    'впровадження': 'implementation',
-    'оптимізація': 'optimization',
-    'автоматизація': 'automation',
-    'навчання': 'training',
-    'менторство': 'mentoring',
-    'консультування': 'consulting',
-    'продажі': 'sales',
-    'маркетинг': 'marketing',
-    'реклама': 'advertising',
-    'брендинг': 'branding',
-    'логістика': 'logistics',
-    'постачання': 'supply chain',
-    'закупівлі': 'procurement',
-    'фінанси': 'finance',
-    'бухгалтерія': 'accounting',
-    'аудит': 'audit',
-    'оподаткування': 'taxation',
-    'юриспруденція': 'law',
-    'право': 'law',
-    'договори': 'contracts',
-
-    # Софт-скіли
+    'js': 'javascript', 'ts': 'typescript',
+    'k8s': 'kubernetes', 'node': 'nodejs', 'node.js': 'nodejs',
+    'react.js': 'react', 'reactjs': 'react',
+    'vue.js': 'vue', 'vuejs': 'vue',
+    'next.js': 'nextjs', 'nuxt.js': 'nuxtjs',
+    'pg': 'postgresql', 'postgres': 'postgresql',
+    'mongo': 'mongodb', 'elastic': 'elasticsearch',
+    'ml': 'machine learning', 'dl': 'deep learning',
+    'nlp': 'natural language processing',
+    'cv': 'computer vision',
+    'llms': 'llm', 'rn': 'react native',
+    'ci cd': 'ci/cd', 'cicd': 'ci/cd',
+    'gh-actions': 'github actions', 'gha': 'github actions',
+    'restful': 'rest api', 'restful api': 'rest api',
+    'mui': 'materialui', 'tf': 'tensorflow',
+    'sklearn': 'scikit-learn', 'sk': 'scikit-learn',
+    'sb': 'springboot',
+    # Українські → англійські
+    'розробник': 'developer', 'розробниця': 'developer',
+    'програмування': 'programming', 'програміст': 'programmer',
+    'тестування': 'testing', 'тестувальник': 'tester',
+    'дизайн': 'design', 'аналіз': 'analysis',
+    'бд': 'database', 'хмара': 'cloud',
+    'контейнер': 'container', 'мікросервіс': 'microservices',
+    'комунікація': 'communication', 'спілкування': 'communication',
     'лідерство': 'leadership',
-    'відповідальність': 'responsibility',
-    'ініціативність': 'initiative',
-    'креативність': 'creativity',
-    'стресостійкість': 'stress resistance',
-    'багатозадачність': 'multitasking',
-    'пунктуальність': 'punctuality',
-    'дисциплінованість': 'discipline',
-    'самоорганізація': 'self organization',
-    'командна робота': 'teamwork',
-    'робота в команді': 'teamwork',
-    'критичне мислення': 'critical thinking',
-    'вирішення проблем': 'problem solving',
-    'адаптивність': 'adaptability',
-    'гнучкість': 'flexibility',
-    'уважність': 'attention to detail',
-    'орієнтація на результат': 'result oriented',
-
-    # Інструменти (загальні)
-    'ексель': 'excel',
-    'ворд': 'word',
-    'паверпоінт': 'powerpoint',
-    'аутлук': 'outlook',
-    'трелло': 'trello',
-    'асана': 'asana',
-    'джира': 'jira',
-    'слек': 'slack',
-    'зум': 'zoom',
-    'тімс': 'teams',
-    'ноушн': 'notion',
-    'майро': 'miro',
-    'фігма': 'figma',
-    'канва': 'canva',
-    'фотошоп': 'photoshop',
-    'ілюстратор': 'illustrator',
-    'індизайн': 'indesign',
-
-    # Освіта та сертифікати
-    'вища освіта': 'higher education',
-    'бакалавр': 'bachelor',
-    'магістр': 'master',
-    'спеціаліст': 'specialist',
-    'аспірант': 'phd student',
-    'сертифікат': 'certificate',
-    'диплом': 'diploma',
-    'курси': 'courses',
-    'тренінг': 'training',
-    'семінар': 'seminar',
-    'вебінар': 'webinar',
-    'стажування': 'internship',
-    'практика': 'practice',
-
-    # Досвід роботи
+    'менеджмент': 'management', 'управління': 'management',
+    'англ': 'english', 'нім': 'german', 'фр': 'french',
+    'ексель': 'excel', 'ворд': 'word',
+    'фотошоп': 'photoshop', 'фігма': 'figma',
     'досвід роботи': 'work experience',
-    'стаж': 'experience',
-    'кар\'єра': 'career',
-    'посада': 'position',
-    'працевлаштування': 'employment',
-    'сумісництво': 'part time',
-    'повна зайнятість': 'full time',
-    'віддалена робота': 'remote work',
-    'фріланс': 'freelance',
-    'гібрид': 'hybrid',
-
-    # Володіння
-    'знання': 'knowledge',
-    'навички': 'skills',
-    'вміння': 'abilities',
-    'компетенції': 'competencies',
-    'кваліфікація': 'qualification',
-    'спеціалізація': 'specialization',
-    'професія': 'profession',
+    'вища освіта': 'higher education',
+    'бакалавр': 'bachelor', 'магістр': 'master',
 }
 
 TECH_SKILLS = {
-    # Web development
-    'javascript', 'typescript', 'python', 'java', 'react', 'angular', 'vue', 'vuejs',
-    'nodejs', 'node', 'express', 'django', 'flask', 'spring', 'springboot',
-    'nextjs', 'next', 'nuxtjs', 'nuxt', 'gatsby', 'svelte', 'jquery',
-    'html', 'html5', 'css', 'css3', 'scss', 'sass', 'less',
-    'webpack', 'babel', 'vite', 'npm', 'yarn', 'pnpm',
-
-    # Mobile
-    'flutter', 'swift', 'kotlin', 'android', 'ios', 'reactnative',
-    'xamarin', 'ionic',
-
-    # Backend & Database
-    'rest', 'restful', 'graphql', 'grpc', 'soap', 'websocket',
-    'sql', 'mysql', 'postgresql', 'postgres', 'mongodb', 'mongo',
-    'redis', 'elasticsearch', 'cassandra', 'dynamodb',
-    'firebase', 'supabase', 'prisma', 'sequelize', 'mongoose',
-
-    # DevOps & Cloud
-    'docker', 'kubernetes', 'k8s', 'aws', 'azure', 'gcp', 'googlecloud',
-    'terraform', 'ansible', 'puppet', 'chef',
-    'jenkins', 'github', 'githubactions', 'gitlab', 'gitlabci',
-    'bitbucket', 'circleci', 'travisci',
-    'prometheus', 'grafana', 'elk', 'datadog', 'newrelic',
-    'nginx', 'apache', 'haproxy',
-
     # Languages
-    'c++', 'c#', 'dotnet', '.net', 'ruby', 'rubyonrails', 'rails',
-    'php', 'laravel', 'symfony', 'go', 'golang', 'rust',
-    'scala', 'elixir', 'haskell', 'clojure',
-
-    # Data & AI
-    'machinelearning', 'deeplearning', 'nlp', 'computervision',
-    'tensorflow', 'pytorch', 'keras', 'scikitlearn',
-    'pandas', 'numpy', 'spark', 'hadoop', 'kafka', 'rabbitmq',
-    'tableau', 'powerbi', 'looker',
-
-    # Design
-    'figma', 'sketch', 'adobe', 'photoshop', 'illustrator',
-    'indesign', 'aftereffects', 'premiere',
-    'zeplin', 'invision', 'marvelapp',
-
-    # Other tech
-    'git', 'linux', 'unix', 'bash', 'shell', 'powershell',
-    'agile', 'scrum', 'kanban', 'jira', 'confluence',
-    'testing', 'unittest', 'integrationtest', 'e2e',
-    'selenium', 'cypress', 'jest', 'mocha', 'chai',
-    'microservices', 'serverless', 'api', 'sdk',
+    'python', 'javascript', 'typescript', 'java', 'c#', 'c++', 'c', 'go', 'golang',
+    'rust', 'swift', 'kotlin', 'scala', 'ruby', 'php', 'perl', 'r', 'matlab',
+    'bash', 'shell', 'powershell', 'sql', 'nosql', 'html', 'css', 'sass', 'scss',
+    'graphql', 'solidity', 'dart', 'lua', 'haskell', 'elixir', 'clojure', 'groovy',
+    # Frontend
+    'react', 'vue', 'angular', 'svelte', 'nextjs', 'nuxtjs', 'gatsby',
+    'jquery', 'redux', 'mobx', 'zustand', 'pinia', 'vuex',
+    'webpack', 'vite', 'parcel', 'rollup', 'esbuild',
+    'babel', 'swc', 'eslint', 'prettier',
+    'tailwind', 'bootstrap', 'materialui', 'antd', 'chakra',
+    'storybook', 'webcomponents', 'pwa',
+    'websocket', 'webassembly', 'wasm', 'webgl', 'threejs', 'd3',
+    # Backend
+    'nodejs', 'express', 'fastapi', 'flask', 'django', 'spring', 'springboot',
+    'rails', 'laravel', 'symfony', 'nestjs', 'koa', 'gin',
+    'celery', 'rabbitmq', 'kafka', 'nats',
+    'grpc', 'rest', 'rest api', 'soap',
+    'oauth', 'oauth2', 'jwt', 'openapi', 'swagger', 'openid',
+    'protobuf', 'avro',
+    # Databases
+    'postgresql', 'mysql', 'sqlite', 'mssql', 'oracle', 'mariadb',
+    'mongodb', 'redis', 'elasticsearch', 'cassandra', 'dynamodb',
+    'couchdb', 'neo4j', 'influxdb', 'clickhouse', 'snowflake', 'bigquery',
+    'supabase', 'firebase', 'firestore',
+    'prisma', 'sqlalchemy', 'hibernate', 'typeorm', 'sequelize', 'mongoose',
+    'drizzle', 'gorm',
+    'vector database', 'pinecone', 'weaviate', 'milvus', 'qdrant', 'chroma',
+    # Cloud & DevOps
+    'aws', 'azure', 'gcp', 'heroku', 'vercel', 'netlify', 'digitalocean',
+    'docker', 'kubernetes', 'podman',
+    'terraform', 'pulumi', 'ansible', 'puppet', 'chef',
+    'jenkins', 'gitlab', 'github', 'github actions', 'circleci',
+    'argocd', 'fluxcd', 'helm', 'kustomize', 'istio',
+    'prometheus', 'grafana', 'loki', 'datadog', 'sentry',
+    'nginx', 'apache', 'caddy', 'haproxy', 'traefik',
+    'cloudflare', 'fastly',
+    'ci/cd', 'gitops', 'devsecops', 'sre',
+    'infrastructure as code', 'iac',
+    # ML / AI
+    'tensorflow', 'pytorch', 'keras', 'scikit-learn',
+    'pandas', 'numpy', 'scipy', 'matplotlib', 'seaborn', 'plotly',
+    'opencv', 'pillow',
+    'transformers', 'huggingface', 'langchain', 'llamaindex',
+    'openai', 'llm', 'bert', 'gpt', 't5', 'llama',
+    'mlflow', 'wandb', 'airflow', 'prefect', 'dagster',
+    'spark', 'hadoop', 'hive', 'flink', 'dask', 'ray',
+    'xgboost', 'lightgbm', 'catboost',
+    'machine learning', 'deep learning', 'computer vision',
+    'natural language processing', 'data science',
+    # Mobile
+    'ios', 'android', 'react native', 'flutter', 'xamarin', 'ionic',
+    'swiftui', 'uikit', 'jetpack compose', 'expo',
+    # Testing
+    'jest', 'pytest', 'unittest', 'mocha', 'chai', 'jasmine',
+    'cypress', 'playwright', 'selenium', 'puppeteer',
+    'testng', 'junit', 'xunit',
+    'postman', 'insomnia', 'k6', 'jmeter', 'gatling', 'locust',
+    # Architecture
+    'microservices', 'monolith', 'serverless', 'event-driven',
+    'ddd', 'cqrs', 'event sourcing', 'saga',
+    'tdd', 'bdd', 'atdd', 'pair programming', 'code review',
+    'mvc', 'mvvm', 'mvp', 'clean architecture', 'hexagonal',
+    'solid', 'dry', 'kiss', 'design patterns',
+    'api design', 'domain modeling', 'system design',
+    # Security
+    'cybersecurity', 'pentest', 'owasp', 'ssl', 'tls', 'encryption',
+    'authentication', 'authorization', 'sso', 'ldap', 'saml', 'keycloak',
+    'vault', 'secrets management', 'sast', 'dast', 'sonarqube',
+    'zero trust', 'iam', 'rbac',
+    # Data Engineering
+    'data pipeline', 'etl', 'elt', 'data warehouse', 'data lake',
+    'delta lake', 'apache iceberg', 'apache hudi',
+    'kafka streams', 'flink sql',
+    # GameDev
+    'unity', 'unreal', 'godot', 'pygame',
+    'opengl', 'vulkan', 'directx', 'webgpu',
+    # Tools
+    'git', 'svn', 'jira', 'confluence', 'notion', 'trello', 'linear',
+    'figma', 'sketch', 'photoshop', 'illustrator', 'xd', 'zeplin',
+    'linux', 'unix', 'vim', 'vscode', 'intellij',
+    'makefile', 'cmake', 'bazel', 'gradle', 'maven',
+    # Blockchain
+    'blockchain', 'web3', 'ipfs', 'ethereum', 'hyperledger',
+    'smart contracts', 'hardhat', 'foundry',
+    'defi', 'nft',
+    # IoT / Embedded
+    'iot', 'embedded', 'rtos', 'freertos', 'zephyr',
+    'raspberrypi', 'arduino', 'stm32', 'esp32',
+    'mqtt', 'coap', 'zigbee', 'lora',
+    # Integrations
+    'webrtc', 'twilio', 'stripe', 'sendgrid',
+    'segment', 'mixpanel', 'amplitude',
+    'zapier', 'make', 'n8n',
 }
 
 SOFT_SKILLS = {
-    'communication', 'teamwork', 'leadership', 'management',
+    'communication', 'комунікація',
+    'teamwork', 'командна робота',
+    'leadership', 'лідерство',
+    'creativity', 'креативність',
+    'adaptability', 'адаптивність',
+    'responsibility', 'відповідальність',
+    'initiative', 'ініціативність',
+    'autonomy', 'самостійність',
+    'organization', 'організованість',
+    'punctuality', 'пунктуальність',
+    'stress resistance', 'стресостійкість',
+    'critical thinking', 'критичне мислення',
+    'problem solving', 'вирішення проблем',
+    'decision making', 'прийняття рішень',
+    'public speaking', 'presentation skills',
+    'negotiation', 'переговори',
+    'empathy', 'emotional intelligence',
+    'mentoring', 'coaching', 'наставництво',
+    'facilitation', 'фасилітація',
+    'time management', 'тайм-менеджмент',
+    'multitasking', 'багатозадачність',
+    'attention to detail', 'увага до деталей',
+    'analytical thinking', 'аналітичне мислення',
+    'flexibility', 'гнучкість',
+    'patience', 'терплячість',
+    'motivation', 'мотивація',
+    'fast learner', 'швидке навчання',
+    'self-learning', 'самонавчання',
+    'documentation', 'written communication',
+    'conflict resolution',
+    'cross-functional collaboration',
+    'ownership', 'accountability',
+    'proactivity', 'результативність',
     'english', 'german', 'french', 'spanish', 'italian',
     'polish', 'ukrainian', 'chinese', 'japanese',
-    'analytical', 'creative', 'problemsolving', 'criticalthinking',
-    'adaptability', 'flexibility', 'timemanagement',
-    'presentation', 'negotiation', 'conflictresolution',
-    'mentoring', 'coaching', 'facilitation',
-    'emotionalintelligence', 'empathy',
-    'decisionmaking', 'strategicthinking',
-    'attentiontodetail', 'organized', 'detailoriented',
-    'selfmotivated', 'proactive', 'initiative',
-    'collaboration', 'interpersonal',
-    'writing', 'publicspeaking', 'storytelling',
-    'projectmanagement', 'productmanagement',
-    'customerservice', 'clientrelations',
-    'sales', 'marketing', 'branding',
-    'research', 'analysis', 'reporting',
 }
 
 BUSINESS_SKILLS = {
-    'finance', 'accounting', 'audit', 'tax',
-    'budgeting', 'forecasting', 'financialmodeling',
-    'riskmanagement', 'compliance', 'regulatory',
-    'strategy', 'businessdevelopment', 'operations',
-    'supplychain', 'logistics', 'procurement',
-    'inventory', 'warehouse', 'distribution',
-    'quality', 'sixsigma', 'lean', 'iso',
-    'hr', 'recruiting', 'onboarding', 'training',
-    'payroll', 'benefits', 'compensation',
-    'legal', 'contract', 'intellectualproperty',
-    'realestate', 'construction', 'architecture',
-    'healthcare', 'medical', 'pharmaceutical',
-    'education', 'teaching', 'curriculum',
-    'nonprofit', 'fundraising', 'grantwriting',
+    'agile', 'scrum', 'kanban', 'waterfall', 'lean', 'six sigma', 'okr', 'kpi',
+    'product management', 'product owner',
+    'project management', 'program management',
+    'business analysis', 'system analysis',
+    'requirements gathering', 'user stories',
+    'ux', 'ui', 'user research', 'usability testing', 'a/b testing',
+    'analytics', 'web analytics', 'product analytics',
+    'marketing', 'growth hacking', 'content marketing',
+    'seo', 'sem', 'ppc', 'email marketing',
+    'crm', 'erp', 'sap', 'salesforce', 'hubspot', 'zendesk',
+    'financial analysis', 'budgeting', 'forecasting',
+    'strategic planning', 'risk management',
+    'stakeholder management', 'vendor management',
+    'supply chain', 'logistics', 'procurement',
+    'customer success', 'client relations', 'account management',
+    'b2b', 'b2c', 'saas', 'paas', 'iaas',
+    'data-driven', 'tableau', 'powerbi', 'looker', 'metabase', 'superset',
+    'compliance', 'gdpr', 'hipaa', 'iso', 'itil',
+    'pmp', 'prince2', 'safe',
+    'change management', 'digital transformation',
+    'go-to-market', 'market research', 'competitive analysis',
 }
 
 
 def tokenize(text: str) -> list:
-    tokens = re.findall(
-        r'[a-zа-яёіїєґ][a-zа-яёіїєґ0-9+#\.\-]*',
-        text.lower()
-    )
+    tokens = re.findall(r'[a-zа-яіїєґ][a-zа-яіїєґ0-9+#\.\-]*', text.lower())
     
     result = []
     for t in tokens:
         t = t.strip('.-_')
-        
         if len(t) < 2:
             continue
-        
         t = SYNONYMS.get(t, t)
-        
         if t in STOPWORDS_ALL:
             continue
-        
         result.append(t)
     
     return result
@@ -359,28 +318,16 @@ def normalize_word(word: str) -> str:
     return w
 
 
-def classify_skill(word: str) -> str:
-    if word in TECH_SKILLS:
-        return 'tech'
-    if word in SOFT_SKILLS:
-        return 'soft'
-    if word in BUSINESS_SKILLS:
-        return 'business'
-    return 'other'
-
-
 def extract_keywords(text: str, top_n: int = 15) -> list:
+    from collections import Counter
+    
     tokens = tokenize(text)
-    
-    freq = {}
-    
-    for t in tokens:
-        freq[t] = freq.get(t, 0) + 1
-    
+    freq = Counter(tokens)
+
     for i in range(len(tokens) - 1):
         bigram = f"{tokens[i]} {tokens[i+1]}"
-        freq[bigram] = freq.get(bigram, 0) + 1.5
+        if bigram in TECH_SKILLS or bigram in SOFT_SKILLS or bigram in BUSINESS_SKILLS:
+            freq[bigram] = freq.get(bigram, 0) + 2
     
-    sorted_words = sorted(freq.items(), key=lambda x: -x[1])[:top_n]
-    
+    sorted_words = freq.most_common(top_n)
     return [{'word': w, 'stemmed': w} for w, _ in sorted_words]
