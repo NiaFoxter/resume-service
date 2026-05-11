@@ -144,7 +144,7 @@ function renderAnalysisLoading() {
         <div class="analysis-loading">
             <div class="spinner-large"></div>
             <p>🔄 Аналізуємо резюме...</p>
-            <small>Перший запуск може зайняти до 2 хвилин — завантажується ШІ-модель</small>
+            <small>Перший запуск може зайняти до 2 хвилин</small>
         </div>`;
 }
 
@@ -227,7 +227,7 @@ function renderAnalysisResults(r) {
                 <div class="score-info">
                     <div class="score-verdict">${esc(r.verdict || 'Аналіз завершено')}</div>
                     <div class="score-meta">
-                        <span class="meta-badge">${r.method === 'semantic' ? '🧠 ШІ-аналіз' : r.method?.startsWith('gemini') ? '🤖 Gemini' : '📊 Статистичний'}</span>
+                        <span class="meta-badge">${r.method === 'semantic' ? '🧠 Семантична модель' : r.method?.startsWith('gemini') ? '🤖 Gemini' : '📊 Статистичний'}</span>
                     </div>
                 </div>
             </div>
