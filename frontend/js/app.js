@@ -1,5 +1,5 @@
 // Конфігурація
-const API = 'http://localhost:5000';
+const API = '';
 
 // Стан
 const state = {
@@ -84,12 +84,12 @@ function showConfirm(title, text, onOk) {
     const titleEl = document.getElementById('confirmTitle');
     const textEl = document.getElementById('confirmText');
     const okBtn = document.getElementById('confirmOk');
-    
+
     if (!overlay || !titleEl || !textEl || !okBtn) {
         if (confirm(title + '\n' + text)) onOk();
         return;
     }
-    
+
     titleEl.textContent = title;
     textEl.textContent = text;
     okBtn.onclick = () => {
