@@ -10,10 +10,10 @@ const authUI = {
             navUser.textContent = `${user.firstName} ${user.lastName}`;
             navUser.classList.add('visible');
         }
+        const greet = document.getElementById('greetName');
+        if (greet) greet.textContent = user.firstName;
 
-        document.getElementById('navLinks')?.classList.add('visible');
-        const greetName = document.getElementById('greetName');
-        if (greetName) greetName.textContent = user.firstName;
+        closeMobileMenu();
     },
 
     setLoggedOut() {
@@ -21,7 +21,8 @@ const authUI = {
         document.getElementById('btnReg')?.classList.remove('hidden');
         document.getElementById('btnLogout')?.classList.add('hidden');
         document.getElementById('navUser')?.classList.remove('visible');
-        document.getElementById('navLinks')?.classList.remove('visible');
+
+        closeMobileMenu();
     }
 };
 

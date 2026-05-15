@@ -113,6 +113,29 @@ function requireAuth() {
     return true;
 }
 
+// Menu
+function openMobileMenu() {
+    $('#navBurger')?.classList.add('open');
+    $('#navMenu')?.classList.add('open');
+    $('#navOverlay')?.classList.add('open');
+}
+
+function closeMobileMenu() {
+    $('#navBurger')?.classList.remove('open');
+    $('#navMenu')?.classList.remove('open');
+    $('#navOverlay')?.classList.remove('open');
+}
+
+function toggleBurger() {
+    if ($('#navMenu')?.classList.contains('open')) closeMobileMenu();
+    else openMobileMenu();
+}
+
+document.addEventListener('click', (e) => { if (e.target === $('#navOverlay') || e.target.closest('.nav-link')) closeMobileMenu(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeMobileMenu(); });
+
+$('#navBurger')?.addEventListener('click', toggleBurger);
+
 // Навігація
 function navigate(page, btn) {
     if (!document.getElementById(`page-${page}`)) return;
@@ -123,7 +146,7 @@ function navigate(page, btn) {
     state.ui.currentPage = page;
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.getElementById(`page-${page}`)?.classList.add('active');
-    document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
     (btn || document.querySelector(`.nav-link[data-page="${page}"]`))?.classList.add('active');
 
     if (page === 'dashboard') loadDashboard?.();
@@ -151,11 +174,14 @@ function navigate(page, btn) {
 
     document.addEventListener('keydown', e => {
         if (e.key === 'Escape') {
-            document.querySelectorAll('.overlay.open').forEach(m => m.classList.remove('open'));
+            document.querySelectorAll('.overlay.open').forEach(modal => modal.classList.remove('open'));
+            closeMobileMenu();
         }
     });
 
     document.querySelectorAll('.nav-link').forEach(btn => {
         btn.addEventListener('click', () => navigate(btn.dataset.page, btn));
     });
+
+    $('#navBurger')?.addEventListener('click', toggleBurger);
 })();

@@ -7,6 +7,10 @@
     grid-template-columns: 1fr 500px;
     gap: 64px;
     align-items: center;
+
+        @media screen and (max-width: 920px) {
+        display: block;
+    }
 }
 
 .hero-eyebrow {
@@ -51,6 +55,10 @@
     position: relative;
     display: flex;
     justify-content: center;
+
+    @media screen and (max-width: 920px) {
+        display: none;
+    }
 }
 
 .hero-resume-float {

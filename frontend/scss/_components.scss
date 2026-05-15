@@ -3,28 +3,32 @@
   position: sticky;
   top: 0;
   z-index: 200;
+  display: flex;
+  align-items: center;
+  height: $navbar-h;
+  padding: 0 32px;
   background: rgba($paper, .92);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid $line;
-  height: $navbar-h;
-  display: flex;
-  align-items: center;
-  padding: 0 32px;
-  gap: 8px;
+  overflow: visible;
 
-  @media (max-width: 768px) {
+  @media (max-width: 920px) {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: $navbar-h;
     padding: 0 16px;
   }
 }
 
 .nav-logo {
   @include font-display($fs-lg);
-  color: $ink;
-  text-decoration: none;
   display: flex;
   align-items: center;
   gap: 8px;
+  color: $ink;
   cursor: pointer;
+  flex-shrink: 0;
+  user-select: none;
 }
 
 .nav-logo-mark {
@@ -42,27 +46,102 @@
   }
 }
 
-.nav-links {
+.nav-burger {
   display: none;
-  flex: 1;
-  gap: 2px;
-  margin-left: 20px;
+  margin-left: auto;
+  padding: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 5px;
 
-  &.visible {
+  span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    border-radius: 2px;
+    background: $ink;
+    transition: all .3s $ease;
+  }
+
+  &.open {
+    span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    span:nth-child(2) {
+      opacity: 0;
+    }
+
+    span:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
+  }
+
+  @media (max-width: 920px) {
     display: flex;
+  }
+}
+
+.nav-menu {
+  display: flex;
+  flex: 1;
+  justify-content: flex-end;
+
+  @media (max-width: 920px) {
+    position: fixed;
+    top: $navbar-h;
+    left: 0;
+    right: 0;
+    display: none;
+    flex-direction: column;
+    background: rgba($paper, 0.98);
+    backdrop-filter: blur(12px);
+    padding: 16px 20px;
+    z-index: 150;
+    overflow-y: auto;
+  }
+
+  &.open {
+    @media (max-width: 920px) {
+      display: flex;
+    }
+  }
+}
+
+.nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 140;
+}
+
+.nav-overlay.open {
+  display: block;
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+
+  @media (max-width: 920px) {
+    flex-direction: column;
+    width: 100%;
   }
 }
 
 .nav-link {
   padding: 6px 12px;
-  border-radius: $r-sm;
-  @include font-body($fs-base, 500);
-  color: $ink-2;
-  background: none;
   border: none;
+  border-radius: $r-sm;
+  background: none;
   cursor: pointer;
-  transition: all $transition;
   white-space: nowrap;
+  color: $ink-2;
+  @include font-body($fs-base, 500);
+  transition: all $transition;
 
   &:hover {
     background: $line-2;
@@ -73,29 +152,44 @@
     background: $copper-lt;
     color: $copper-dk;
   }
-}
 
-.nav-right {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.nav-user {
-  @include font-body($fs-base, 500);
-  color: $ink-2;
-  padding: 5px 12px;
-  background: $line-2;
-  border-radius: $r-full;
-  display: none;
-
-  &.visible {
-    display: block !important;
+  @media (max-width: 920px) {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
   }
 }
 
+.nav-auth {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 
+  @media (max-width: 920px) {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    padding-top: 12px;
+    border-top: 1px solid $line;
+  }
+}
+
+.nav-user {
+  display: none;
+  padding: 5px 12px;
+  border-radius: $r-full;
+  background: $line-2;
+  color: $ink-2;
+  @include font-body($fs-base, 500);
+
+  &.visible {
+    display: block;
+  }
+
+  @media (max-width: 920px) {
+    margin-bottom: 4px;
+  }
+}
 
 // Кнопки
 .btn {
@@ -289,13 +383,13 @@
 }
 
 .modal-sm {
-    width: 380px;
-    text-align: center;
+  width: 380px;
+  text-align: center;
 }
 
 .modal-icon {
-    font-size: 40px;
-    margin-bottom: 12px;
+  font-size: 40px;
+  margin-bottom: 12px;
 }
 
 // Тости

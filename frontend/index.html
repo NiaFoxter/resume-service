@@ -29,23 +29,28 @@
             Автоматизоване Резюме
         </div>
 
-        <button class="nav-hamburger" id="hamburger" onclick="toggleMenu()">
-            <span></span><span></span><span></span>
+        <button class="nav-burger" id="navBurger" aria-label="Меню" onclick="toggleMenu()">
+            <span></span> <span></span> <span></span>
         </button>
 
-        <div class="nav-links" id="navLinks">
-            <button class="nav-link" data-page="dashboard">Мої резюме</button>
-            <button class="nav-link" data-page="templates" onclick="syncTemplateSelection()">Шаблони</button>
-            <button class="nav-link" data-page="analysis">Аналіз</button>
-        </div>
+        <div class="nav-menu" id="navMenu">
+            <div class="nav-links">
+                <button class="nav-link" data-page="dashboard"> Мої резюме </button>
+                <button class="nav-link" data-page="templates" onclick="syncTemplateSelection()"> Шаблони </button>
+                <button class="nav-link" data-page="analysis"> Аналіз </button>
+            </div>
 
-        <div class="nav-right">
-            <span class="nav-user hidden" id="navUser"></span>
-            <button class="btn btn-ghost btn-sm" id="btnLogin" onclick="openModal('mLogin')">Увійти</button>
-            <button class="btn btn-primary btn-sm" id="btnReg" onclick="openModal('mRegister')">Реєстрація</button>
-            <button class="btn btn-ghost btn-sm hidden" id="btnLogout" onclick="logout()">Вийти</button>
+            <div class="nav-auth">
+                <span class="nav-user" id="navUser"></span>
+                <button class="btn btn-ghost btn-sm" id="btnLogin" onclick="openModal('mLogin')"> Увійти </button>
+                <button class="btn btn-primary btn-sm" id="btnReg" onclick="openModal('mRegister')"> Реєстрація
+                </button>
+                <button class="btn btn-ghost btn-sm hidden" id="btnLogout" onclick="logout()"> Вийти </button>
+            </div>
         </div>
     </nav>
+
+    <div class="nav-overlay" id="navOverlay"></div>
 
     <!-- Головна сторінка -->
     <div class="page active" id="page-landing">
