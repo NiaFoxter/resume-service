@@ -8,11 +8,17 @@ function esc(str) {
     return String(str)
 }
 
+const hasExp = e => e.position?.trim() || e.company?.trim()
+const hasEdu = e => e.institution?.trim() || e.degree?.trim()
+const hasProj = pr => pr.name?.trim()
+const hasLang = l => l.language?.trim()
+
 function SkillPills({ skills }) {
-    if (!skills?.length) return null
+    const list = (skills || []).filter(s => s?.trim())
+    if (!list.length) return null
     return (
         <div className="a4-skills-wrap">
-            {skills.slice(0, 12).map((sk, i) => (
+            {list.slice(0, 12).map((sk, i) => (
                 <span key={i} className="a4-skill-pill">{esc(sk)}</span>
             ))}
         </div>
@@ -20,10 +26,11 @@ function SkillPills({ skills }) {
 }
 
 function LangList({ languages }) {
-    if (!languages?.length) return null
+    const list = (languages || []).filter(hasLang)
+    if (!list.length) return null
     return (
         <>
-            {languages.map((l, i) => (
+            {list.map((l, i) => (
                 <div key={i} className="a4-lang">
                     <span className="a4-lang-name">{esc(l.language)}</span>
                     <span className="a4-lang-level">{esc(l.level)}</span>
@@ -34,7 +41,7 @@ function LangList({ languages }) {
 }
 
 function LinksList({ links }) {
-    const items = Object.entries(links || {}).filter(([, v]) => v)
+    const items = Object.entries(links || {}).filter(([, v]) => v?.trim())
     if (!items.length) return null
     const icons = { github: '⌥', website: '🌐', telegram: '✈' }
     return (
@@ -50,10 +57,11 @@ function LinksList({ links }) {
 }
 
 function ExpList({ experience }) {
-    if (!experience?.length) return null
+    const list = (experience || []).filter(hasExp)
+    if (!list.length) return null
     return (
         <>
-            {experience.map((e, i) => {
+            {list.map((e, i) => {
                 const period = [e.startDate, e.current ? 'тепер' : e.endDate].filter(Boolean).join(' — ')
                 const bullets = (e.description || '').split('\n').filter(l => l.trim()).slice(0, 5)
                 return (
@@ -62,7 +70,7 @@ function ExpList({ experience }) {
                             <span className="a4-exp-title">{esc(e.position)}</span>
                             {period && <span className="a4-exp-period">{period}</span>}
                         </div>
-                        <div className="a4-exp-company">{esc(e.company)}</div>
+                        {e.company && <div className="a4-exp-company">{esc(e.company)}</div>}
                         {bullets.length > 0 && (
                             <ul className="a4-exp-list">
                                 {bullets.map((b, bi) => (
@@ -78,16 +86,20 @@ function ExpList({ experience }) {
 }
 
 function EduList({ education }) {
-    if (!education?.length) return null
+    const list = (education || []).filter(hasEdu)
+    if (!list.length) return null
     return (
         <>
-            {education.map((e, i) => (
+            {list.map((e, i) => (
                 <div key={i} className="a4-edu">
-                    <div className="a4-edu-deg">{esc(e.degree)}</div>
-                    <div className="a4-edu-school">{esc(e.institution)}</div>
-                    <div className="a4-edu-year">
-                        {esc(e.startYear)}{e.endYear ? ` – ${esc(e.endYear)}` : ''}
-                    </div>
+                    {e.degree && <div className="a4-edu-deg">{esc(e.degree)}</div>}
+                    {e.institution && <div className="a4-edu-school">{esc(e.institution)}</div>}
+                    {e.field && <div className="a4-edu-field">{esc(e.field)}</div>}
+                    {(e.startYear || e.endYear) && (
+                        <div className="a4-edu-year">
+                            {esc(e.startYear)}{e.endYear ? ` – ${esc(e.endYear)}` : ''}
+                        </div>
+                    )}
                 </div>
             ))}
         </>
@@ -95,10 +107,11 @@ function EduList({ education }) {
 }
 
 function ProjectsList({ projects }) {
-    if (!projects?.length) return null
+    const list = (projects || []).filter(hasProj)
+    if (!list.length) return null
     return (
         <>
-            {projects.map((pr, i) => (
+            {list.map((pr, i) => (
                 <div key={i} className="a4-proj">
                     <div className="a4-proj-head">
                         <span className="a4-proj-name">{esc(pr.name)}</span>
@@ -111,12 +124,18 @@ function ProjectsList({ projects }) {
     )
 }
 
-// Main preview
-
 const A4Preview = forwardRef(function A4Preview(_, ref) {
     const { data, photo, template } = useResumeStore()
     const p = data.personal
     const singleCol = SINGLE_COL.includes(template)
+
+    const experience = (data.experience || []).filter(hasExp)
+    const education = (data.education || []).filter(hasEdu)
+    const projects = (data.projects || []).filter(hasProj)
+    const skills = (data.skills || []).filter(s => s?.trim())
+    const languages = (data.languages || []).filter(hasLang)
+    const links = data.links || {}
+    const hasLinks = Object.values(links).some(v => v?.trim())
 
     const contactItems = [
         p.email && { icon: '✉', val: p.email },
@@ -125,120 +144,116 @@ const A4Preview = forwardRef(function A4Preview(_, ref) {
         p.linkedin && { icon: 'in', val: p.linkedin },
     ].filter(Boolean)
 
-    const hasLinks = Object.values(data.links).some(v => v)
+    const leftHasPhoto = !singleCol && !!photo
+    const leftHasSkills = !singleCol && skills.length > 0
+    const leftHasLangs = !singleCol && languages.length > 0
+    const leftHasLinks = !singleCol && hasLinks
+    const showLeft = leftHasPhoto || leftHasSkills || leftHasLangs || leftHasLinks
 
     return (
         <div ref={ref} className={`a4 tmpl-${template}`} id="a4Preview">
-            {/* LEFT column (two-col templates only) */}
-            {!singleCol && (
+
+            {!singleCol && showLeft && (
                 <div className="a4-left">
                     {photo && (
                         <div className="a4-photo-wrap">
                             <img className="a4-photo" src={photo} alt="Фото" />
                         </div>
                     )}
-
-                    {data.skills.length > 0 && (
-                        <div className="a4-sec" id="pvSkillsSec">
+                    {skills.length > 0 && (
+                        <div className="a4-sec">
                             <div className="a4-sec-title">Навички</div>
-                            <SkillPills skills={data.skills} />
+                            <SkillPills skills={skills} />
                         </div>
                     )}
-
-                    {data.languages.length > 0 && (
-                        <div className="a4-sec" id="pvLangsSec">
+                    {languages.length > 0 && (
+                        <div className="a4-sec">
                             <div className="a4-sec-title">Мови</div>
-                            <LangList languages={data.languages} />
+                            <LangList languages={languages} />
                         </div>
                     )}
-
                     {hasLinks && (
-                        <div className="a4-sec" id="pvLinksSec">
+                        <div className="a4-sec">
                             <div className="a4-sec-title">Посилання</div>
-                            <LinksList links={data.links} />
+                            <LinksList links={links} />
                         </div>
                     )}
                 </div>
             )}
 
-            {/* RIGHT / main column */}
             <div className="a4-right">
-                {/* Header */}
-                <div className={`a4-head ${photo && singleCol ? 'has-photo' : ''}`} id="a4Head">
+
+                <div className={`a4-head ${photo && singleCol ? 'has-photo' : ''}`}>
                     {photo && singleCol && (
-                        <img className="a4-photo" id="pvPhoto" src={photo} alt="Фото" />
+                        <img className="a4-photo" src={photo} alt="Фото" />
                     )}
                     <div className="a4-head-info">
                         {(p.firstName || p.lastName) && (
-                            <div className="a4-name">{esc(p.firstName)} {esc(p.lastName)}</div>
+                            <div className="a4-name">
+                                {esc(p.firstName)}{p.firstName && p.lastName ? ' ' : ''}{esc(p.lastName)}
+                            </div>
                         )}
                         {p.jobTitle && <div className="a4-title">{esc(p.jobTitle)}</div>}
                     </div>
                 </div>
 
-                {/* Contacts */}
                 {contactItems.length > 0 && (
-                    <div className="a4-contacts" id="pvContacts">
+                    <div className="a4-contacts">
                         {contactItems.map((c, i) => (
                             <span key={i} className="a4-contact">{c.icon} {c.val}</span>
                         ))}
                     </div>
                 )}
 
-                {/* Summary */}
-                {data.summary && (
-                    <div className="a4-sec" id="pvAboutSec">
+                {data.summary?.trim() && (
+                    <div className="a4-sec">
                         <div className="a4-sec-title">Про себе</div>
-                        <div className="a4-about" id="pvAbout">{data.summary}</div>
+                        <div className="a4-about">{data.summary}</div>
                     </div>
                 )}
 
-                {/* Experience */}
-                {data.experience.length > 0 && (
-                    <div className="a4-sec" id="pvExpSec">
+                {experience.length > 0 && (
+                    <div className="a4-sec">
                         <div className="a4-sec-title">Досвід</div>
-                        <div id="pvExp"><ExpList experience={data.experience} /></div>
+                        <ExpList experience={experience} />
                     </div>
                 )}
 
-                {/* Education */}
-                {data.education.length > 0 && (
-                    <div className="a4-sec" id="pvEduSec">
+                {education.length > 0 && (
+                    <div className="a4-sec">
                         <div className="a4-sec-title">Освіта</div>
-                        <div id="pvEdu"><EduList education={data.education} /></div>
+                        <EduList education={education} />
                     </div>
                 )}
 
-                {/* Projects */}
-                {data.projects.length > 0 && (
-                    <div className="a4-sec" id="pvProjSec">
+                {projects.length > 0 && (
+                    <div className="a4-sec">
                         <div className="a4-sec-title">Проєкти</div>
-                        <div id="pvProjects"><ProjectsList projects={data.projects} /></div>
+                        <ProjectsList projects={projects} />
                     </div>
                 )}
 
-                {/* Single-col extras: skills / langs / links at bottom */}
                 {singleCol && (
-                    <div id="pvRightExtra">
-                        {data.skills.length > 0 && (
+                    <>
+                        {skills.length > 0 && (
                             <div className="a4-sec">
                                 <div className="a4-sec-title">Навички</div>
-                                <SkillPills skills={data.skills} />
+                                <SkillPills skills={skills} />
                             </div>
                         )}
-                        {data.languages.length > 0 && (
+                        {languages.length > 0 && (
                             <div className="a4-sec">
                                 <div className="a4-sec-title">Мови</div>
-                                <LangList languages={data.languages} />
+                                <LangList languages={languages} />
                             </div>
                         )}
                         {hasLinks && (
-                            <div className="a4-sec pv-links">
+                            <div className="a4-sec">
                                 <div className="a4-sec-title">Посилання</div>
-                                <LinksList links={data.links} />
+                                <LinksList links={links} />
                             </div>
                         )}
-                    </div>
+                    </>
                 )}
             </div>
         </div>
