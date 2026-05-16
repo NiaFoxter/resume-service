@@ -10,12 +10,9 @@
   background: rgba($paper, .92);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid $line;
-  overflow: visible;
+  gap: 8px;
 
   @media (max-width: 920px) {
-    flex-wrap: wrap;
-    height: auto;
-    min-height: $navbar-h;
     padding: 0 16px;
   }
 }
@@ -24,90 +21,57 @@
   @include font-display($fs-lg);
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   color: $ink;
   cursor: pointer;
   flex-shrink: 0;
   user-select: none;
   text-decoration: none;
+  white-space: nowrap;
 }
 
-.nav-burger {
-  display: none;
-  margin-left: 12px;
-  padding: 4px;
-  border: none;
-  background: none;
-  cursor: pointer;
-  flex-direction: column;
-  gap: 5px;
+.nav-logo-mark {
+  width: 30px;
+  height: 30px;
+  background: $ink;
+  border-radius: $r-sm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 
-  span {
-    display: block;
-    width: 24px;
-    height: 2px;
-    border-radius: 2px;
-    background: $ink;
-    transition: all .3s $ease;
+  svg {
+    width: 16px;
+    height: 16px;
   }
+}
 
-  &.open {
-    span:nth-child(1) {
-      transform: rotate(45deg) translate(5px, 5px);
-    }
-
-    span:nth-child(2) {
-      opacity: 0;
-    }
-
-    span:nth-child(3) {
-      transform: rotate(-45deg) translate(5px, -5px);
-    }
-  }
+// Десктоп-посилання — в центрі
+.nav-links {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  justify-content: center;
 
   @media (max-width: 920px) {
-    display: flex;
+    display: none; // приховуємо на мобільному, є в nav-menu
   }
 }
 
-.nav-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-  z-index: 140;
+// Права частина — auth + бургер
+.nav-auth {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
 
-  &.open {
-    display: block;
-  }
-}
+  @media (max-width: 920px) {
 
-.nav-menu {
-  position: fixed;
-  top: $navbar-h;
-  left: 0;
-  right: 0;
-  display: none;
-  flex-direction: column;
-  background: rgba($paper, 0.98);
-  backdrop-filter: blur(12px);
-  padding: 16px 20px;
-  z-index: 150;
-  overflow-y: auto;
-  box-shadow: $shadow-lg;
-
-  &.open {
-    display: flex;
-  }
-
-  .nav-link {
-    width: 100%;
-    text-align: left;
-    padding: 10px 12px;
-  }
-
-  .btn {
-    margin-top: 4px;
+    // на мобільному показуємо тільки бургер, кнопки auth — в меню
+    .btn:not(.nav-burger) {
+      display: none;
+    }
   }
 }
 
@@ -141,9 +105,113 @@
   background: $line-2;
   color: $ink-2;
   @include font-body($fs-base, 500);
+  white-space: nowrap;
 
   &.visible {
     display: block;
+  }
+
+  @media (max-width: 920px) {
+    display: none !important;
+  }
+}
+
+// Бургер
+.nav-burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  padding: 4px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    border-radius: 2px;
+    background: $ink;
+    transition: all .3s $ease;
+  }
+
+  &.open {
+    span:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    span:nth-child(2) {
+      opacity: 0;
+    }
+
+    span:nth-child(3) {
+      transform: rotate(-45deg) translate(5px, -5px);
+    }
+  }
+
+  @media (max-width: 920px) {
+    display: flex;
+  }
+}
+
+// Мобільне меню (overlay + панель)
+.nav-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .35);
+  z-index: 140;
+
+  &.open {
+    display: block;
+  }
+}
+
+.nav-menu {
+  display: none;
+  position: fixed;
+  top: $navbar-h;
+  left: 0;
+  right: 0;
+  flex-direction: column;
+  gap: 2px;
+  background: rgba($paper, .98);
+  backdrop-filter: blur(12px);
+  padding: 16px 20px;
+  z-index: 150;
+  box-shadow: $shadow-lg;
+  border-bottom: 1px solid $line;
+
+  &.open {
+    display: flex;
+  }
+
+  .nav-links {
+    display: flex !important;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .nav-link {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+  }
+
+  .nav-auth {
+    margin-left: 0;
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px solid $line;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+
+    .btn {
+      display: flex !important; // показуємо кнопки auth у мобільному меню
+      justify-content: center;
+    }
   }
 }
 

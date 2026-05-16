@@ -1,4 +1,39 @@
-// Сторінка вибору шаблонів
+// Сторінка шаблонів
+.templates-wrap {
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 36px 32px 48px;
+
+  @media (max-width: 768px) {
+    padding: 24px 16px 36px;
+  }
+}
+
+.templates-head {
+  margin-bottom: 28px;
+
+  h2 {
+    @include font-display($fs-xxl);
+    margin-top: 8px;
+  }
+}
+
+// 4 колонки × 2 рядки (як в оригіналі)
+.tmpl-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
 
 .tmpl-card {
   background: $surface;
@@ -6,8 +41,12 @@
   border-radius: $r-lg;
   overflow: hidden;
   cursor: pointer;
-  @include hover-lift;
   transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: $shadow;
+  }
 
   &.selected {
     border-color: $copper;
@@ -21,7 +60,7 @@
 }
 
 .tmpl-thumb {
-  height: 148px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -51,31 +90,45 @@
 }
 
 .tmpl-info {
-  padding: 13px;
+  padding: 11px 12px;
 }
 
 .tmpl-name {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   margin-bottom: 3px;
+
+  .tmpl-card.selected &::after {
+    content: ' ✓';
+    color: $copper;
+  }
 }
 
 .tmpl-desc {
-  font-size: 12px;
+  font-size: 11px;
   color: $ink-3;
   line-height: 1.4;
+
+  @media (max-width: 480px) {
+    display: none; // на малих екранах прибираємо опис
+  }
 }
 
-// Кольори фону карток
+.templates-action {
+  display: flex;
+  justify-content: center;
+}
+
+// Кольори фону мініатюр
 @each $name, $colors in $tmpl-colors {
   .ct-#{$name} {
     background: linear-gradient(135deg, nth($colors, 1), nth($colors, 2));
   }
 }
 
-// Мініатюри
+// Мініатюри (маленькі прев'ю шаблонів)
 .tmpl-mini {
-  width: 78px;
+  width: 68px;
   background: #fff;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
   border-radius: 2px;
@@ -83,7 +136,7 @@
   transition: transform .2s ease;
 
   .tmpl-card:hover & {
-    transform: scale(1.05);
+    transform: scale(1.06);
   }
 }
 
@@ -94,28 +147,28 @@
 
 .t-line-1 {
   height: 4.5px;
-  background: $tmpl-line-brightest;
+  background: rgba(#fff, .75);
 }
 
 .t-line-2 {
   height: 2.5px;
-  background: $tmpl-line-medium;
+  background: rgba(#fff, .4);
 }
 
 .t-line-3 {
   height: 1px;
-  background: $tmpl-line-subtle;
+  background: rgba(#fff, .15);
   margin: 5px 0;
 }
 
 .t-line-4 {
   height: 2.5px;
-  background: $tmpl-line-dim;
+  background: rgba(#fff, .25);
 }
 
 .t-line-5 {
   height: 2.5px;
-  background: $tmpl-line-dim;
+  background: rgba(#fff, .25);
   width: 65%;
 }
 
@@ -127,8 +180,8 @@
 
   &::before {
     content: '';
-    width: 22px;
-    background: $tmpl-line-subtle;
+    width: 20px;
+    background: rgba(#fff, .15);
     border-radius: 2px;
     flex-shrink: 0;
   }
@@ -136,13 +189,13 @@
   .t-line-1 {
     height: 3px;
     width: 100%;
-    background: $tmpl-line-bright;
+    background: rgba(#fff, .6);
   }
 
   .t-line-2 {
     height: 2px;
     width: 100%;
-    background: $tmpl-line-medium;
+    background: rgba(#fff, .4);
   }
 
   .t-line-3 {
@@ -152,13 +205,13 @@
   .t-line-4 {
     height: 4px;
     width: 100%;
-    background: $tmpl-line-brightest;
+    background: rgba(#fff, .75);
   }
 
   .t-line-5 {
     height: 2px;
     width: 100%;
-    background: $tmpl-line-medium;
+    background: rgba(#fff, .4);
   }
 }
 
@@ -172,26 +225,26 @@
 
   .t-line-2 {
     height: 3px;
-    background: $tmpl-line-brightest;
+    background: rgba(#fff, .75);
     width: 55%;
     margin-bottom: 4px;
   }
 
   .t-line-3 {
     height: 1px;
-    background: $tmpl-line-dim;
+    background: rgba(#fff, .25);
     margin-bottom: 5px;
   }
 
   .t-line-4 {
     height: 2px;
-    background: $tmpl-line-medium;
+    background: rgba(#fff, .4);
     margin-bottom: 2px;
   }
 
   .t-line-5 {
     height: 2px;
-    background: $tmpl-line-medium;
+    background: rgba(#fff, .4);
     width: 70%;
   }
 }
@@ -200,13 +253,13 @@
 .tmpl-mini-creative {
   .t-line-1 {
     height: 8px;
-    background: $creative-gradient;
+    background: linear-gradient(135deg, #2563EB, #1D4ED8);
     margin-bottom: 6px;
   }
 
   .t-line-2 {
     height: 6px;
-    background: rgba($creative-accent, .3);
+    background: rgba(#2563EB, .3);
     width: 65%;
     border-radius: 3px;
     margin-bottom: 5px;
@@ -218,12 +271,12 @@
 
   .t-line-4 {
     height: 2px;
-    background: $tmpl-line-medium;
+    background: rgba(#fff, .4);
   }
 
   .t-line-5 {
     height: 2px;
-    background: $tmpl-line-medium;
+    background: rgba(#fff, .4);
     width: 40%;
   }
 }
@@ -232,31 +285,31 @@
 .tmpl-mini-professional {
   .t-line-1 {
     height: 6px;
-    background: $tmpl-line-brightest;
+    background: rgba(#fff, .75);
     margin-bottom: 2px;
   }
 
   .t-line-2 {
     height: 2px;
-    background: $tmpl-line-medium;
+    background: rgba(#fff, .4);
     margin-bottom: 5px;
   }
 
   .t-line-3 {
     height: 1px;
-    background: $tmpl-line-subtle;
+    background: rgba(#fff, .15);
     margin-bottom: 5px;
   }
 
   .t-line-4 {
     height: 8px;
-    background: $tmpl-line-bright;
+    background: rgba(#fff, .6);
     margin-bottom: 3px;
   }
 
   .t-line-5 {
     height: 2px;
-    background: $tmpl-line-dim;
+    background: rgba(#fff, .25);
     width: 70%;
   }
 }
@@ -264,13 +317,13 @@
 // Compact
 .tmpl-mini-compact {
   display: grid;
-  grid-template-columns: 22px 1fr;
+  grid-template-columns: 20px 1fr;
   gap: 5px;
   padding: 4px;
 
   &::before {
     content: '';
-    background: $tmpl-line-subtle;
+    background: rgba(#fff, .15);
     border-radius: 2px;
   }
 
@@ -282,13 +335,13 @@
 
   .t-line-4 {
     height: 4px;
-    background: $tmpl-line-bright;
+    background: rgba(#fff, .6);
     margin-bottom: 3px;
   }
 
   .t-line-5 {
     height: 2px;
-    background: $tmpl-line-dim;
+    background: rgba(#fff, .25);
     width: 65%;
   }
 }
@@ -299,32 +352,32 @@
 
   .t-line-1 {
     height: 1px;
-    background: $tmpl-line-dim;
+    background: rgba(#fff, .25);
     margin-bottom: 7px;
   }
 
   .t-line-2 {
     height: 3px;
-    background: $tmpl-line-medium;
+    background: rgba(#fff, .4);
     width: 50%;
     margin-bottom: 5px;
   }
 
   .t-line-3 {
     height: 1px;
-    background: $tmpl-line-subtle;
+    background: rgba(#fff, .15);
     margin-bottom: 5px;
   }
 
   .t-line-4 {
     height: 2px;
-    background: $tmpl-line-dim;
+    background: rgba(#fff, .25);
     margin-bottom: 3px;
   }
 
   .t-line-5 {
     height: 2px;
-    background: $tmpl-line-subtle;
+    background: rgba(#fff, .15);
     width: 60%;
   }
 }
@@ -333,13 +386,13 @@
 .tmpl-mini-it-special {
   .t-line-1 {
     height: 4px;
-    background: $tmpl-line-bright;
+    background: rgba(#fff, .6);
     margin-bottom: 2px;
   }
 
   .t-line-2 {
     height: 2px;
-    background: $tmpl-line-dim;
+    background: rgba(#fff, .25);
     width: 40%;
     margin-bottom: 6px;
   }
@@ -347,9 +400,9 @@
   .t-line-3 {
     height: 10px;
     background: repeating-linear-gradient(90deg,
-        $tmpl-line-dim 0px, $tmpl-line-dim 18px,
+        rgba(#fff, .25) 0px, rgba(#fff, .25) 18px,
         transparent 18px, transparent 24px,
-        $tmpl-line-subtle 24px, $tmpl-line-subtle 36px,
+        rgba(#fff, .15) 24px, rgba(#fff, .15) 36px,
         transparent 36px, transparent 42px);
     border-radius: 2px;
     margin-bottom: 5px;
@@ -357,7 +410,7 @@
 
   .t-line-4 {
     height: 2px;
-    background: $tmpl-line-dim;
+    background: rgba(#fff, .25);
     width: 70%;
   }
 
@@ -366,24 +419,14 @@
   }
 }
 
-// Вибір шаблону
-.tmpl-card.selected .tmpl-info .tmpl-name::after {
-  content: ' ✓';
-  color: $copper;
-}
 
 // =============================================
-// СТИЛІ ШАБЛОНІВ ДЛЯ ПРЕВ'Ю (A4)
+// СТИЛІ ШАБЛОНІВ ДЛЯ A4
 // =============================================
 
 // 1. Classic
 .a4.tmpl-classic {
   @include tmpl-serif;
-
-  .a4-sec-title {
-    border-bottom: 1px solid $ink;
-    padding-bottom: 3px;
-  }
 }
 
 // 2. Modern
@@ -415,11 +458,6 @@
 
   .a4-right {
     order: 1;
-  }
-
-  .a4-photo {
-    border-radius: 4px;
-    border-color: rgba($copper, .3);
   }
 }
 
@@ -460,7 +498,6 @@
     border-bottom: none;
     font-size: 10px;
     letter-spacing: .15em;
-    margin-bottom: 12px;
   }
 }
 
@@ -470,7 +507,7 @@
   flex-direction: column;
 
   .a4-head {
-    background: $creative-gradient;
+    background: linear-gradient(135deg, #2563EB, #1D4ED8);
     padding: 26px 30px;
     display: block;
   }
@@ -491,18 +528,13 @@
   }
 
   .a4-sec-title {
-    color: $creative-accent;
-    border-bottom-color: rgba($creative-accent, .2);
+    color: #2563EB;
+    border-bottom-color: rgba(#2563EB, .2);
   }
 
   .a4-skill-pill {
     background: #EEF0FF;
-    color: $creative-accent;
-  }
-
-  .a4-photo {
-    border-radius: 50%;
-    border-color: rgba(255, 255, 255, .5);
+    color: #2563EB;
   }
 }
 
@@ -517,12 +549,6 @@
     color: #fff;
     padding: 30px 35px;
     display: block;
-
-    &.has-photo {
-      display: grid !important;
-      grid-template-columns: 85px 1fr !important;
-      gap: 16px !important;
-    }
   }
 
   .a4-left {
@@ -540,10 +566,6 @@
     padding-bottom: 6px;
     margin-bottom: 14px;
   }
-
-  .a4-photo {
-    border-radius: 4px;
-  }
 }
 
 // 6. Compact
@@ -554,11 +576,6 @@
     background: $ink;
     padding: 16px 24px;
     display: block;
-
-    &.has-photo {
-      grid-template-columns: 60px 1fr !important;
-      gap: 12px !important;
-    }
   }
 
   .a4-name {
@@ -569,14 +586,9 @@
     font-size: 10px;
   }
 
-  .a4-contact {
-    font-size: 8px;
-  }
-
   .a4-left {
     background: #f8f7f5;
     padding: 12px 14px;
-    border-right: 1px solid $line;
     width: 140px;
   }
 
@@ -588,31 +600,11 @@
   .a4-skill-pill {
     font-size: 7px;
     padding: 2px 6px;
-    margin: 1px 2px 1px 0;
   }
 
   .a4-sec-title {
     font-size: 7px;
     margin-bottom: 6px;
-    padding-bottom: 2px;
-  }
-
-  .a4-exp {
-    margin-bottom: 8px;
-  }
-
-  .a4-exp-title {
-    font-size: 9px;
-  }
-
-  .a4-exp-company {
-    font-size: 8px;
-  }
-
-  .a4-photo {
-    width: 55px;
-    height: 55px;
-    border-radius: 4px;
   }
 }
 
@@ -633,7 +625,6 @@
   .a4-name {
     font-size: 28px;
     font-weight: 300;
-    letter-spacing: .02em;
     color: $ink;
   }
 
@@ -641,11 +632,6 @@
     font-size: 13px;
     color: $copper;
     font-weight: 400;
-  }
-
-  .a4-contact {
-    font-size: 10px;
-    color: $ink-3;
   }
 
   .a4-left {
@@ -661,12 +647,6 @@
     font-weight: 400;
     color: $copper;
     border-bottom: 1px solid $copper-lt;
-    letter-spacing: .08em;
-  }
-
-  .a4-photo {
-    border-radius: 50%;
-    border-color: rgba($copper, .3);
   }
 }
 
@@ -689,18 +669,17 @@
   }
 
   .a4-left {
-    background: $it-bg;
-    border-right: 1px solid $it-border;
+    background: #f0f4f8;
+    border-right: 1px solid #dde4ed;
     width: 170px;
   }
 
   .a4-skill-pill {
-    background: $it-tag-bg;
-    color: $it-tag-text;
+    background: #e8f0fe;
+    color: #1a56db;
     font-family: $font-mono;
     font-size: 8px;
-    padding: 2px 8px;
-    border: 1px solid $it-tag-border;
+    border: 1px solid #d0dffc;
     border-radius: 3px;
   }
 
@@ -709,10 +688,5 @@
     color: $ink;
     border-bottom: 1px solid $ink;
     font-size: 9px;
-  }
-
-  .a4-photo {
-    border-radius: 3px;
-    border-color: rgba($teal, .3);
   }
 }
