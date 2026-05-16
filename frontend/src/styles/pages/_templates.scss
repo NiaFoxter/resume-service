@@ -1,42 +1,4 @@
-// Шаблони //
-
-// Сторінка вибору
-.templates-wrap {
-  max-width: 1140px;
-  margin: 0 auto;
-  padding: 36px 32px;
-
-  @media (max-width: 768px) {
-    padding: 24px 16px;
-  }
-}
-
-.templates-head {
-  margin-bottom: 28px;
-
-  h2 {
-    @include font-display($fs-xl);
-    margin-top: 8px;
-  }
-}
-
-.tmpl-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-
-  @media (max-width: 1024px) {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-  }
-}
+// Сторінка вибору шаблонів
 
 .tmpl-card {
   background: $surface;
@@ -104,12 +66,6 @@
   line-height: 1.4;
 }
 
-.templates-action {
-  margin-top: 26px;
-  display: flex;
-  justify-content: center;
-}
-
 // Кольори фону карток
 @each $name, $colors in $tmpl-colors {
   .ct-#{$name} {
@@ -136,7 +92,6 @@
   margin-bottom: 3px;
 }
 
-// Classic
 .t-line-1 {
   height: 4.5px;
   background: $tmpl-line-brightest;
@@ -319,14 +274,8 @@
     border-radius: 2px;
   }
 
-  .t-line-1 {
-    display: none;
-  }
-
-  .t-line-2 {
-    display: none;
-  }
-
+  .t-line-1,
+  .t-line-2,
   .t-line-3 {
     display: none;
   }
@@ -417,80 +366,15 @@
   }
 }
 
-// Анімація
-@keyframes tmpl-pulse {
-  0% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.03);
-  }
-
-  100% {
-    transform: scale(1);
-  }
-}
-
-.tmpl-card-pulse {
-  animation: tmpl-pulse .4s ease;
-}
-
+// Вибір шаблону
 .tmpl-card.selected .tmpl-info .tmpl-name::after {
   content: ' ✓';
   color: $copper;
 }
 
-// Варіації шаблонів для прев'ю
-// всі
-.a4-photo {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid rgba(255, 255, 255, .3);
-  display: none;
-  flex-shrink: 0;
-
-  .has-photo & {
-    display: block;
-  }
-}
-
-.a4-head.has-photo {
-  display: grid !important;
-  grid-template-columns: 85px 1fr !important;
-  gap: 16px !important;
-  align-items: center !important;
-}
-
-// Міксини
-@mixin tmpl-serif {
-  font-family: $font-serif !important;
-}
-
-@mixin tmpl-sans {
-  font-family: $font-body !important;
-}
-
-@mixin tmpl-mono-headings {
-
-  .a4-name,
-  .a4-sec-title {
-    font-family: $font-mono !important;
-  }
-}
-
-@mixin tmpl-thin {
-  font-weight: 300 !important;
-}
-
-@mixin tmpl-bold-headings {
-  .a4-sec-title {
-    font-weight: 800;
-    font-size: 11px;
-  }
-}
+// =============================================
+// СТИЛІ ШАБЛОНІВ ДЛЯ ПРЕВ'Ю (A4)
+// =============================================
 
 // 1. Classic
 .a4.tmpl-classic {
@@ -517,13 +401,9 @@
     color: $ink;
   }
 
-  .a4-role,
+  .a4-title,
   .a4-contact {
     color: $ink-2;
-  }
-
-  .a4-body {
-    grid-template-columns: 1fr 178px;
   }
 
   .a4-left {
@@ -546,6 +426,7 @@
 // 3. Minimalist
 .a4.tmpl-minimalist {
   @include tmpl-sans;
+  flex-direction: column;
 
   .a4-head {
     background: #fff;
@@ -560,13 +441,9 @@
     font-size: 24px;
   }
 
-  .a4-role,
+  .a4-title,
   .a4-contact {
     color: $ink-2;
-  }
-
-  .a4-body {
-    grid-template-columns: 1fr;
   }
 
   .a4-left {
@@ -575,6 +452,7 @@
 
   .a4-right {
     padding: 30px 40px;
+    width: 100%;
   }
 
   .a4-sec-title {
@@ -589,15 +467,18 @@
 // 4. Creative
 .a4.tmpl-creative {
   @include tmpl-sans;
+  flex-direction: column;
 
-  .a4-name,
-  .a4-role,
-  .a4-contact {
-    color: #fff;
+  .a4-head {
+    background: $creative-gradient;
+    padding: 26px 30px;
+    display: block;
   }
 
-  .a4-body {
-    grid-template-columns: 1fr;
+  .a4-name,
+  .a4-title,
+  .a4-contact {
+    color: #fff;
   }
 
   .a4-left {
@@ -606,6 +487,7 @@
 
   .a4-right {
     padding: 24px 30px;
+    width: 100%;
   }
 
   .a4-sec-title {
@@ -614,56 +496,8 @@
   }
 
   .a4-skill-pill {
-    display: inline-block;
     background: #EEF0FF;
     color: $creative-accent;
-    font-family: $font-body;
-    font-size: 9px;
-    padding: 3px 10px;
-    border-radius: $r-full;
-    margin: 2px 4px 2px 0;
-  }
-
-  .a4-lang {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 7px;
-  }
-
-  .a4-lang-name {
-    font-family: $font-body;
-    font-size: 9.5px;
-    color: $ink;
-    flex-shrink: 0;
-    width: 70px;
-  }
-
-  .a4-lang-bar-wrap {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-  }
-
-  .a4-lang-bar {
-    flex: 1;
-    height: 5px;
-    background: #E8E8E4;
-    border-radius: 3px;
-    overflow: hidden;
-  }
-
-  .a4-lang-fill {
-    height: 100%;
-    border-radius: 3px;
-  }
-
-  .a4-lang-lvl {
-    font-family: $font-body;
-    font-size: $fs-xs;
-    color: $ink-3;
-    flex-shrink: 0;
   }
 
   .a4-photo {
@@ -676,22 +510,19 @@
 .a4.tmpl-professional {
   @include tmpl-serif;
   @include tmpl-bold-headings;
+  flex-direction: column;
 
   .a4-head {
     background: $ink;
     color: #fff;
     padding: 30px 35px;
-    display: grid;
-    grid-template-columns: 1fr;
+    display: block;
 
     &.has-photo {
-      grid-template-columns: 85px 1fr;
-      gap: 16px;
+      display: grid !important;
+      grid-template-columns: 85px 1fr !important;
+      gap: 16px !important;
     }
-  }
-
-  .a4-body {
-    grid-template-columns: 1fr;
   }
 
   .a4-left {
@@ -700,6 +531,7 @@
 
   .a4-right {
     padding: 28px 35px;
+    width: 100%;
   }
 
   .a4-sec-title {
@@ -733,7 +565,7 @@
     font-size: 16px;
   }
 
-  .a4-role {
+  .a4-title {
     font-size: 10px;
   }
 
@@ -741,19 +573,16 @@
     font-size: 8px;
   }
 
-  .a4-body {
-    grid-template-columns: 1fr 1fr;
-    font-size: 8.5px;
-  }
-
   .a4-left {
     background: #f8f7f5;
     padding: 12px 14px;
     border-right: 1px solid $line;
+    width: 140px;
   }
 
   .a4-right {
     padding: 12px 16px;
+    font-size: 8.5px;
   }
 
   .a4-skill-pill {
@@ -791,6 +620,7 @@
 .a4.tmpl-elegant {
   @include tmpl-serif;
   @include tmpl-thin;
+  flex-direction: column;
 
   .a4-head {
     background: #fafaf8;
@@ -804,9 +634,10 @@
     font-size: 28px;
     font-weight: 300;
     letter-spacing: .02em;
+    color: $ink;
   }
 
-  .a4-role {
+  .a4-title {
     font-size: 13px;
     color: $copper;
     font-weight: 400;
@@ -817,16 +648,13 @@
     color: $ink-3;
   }
 
-  .a4-body {
-    grid-template-columns: 1fr;
-  }
-
   .a4-left {
     display: none;
   }
 
   .a4-right {
     padding: 30px 50px;
+    width: 100%;
   }
 
   .a4-sec-title {
@@ -860,13 +688,10 @@
     color: $teal-lt;
   }
 
-  .a4-body {
-    grid-template-columns: 170px 1fr;
-  }
-
   .a4-left {
     background: $it-bg;
     border-right: 1px solid $it-border;
+    width: 170px;
   }
 
   .a4-skill-pill {
@@ -890,10 +715,4 @@
     border-radius: 3px;
     border-color: rgba($teal, .3);
   }
-}
-
-// Анімація зміни шаблону
-.a4.tmpl-switching {
-  opacity: 0;
-  transform: scale(0.98);
 }

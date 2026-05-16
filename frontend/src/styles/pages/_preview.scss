@@ -22,8 +22,7 @@
     overflow: hidden;
     font-family: Georgia, serif;
     transition: opacity .18s ease, transform .18s ease;
-    opacity: 1;
-    transform: scale(1);
+    display: flex;
 
     @media print {
         box-shadow: none;
@@ -54,7 +53,7 @@
     word-break: break-word;
 }
 
-.a4-role {
+.a4-title {
     font-size: 11.5px;
     color: rgba(#fff, .6);
     margin-top: 3px;
@@ -73,32 +72,27 @@
     color: rgba(#fff, .5);
 }
 
-// Тіло прев'ю
-.a4-body {
-    display: grid;
-    grid-template-columns: 178px 1fr;
-}
-
+// Колонки
 .a4-left {
     background: $preview-sidebar;
     padding: 20px 16px;
     border-right: 1px solid $preview-sidebar-border;
     display: flex;
     flex-direction: column;
+    width: 178px;
+    flex-shrink: 0;
 
-    &-spacer {
-        flex: 1;
-    }
-
-    > div:first-child .a4-sec-title {
+    >div:first-child .a4-sec-title {
         margin-top: 0;
     }
 }
 
 .a4-right {
     padding: 20px 24px;
+    flex: 1;
 
-    > div:first-child .a4-sec-title {
+    >div:first-child .a4-sec-title,
+    >.a4-head+.a4-contacts+.a4-sec .a4-sec-title {
         margin-top: 0;
     }
 }
@@ -114,55 +108,22 @@
     line-height: 1.7;
 }
 
-.a4-chips {
+// Навички
+.a4-skills-wrap {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
 }
 
-.a4-chip {
-    font-family: $font-body;
-    font-size: $fs-xs;
+.a4-skill-pill {
+    display: inline-block;
     background: #EEF6F5;
     color: $teal;
-    padding: 2px 7px;
-    border-radius: 3px;
-}
-
-// Навички
-.a4-skill {
-    margin-bottom: 7px;
-
-    &-name {
-        font-family: $font-body;
-        font-size: 9.5px;
-        margin-bottom: 2px;
-    }
-
-    &-bar {
-        height: 3px;
-        background: #E8E8E4;
-        border-radius: 2px;
-        overflow: hidden;
-    }
-
-    &-fill {
-        height: 100%;
-        background: $teal;
-        border-radius: 2px;
-        transition: width .3s ease;
-    }
-
-    &-pill {
-        display: inline-block;
-        background: #EEF6F5;
-        color: $teal;
-        font-family: $font-body;
-        font-size: 9px;
-        padding: 3px 10px;
-        border-radius: $r-full;
-        margin: 2px 4px 2px 0;
-    }
+    font-family: $font-body;
+    font-size: 9px;
+    padding: 3px 10px;
+    border-radius: $r-full;
+    margin: 2px 4px 2px 0;
 }
 
 // Мови
@@ -177,7 +138,7 @@
         font-size: 9.5px;
     }
 
-    &-lvl {
+    &-level {
         font-size: $fs-xs;
         color: $preview-text-muted;
         background: #F0EFED;
@@ -278,22 +239,19 @@
     color: #555;
 }
 
-.a4-link {
-    &-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 4px;
-    }
+.a4-link-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    gap: 6px;
 
-    &-key {
-        font-family: $font-body;
+    span {
         font-size: 9px;
         color: $ink-3;
-        text-transform: capitalize;
     }
 
-    &-val {
+    a {
         font-family: $font-body;
         font-size: 9px;
         color: $teal;
@@ -302,9 +260,7 @@
         text-overflow: ellipsis;
         white-space: nowrap;
         text-decoration: none;
-    }
 
-    &[href] {
         &:hover {
             text-decoration: underline;
         }
@@ -349,4 +305,32 @@
         margin-top: 2px;
         line-height: 1.5;
     }
+}
+
+// Фото
+.a4-photo {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, .3);
+    flex-shrink: 0;
+}
+
+.a4-head.has-photo {
+    display: grid !important;
+    grid-template-columns: 85px 1fr !important;
+    gap: 16px !important;
+    align-items: center !important;
+}
+
+.a4-head-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.a4-photo-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 14px;
 }

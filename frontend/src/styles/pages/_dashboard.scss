@@ -1,50 +1,6 @@
 // Дашборд
-.dash {
-    &-wrap {
-        max-width: 1140px;
-        margin: 0 auto;
-        padding: 36px 32px;
-
-        @media (max-width: 480px) {
-            padding: 24px 16px;
-        }
-    }
-
-    &-top {
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        margin-bottom: 32px;
-        flex-wrap: wrap;
-        gap: 16px;
-    }
-
-    &-title {
-        @include font-display($fs-xl);
-
-        @media (max-width: 480px) {
-            font-size: 24px;
-        }
-    }
-
-    &-greeting {
-        font-size: 13px;
-        color: $ink-3;
-        margin-bottom: 4px;
-    }
-}
 
 .resume {
-    &-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(238px, 1fr));
-        gap: 18px;
-
-        @media (max-width: 480px) {
-            grid-template-columns: 1fr;
-        }
-    }
-
     &-card {
         background: $surface;
         border: 1px solid $line;
@@ -76,7 +32,8 @@
             position: absolute;
             inset: 0;
             opacity: .07;
-            background-image: repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 12px),
+            background-image:
+                repeating-linear-gradient(0deg, #fff 0px, #fff 1px, transparent 1px, transparent 12px),
                 repeating-linear-gradient(90deg, #fff 0px, #fff 1px, transparent 1px, transparent 12px);
         }
 

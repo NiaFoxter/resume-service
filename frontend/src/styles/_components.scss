@@ -29,26 +29,12 @@
   cursor: pointer;
   flex-shrink: 0;
   user-select: none;
-}
-
-.nav-logo-mark {
-  width: 26px;
-  height: 26px;
-  border-radius: 7px;
-  background: $ink;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  svg {
-    width: 14px;
-    height: 14px;
-  }
+  text-decoration: none;
 }
 
 .nav-burger {
   display: none;
-  margin-left: auto;
+  margin-left: 12px;
   padding: 4px;
   border: none;
   background: none;
@@ -84,51 +70,44 @@
   }
 }
 
-.nav-menu {
-  display: flex;
-  flex: 1;
-  justify-content: flex-end;
-
-  @media (max-width: 920px) {
-    position: fixed;
-    top: $navbar-h;
-    left: 0;
-    right: 0;
-    display: none;
-    flex-direction: column;
-    background: rgba($paper, 0.98);
-    backdrop-filter: blur(12px);
-    padding: 16px 20px;
-    z-index: 150;
-    overflow-y: auto;
-  }
-
-  &.open {
-    @media (max-width: 920px) {
-      display: flex;
-    }
-  }
-}
-
 .nav-overlay {
   display: none;
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.35);
   z-index: 140;
+
+  &.open {
+    display: block;
+  }
 }
 
-.nav-overlay.open {
-  display: block;
-}
+.nav-menu {
+  position: fixed;
+  top: $navbar-h;
+  left: 0;
+  right: 0;
+  display: none;
+  flex-direction: column;
+  background: rgba($paper, 0.98);
+  backdrop-filter: blur(12px);
+  padding: 16px 20px;
+  z-index: 150;
+  overflow-y: auto;
+  box-shadow: $shadow-lg;
 
-.nav-links {
-  display: flex;
-  gap: 4px;
+  &.open {
+    display: flex;
+  }
 
-  @media (max-width: 920px) {
-    flex-direction: column;
+  .nav-link {
     width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+  }
+
+  .btn {
+    margin-top: 4px;
   }
 }
 
@@ -142,6 +121,7 @@
   color: $ink-2;
   @include font-body($fs-base, 500);
   transition: all $transition;
+  text-decoration: none;
 
   &:hover {
     background: $line-2;
@@ -151,26 +131,6 @@
   &.active {
     background: $copper-lt;
     color: $copper-dk;
-  }
-
-  @media (max-width: 920px) {
-    width: 100%;
-    text-align: left;
-    padding: 10px 12px;
-  }
-}
-
-.nav-auth {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-
-  @media (max-width: 920px) {
-    width: 100%;
-    flex-direction: column;
-    align-items: stretch;
-    padding-top: 12px;
-    border-top: 1px solid $line;
   }
 }
 
@@ -184,10 +144,6 @@
 
   &.visible {
     display: block;
-  }
-
-  @media (max-width: 920px) {
-    margin-bottom: 4px;
   }
 }
 
@@ -340,12 +296,6 @@
   margin-bottom: 4px;
 }
 
-.modal-sub {
-  @include font-body($fs-base, 400);
-  color: $ink-3;
-  margin-bottom: 22px;
-}
-
 .modal-footer {
   display: flex;
   gap: 10px;
@@ -353,57 +303,7 @@
   margin-top: 22px;
 }
 
-.modal-switch {
-  text-align: center;
-  font-size: 13px;
-  color: $ink-3;
-  margin-top: 14px;
-
-  a {
-    color: $copper;
-    cursor: pointer;
-    text-decoration: none;
-    font-weight: 500;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-}
-
-.modal-error {
-  background: $red-lt;
-  border: 1px solid $red-border;
-  border-radius: $r-sm;
-  padding: 9px 12px;
-  font-size: 13px;
-  color: $red;
-  margin-bottom: 14px;
-  display: none;
-}
-
-.modal-sm {
-  width: 380px;
-  text-align: center;
-}
-
-.modal-icon {
-  font-size: 40px;
-  margin-bottom: 12px;
-}
-
 // Тости
-.toasts {
-  position: fixed;
-  bottom: 22px;
-  right: 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  z-index: 999;
-  pointer-events: none;
-}
-
 .toast {
   background: $ink;
   color: #fff;
@@ -416,7 +316,7 @@
   align-items: center;
   gap: 7px;
   animation: toastIn .3s $spring;
-  pointer-events: auto;
+  cursor: pointer;
 
   &.ok {
     background: $green;
