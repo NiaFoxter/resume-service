@@ -22,7 +22,10 @@ app.config['JWT_EXPIRE_HOURS'] = 24
 DB_PATH = os.path.join(os.path.dirname(__file__), 'resume.db')
 
 # Шлях до фронтенду
-FRONTEND_DIR = os.path.join(os.path.dirname(__file__), '..', 'frontend')
+_base = os.path.dirname(__file__)
+_dist = os.path.join(_base, '..', 'frontend', 'dist')
+_old  = os.path.join(_base, '..', 'frontend')
+FRONTEND_DIR = _dist if os.path.isdir(_dist) else _old
 
 # Gemini config
 GEMINI_KEY = os.environ.get('GEMINI_KEY', '')
@@ -58,26 +61,15 @@ def get_semantic_model():
     return _model
 
 # 
-
-@app.route('/')
-def serve_index():
-    return send_from_directory(FRONTEND_DIR, 'index.html')
-
-@app.route('/css/<path:filename>')
-def serve_css(filename):
-    return send_from_directory(os.path.join(FRONTEND_DIR, 'css'), filename)
-
-@app.route('/js/<path:filename>')
-def serve_js(filename):
-    return send_from_directory(os.path.join(FRONTEND_DIR, 'js'), filename)
-
+@app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
-def serve_static(path):
-    """Віддає інші статичні файли (favicon, зображення тощо)"""
-    file_path = os.path.join(FRONTEND_DIR, path)
-    if os.path.exists(file_path) and os.path.isfile(file_path):
+def serve_spa(path):
+    if path.startswith(('auth/', 'resumes/')):
+            return jsonify({'error': 'Not found'}), 404
+    full = os.path.join(FRONTEND_DIR, path)
+    if path and os.path.isfile(full):
         return send_from_directory(FRONTEND_DIR, path)
-    return jsonify({'error': 'Not found'}), 404
+    return send_from_directory(FRONTEND_DIR, 'index.html')
 
 # CORS
 @app.after_request
@@ -507,7 +499,6 @@ def call_gemini_api(prompt):
     return None, None
 
 def parse_gemini_response(data):
-    """Парсить відповідь Gemini"""
     text = data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
     
     if not text:
