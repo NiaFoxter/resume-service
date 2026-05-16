@@ -16,16 +16,13 @@ from nlp_data import STOPWORDS_ALL, SYNONYMS, TECH_SKILLS, SOFT_SKILLS, BUSINESS
 
 
 # App config
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-change-in-prod')
 app.config['JWT_EXPIRE_HOURS'] = 24
 DB_PATH = os.path.join(os.path.dirname(__file__), 'resume.db')
 
 # Шлях до фронтенду
-_base = os.path.dirname(__file__)
-_dist = os.path.join(_base, '..', 'frontend', 'dist')
-_old  = os.path.join(_base, '..', 'frontend')
-FRONTEND_DIR = _dist if os.path.isdir(_dist) else _old
+FRONTEND_DIR = os.path.join(os.path.dirname(__file__), '..', 'dist')
 
 # Gemini config
 GEMINI_KEY = os.environ.get('GEMINI_KEY', '')
@@ -61,23 +58,39 @@ def get_semantic_model():
     return _model
 
 # 
+
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
-def serve_spa(path):
-    if path.startswith(('auth/', 'resumes/')):
-            return jsonify({'error': 'Not found'}), 404
-    full = os.path.join(FRONTEND_DIR, path)
-    if path and os.path.isfile(full):
+def serve_frontend(path):
+    full_path = os.path.join(FRONTEND_DIR, path)
+
+    if path and os.path.exists(full_path):
         return send_from_directory(FRONTEND_DIR, path)
+
     return send_from_directory(FRONTEND_DIR, 'index.html')
 
 # CORS
 @app.after_request
-def add_cors(r: Response):
+def add_cors_and_mime(r: Response):
     r.headers['Access-Control-Allow-Origin'] = '*'
     r.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     r.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,PATCH,DELETE,OPTIONS'
+    
+    path = request.path
+    
+    if path.endswith(('.js', '.mjs')):
+        r.headers['Content-Type'] = 'application/javascript'
+    elif path.endswith('.css'):
+        r.headers['Content-Type'] = 'text/css'
+    elif path.endswith('.wasm'):
+        r.headers['Content-Type'] = 'application/wasm'
+    elif path.endswith('.json'):
+        r.headers['Content-Type'] = 'application/json'
+    elif path.endswith('.html'):
+        r.headers['Content-Type'] = 'text/html'
+    
     return r
+
 
 @app.route('/api', defaults={'path': ''}, methods=['OPTIONS'])
 @app.route('/api/<path:path>', methods=['OPTIONS'])
