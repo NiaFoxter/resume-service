@@ -673,3 +673,29 @@
     color: $teal;
   }
 }
+
+// Шаблони на вузьких екранах
+@media (max-width: 380px) {
+  .tmpl-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .templates-wrap {
+    padding-bottom: 28px;
+  }
+
+  .templates-head h2 {
+    font-size: 28px;
+    line-height: 1.15;
+  }
+
+  .tmpl-thumb {
+    height: 108px;
+  }
+
+  .templates-action {
+    padding: 0 16px 28px;
+  }
+}

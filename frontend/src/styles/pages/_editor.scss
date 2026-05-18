@@ -288,3 +288,148 @@
     background: darken($copper-lt, 5%);
   }
 }
+
+// Редактор на телефоні: без обрізання контенту і з горизонтальною навігацією секцій
+@media (max-width: 768px) {
+  .editor-shell {
+    display: block;
+    height: auto;
+    overflow: visible;
+  }
+
+  .editor-sidebar {
+    min-width: 0;
+    width: 100%;
+    max-height: none;
+    overflow: visible;
+    border-right: none;
+    border-bottom: 1px solid $line;
+  }
+
+  .progress-ring-wrap {
+    margin: 10px 12px;
+  }
+
+  .sec-nav {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    max-height: none;
+    padding: 6px 12px 8px;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .sec-item {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+    padding: 8px 10px;
+  }
+
+  .sec-label {
+    white-space: nowrap;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .fg input,
+  .fg textarea,
+  .fg select {
+    font-size: 16px; // прибирає автозум iOS під час фокуса
+  }
+
+  #photoField>div {
+    flex-wrap: wrap;
+  }
+
+  #photoField input[type='file'] {
+    max-width: 100%;
+  }
+
+  .entry-card {
+    padding: 11px;
+  }
+
+  .entry-card-head {
+    gap: 8px;
+  }
+
+  .entry-card-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .add-entry-btn,
+  .form-sec>.btn {
+    width: 100%;
+  }
+
+  .tag {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .editor-preview {
+    display: flex;
+    height: auto;
+    min-height: 0;
+    padding: 14px 0 24px;
+    overflow: hidden;
+    border-top: 1px solid $line;
+  }
+
+  .editor-preview .a4 {
+    flex: 0 0 595px;
+    transform-origin: top center;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 768px) {
+  .editor-preview {
+    min-height: 760px;
+  }
+
+  .editor-preview .a4 {
+    transform: scale(.86);
+    margin-bottom: -118px;
+  }
+}
+
+@media (min-width: 421px) and (max-width: 600px) {
+  .editor-preview {
+    min-height: 560px;
+  }
+
+  .editor-preview .a4 {
+    transform: scale(.68);
+    margin-bottom: -270px;
+  }
+}
+
+@media (max-width: 420px) {
+  .editor-preview {
+    min-height: 500px;
+  }
+
+  .editor-preview .a4 {
+    transform: scale(.58);
+    margin-bottom: -354px;
+  }
+}
+
+@media (max-width: 360px) {
+  .editor-preview {
+    min-height: 465px;
+  }
+
+  .editor-preview .a4 {
+    transform: scale(.52);
+    margin-bottom: -405px;
+  }
+}

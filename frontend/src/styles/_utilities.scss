@@ -292,3 +292,75 @@
     display: flex;
     justify-content: center;
 }
+
+// Мобільний режим редактора та загальних сіток
+@media (max-width: 768px) {
+    .editor-page {
+        height: auto;
+        min-height: calc(100dvh - #{$navbar-h});
+        overflow: visible;
+    }
+
+    .editor-toolbar {
+        height: auto;
+        min-height: 46px;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 8px;
+        padding: 8px 12px;
+    }
+
+    .resume-title-input {
+        flex: 1 1 100%;
+        min-height: 34px;
+        font-size: 14px;
+    }
+
+    .toolbar-right {
+        width: 100%;
+        margin-left: 0;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .toolbar-right .btn {
+        flex: 1 1 auto;
+    }
+
+    .save-status {
+        flex: 1 1 100%;
+        white-space: normal;
+        min-height: 14px;
+    }
+
+    .editor-forms {
+        padding: 12px;
+        overflow: visible;
+    }
+
+    .analysis-form {
+        width: auto;
+        padding: 18px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .dashboard-header,
+    .analysis-header,
+    .templates-header {
+        gap: 12px;
+    }
+
+    .dashboard-header .btn,
+    .templates-action .btn,
+    .analysis-form .btn {
+        width: 100%;
+    }
+
+    .analysis-results-wrap {
+        margin-top: 0;
+    }
+}

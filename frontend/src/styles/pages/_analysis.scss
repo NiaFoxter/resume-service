@@ -1,5 +1,4 @@
 // Аналіз
-
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -234,4 +233,48 @@
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin: 0 auto;
+}
+
+// Аналіз на телефоні
+@media (max-width: 600px) {
+
+    .analysis-loading,
+    .analysis-error {
+        padding: 32px 16px;
+    }
+
+    .score-hero {
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    .score-visual svg {
+        width: 128px;
+        height: 128px;
+    }
+
+    .score-verdict {
+        font-size: 19px;
+        line-height: 1.25;
+    }
+
+    .skills-col,
+    .advice-section {
+        padding: 15px;
+    }
+
+    .skill-tag,
+    .advice-keyword {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .advice-item {
+        flex-direction: column;
+        gap: 6px;
+
+        &:hover {
+            transform: none;
+        }
+    }
 }

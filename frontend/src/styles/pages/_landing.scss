@@ -469,3 +469,41 @@
     color: $ink-3;
     line-height: 1.65;
 }
+
+// Головна сторінка на телефоні
+@media (max-width: 600px) {
+    .hero {
+        padding: 34px 16px 34px;
+    }
+
+    .hero h1 {
+        font-size: clamp(32px, 12vw, 42px);
+        line-height: 1.08;
+    }
+
+    .hero-desc {
+        font-size: 15px;
+        margin-bottom: 26px;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+    }
+
+    .features {
+        padding: 34px 16px;
+    }
+
+    .features-head {
+        margin-bottom: 24px;
+
+        h2 {
+            font-size: 28px;
+            line-height: 1.15;
+        }
+    }
+
+    .feature-cell {
+        padding: 22px 18px;
+    }
+}
