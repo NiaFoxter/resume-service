@@ -1,4 +1,4 @@
-// Прев'ю
+// Прев'ю A4
 .preview-pane {
     background: $preview-bg;
     overflow-y: auto;
@@ -21,18 +21,13 @@
     border-radius: 2px;
     overflow: hidden;
     font-family: Georgia, serif;
-    transition: opacity .18s ease, transform .18s ease;
     display: flex;
+    flex-direction: column;
 
     @media print {
         box-shadow: none;
         width: 100%;
         min-height: auto;
-    }
-
-    &.tmpl-switching {
-        opacity: 0;
-        transform: scale(0.98);
     }
 }
 
@@ -40,8 +35,27 @@
 .a4-head {
     background: $ink;
     color: #fff;
-    padding: 26px 30px;
-    display: block;
+    padding: 20px 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.a4-photo-head {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid rgba(#fff, .3);
+    flex-shrink: 0;
+}
+
+.a4-head-info {
+    flex: 1;
+    min-width: 0;
 }
 
 .a4-name {
@@ -54,46 +68,75 @@
 }
 
 .a4-title {
-    font-size: 11.5px;
+    font-size: 10.5px;
     color: rgba(#fff, .6);
     margin-top: 3px;
 }
 
 .a4-contacts {
     display: flex;
-    gap: 14px;
-    margin-top: 10px;
     flex-wrap: wrap;
+    gap: 5px 12px;
+    margin-top: 8px;
 }
 
 .a4-contact {
     font-family: $font-body;
-    font-size: 9.5px;
-    color: rgba(#fff, .5);
-}
-
-// Колонки
-.a4-left {
-    background: $preview-sidebar;
-    padding: 20px 16px;
-    border-right: 1px solid $preview-sidebar-border;
+    font-size: 8.5px;
+    color: rgba(#fff, .55);
     display: flex;
-    flex-direction: column;
-    width: 178px;
-    flex-shrink: 0;
-
-    >div:first-child .a4-sec-title {
-        margin-top: 0;
-    }
+    align-items: center;
+    gap: 3px;
+    white-space: nowrap;
 }
 
-.a4-right {
-    padding: 20px 24px;
-    flex: 1;
+.a4-contact-icon {
+    font-size: 7.5px;
+    opacity: .7;
+    flex-shrink: 0;
+}
 
-    >div:first-child .a4-sec-title,
-    >.a4-head+.a4-contacts+.a4-sec .a4-sec-title {
-        margin-top: 0;
+// Тіло
+.a4-body {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    min-height: 0;
+}
+
+// Ліва колонка
+.a4-left {
+    width: 175px;
+    min-width: 175px;
+    max-width: 175px;
+    flex-shrink: 0;
+    background: $preview-sidebar;
+    border-right: 1px solid $preview-sidebar-border;
+    padding: 18px 14px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+// Права колонка
+.a4-right {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+// Секції
+.a4-sec {
+    padding: 0 22px;
+    margin-top: 14px;
+
+    &--left {
+        padding: 0;
+        margin-top: 14px;
+
+        &:first-child {
+            margin-top: 0;
+        }
     }
 }
 
@@ -101,18 +144,12 @@
     @include section-title;
 }
 
-// Компоненти прев'ю
-.a4-about {
-    font-size: 9.5px;
-    color: $preview-text-body;
-    line-height: 1.7;
-}
-
 // Навички
 .a4-skills-wrap {
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 3px;
+    width: 100%;
 }
 
 .a4-skill-pill {
@@ -120,10 +157,14 @@
     background: #EEF6F5;
     color: $teal;
     font-family: $font-body;
-    font-size: 9px;
-    padding: 3px 10px;
+    font-size: 8.5px;
+    font-weight: 500;
+    padding: 2px 7px;
     border-radius: $r-full;
-    margin: 2px 4px 2px 0;
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 // Мови
@@ -135,7 +176,8 @@
 
     &-name {
         font-family: $font-body;
-        font-size: 9.5px;
+        font-size: 9px;
+        color: $ink-2;
     }
 
     &-level {
@@ -144,6 +186,41 @@
         background: #F0EFED;
         padding: 1px 5px;
         border-radius: 2px;
+        flex-shrink: 0;
+    }
+}
+
+// Посилання
+.a4-link-item {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 7px;
+    overflow: hidden;
+}
+
+.a4-link-label {
+    font-family: $font-body;
+    font-size: 7.5px;
+    font-weight: 600;
+    color: $ink-3;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 1px;
+}
+
+.a4-link-url {
+    font-family: $font-body;
+    font-size: 8.5px;
+    color: $teal;
+    text-decoration: none;
+    display: block;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    line-height: 1.35;
+
+    &:hover {
+        text-decoration: underline;
     }
 }
 
@@ -151,41 +228,60 @@
 .a4-edu {
     margin-bottom: 10px;
 
+    &-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    &-main {
+        flex: 1;
+        min-width: 0;
+    }
+
     &-deg {
         font-family: $font-body;
         font-size: 10px;
         font-weight: 600;
+        line-height: 1.3;
     }
 
     &-school {
         font-family: $font-body;
         font-size: 9px;
         color: $teal;
+        margin-top: 1px;
     }
 
-    &-year {
-        font-size: $fs-xs;
-        color: $preview-text-muted;
+    &-field {
+        font-family: $font-body;
+        font-size: 8.5px;
+        color: $ink-3;
+        font-style: italic;
+        margin-top: 1px;
     }
 }
 
 // Досвід
 .a4-exp {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     break-inside: avoid;
 
     &-head {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 3px;
+        gap: 8px;
+        margin-bottom: 2px;
     }
 
     &-title {
         font-family: $font-body;
-        font-size: 11.5px;
+        font-size: 11px;
         font-weight: 700;
         flex: 1;
+        min-width: 0;
     }
 
     &-period {
@@ -197,22 +293,24 @@
         border-radius: 3px;
         white-space: nowrap;
         flex-shrink: 0;
+        align-self: flex-start;
     }
 
     &-company {
         font-family: $font-body;
-        font-size: 9.5px;
+        font-size: 9px;
         color: $teal;
         font-weight: 500;
-        margin-bottom: 5px;
+        margin-bottom: 4px;
     }
 
     &-list {
         list-style: none;
         padding: 0;
+        margin: 0;
 
         li {
-            font-size: 9.5px;
+            font-size: 9px;
             color: $preview-text-body;
             padding-left: 10px;
             position: relative;
@@ -224,47 +322,18 @@
                 position: absolute;
                 left: 0;
                 color: $copper;
-                font-size: 8px;
-                top: 1px;
+                font-size: 7px;
+                top: 2px;
             }
         }
     }
 }
 
-// Посилання
-.pv-links {
+// Про себе
+.a4-about {
     font-size: 9.5px;
-    font-family: $font-body;
-    line-height: 1.9;
-    color: #555;
-}
-
-.a4-link-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 4px;
-    gap: 6px;
-
-    span {
-        font-size: 9px;
-        color: $ink-3;
-    }
-
-    a {
-        font-family: $font-body;
-        font-size: 9px;
-        color: $teal;
-        max-width: 120px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        text-decoration: none;
-
-        &:hover {
-            text-decoration: underline;
-        }
-    }
+    color: $preview-text-body;
+    line-height: 1.7;
 }
 
 // Проєкти
@@ -275,8 +344,9 @@
     &-head {
         display: flex;
         justify-content: space-between;
-        align-items: baseline;
-        gap: 8px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 2px 8px;
     }
 
     &-name {
@@ -284,6 +354,7 @@
         font-size: 10px;
         font-weight: 600;
         flex: 1;
+        min-width: 0;
     }
 
     &-url {
@@ -291,7 +362,11 @@
         font-size: 8px;
         color: $teal;
         text-decoration: none;
-        flex-shrink: 0;
+        flex: 1 1 100%;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        line-height: 1.35;
 
         &:hover {
             text-decoration: underline;
@@ -304,33 +379,22 @@
         color: #555;
         margin-top: 2px;
         line-height: 1.5;
+        overflow-wrap: anywhere;
     }
 }
 
-// Фото
+// Фото у лівій колонці
 .a4-photo {
     width: 70px;
     height: 70px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid rgba(255, 255, 255, .3);
+    border: 2px solid rgba(#fff, .3);
     flex-shrink: 0;
-}
-
-.a4-head.has-photo {
-    display: grid !important;
-    grid-template-columns: 85px 1fr !important;
-    gap: 16px !important;
-    align-items: center !important;
-}
-
-.a4-head-info {
-    flex: 1;
-    min-width: 0;
 }
 
 .a4-photo-wrap {
     display: flex;
     justify-content: center;
-    margin-bottom: 14px;
+    margin-bottom: 16px;
 }

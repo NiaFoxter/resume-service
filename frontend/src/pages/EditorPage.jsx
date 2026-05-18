@@ -35,21 +35,24 @@ export default function EditorPage() {
     const previewRef = useRef(null)
 
     const onStatus = useCallback((text, ok) => setSaveStatus(ok ? '✓ ' + text : text), [])
-    const { schedule, autosave } = useAutosave(onStatus)
+    const { schedule } = useAutosave(onStatus)
     const { downloadPDF } = usePDF(previewRef)
 
     // Load resume from API if id provided and store doesn't have it yet
     useEffect(() => {
         if (!id) return
         getResume(id).then(setResume).catch(e => { toast(e.message, 'bad'); navigate('/dashboard') })
-    }, [id])
+    }, [id, navigate, setResume])
 
     function handleChange() { schedule() }
 
     async function handlePDF() {
         setPdfLoading(true)
-        await downloadPDF()
-        setPdfLoading(false)
+        try {
+            await downloadPDF()
+        } finally {
+            setPdfLoading(false)
+        }
     }
 
     // Sidebar drag-resize
@@ -64,25 +67,40 @@ export default function EditorPage() {
         sidebar.appendChild(handle)
         const MIN_W = 240, MAX_W = 540
         let dragging = false, startX = 0, startW = 0
-        handle.addEventListener('mousedown', e => {
+
+        const handleMouseDown = e => {
             e.preventDefault(); dragging = true
             startX = e.clientX; startW = sidebar.getBoundingClientRect().width
             handle.classList.add('active')
             document.documentElement.style.cursor = 'col-resize'
             document.documentElement.style.userSelect = 'none'
-        })
-        document.addEventListener('mousemove', e => {
+        }
+
+        const handleMouseMove = e => {
             if (!dragging) return
             const w = Math.min(MAX_W, Math.max(MIN_W, startW + (e.clientX - startX)))
             shell.style.gridTemplateColumns = w + 'px 1fr'
-        })
-        document.addEventListener('mouseup', () => {
+        }
+
+        const handleMouseUp = () => {
             if (!dragging) return
             dragging = false; handle.classList.remove('active')
             document.documentElement.style.cursor = ''
             document.documentElement.style.userSelect = ''
-        })
-        return () => { if (sidebar.contains(handle)) sidebar.removeChild(handle) }
+        }
+
+        handle.addEventListener('mousedown', handleMouseDown)
+        document.addEventListener('mousemove', handleMouseMove)
+        document.addEventListener('mouseup', handleMouseUp)
+
+        return () => {
+            handle.removeEventListener('mousedown', handleMouseDown)
+            document.removeEventListener('mousemove', handleMouseMove)
+            document.removeEventListener('mouseup', handleMouseUp)
+            document.documentElement.style.cursor = ''
+            document.documentElement.style.userSelect = ''
+            if (sidebar.contains(handle)) sidebar.removeChild(handle)
+        }
     }, [])
 
     return (

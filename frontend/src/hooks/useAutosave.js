@@ -1,7 +1,6 @@
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useEffect } from 'react'
 import { useResumeStore } from '../store/resumeStore'
 import { updateResume } from '../api/resumes'
-import { toast } from '../store/toastStore'
 
 export function useAutosave(onStatus) {
     const timerRef = useRef(null)
@@ -22,6 +21,8 @@ export function useAutosave(onStatus) {
         onStatus?.('збереження...')
         timerRef.current = setTimeout(autosave, 1200)
     }, [autosave, onStatus])
+
+    useEffect(() => () => clearTimeout(timerRef.current), [])
 
     return { schedule, autosave }
 }

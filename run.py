@@ -24,17 +24,13 @@ if not os.path.exists(backend_app):
     sys.exit(1)
 
 # Перевірка фронтенду
-react_build  = os.path.join(BASE, 'frontend', 'dist', 'index.html')
-old_frontend = os.path.join(BASE, 'frontend', 'index.html')
+react_build = os.path.join(BASE, 'dist', 'index.html')
 
 if os.path.exists(react_build):
     frontend_mode = 'react-build'
-    frontend_path = os.path.join(BASE, 'frontend', 'dist')
-elif os.path.exists(old_frontend):
-    frontend_mode = 'static'
-    frontend_path = os.path.join(BASE, 'frontend')
+    frontend_path = os.path.join(BASE, 'dist')
 else:
-    print("X Фронтенд не знайдено.")
+    print("X Збірку фронтенду не знайдено. Запустіть: cd frontend && npm run build")
     sys.exit(1)
 
 # Запуск бекенду

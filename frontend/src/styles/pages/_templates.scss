@@ -18,7 +18,6 @@
   }
 }
 
-// 4 колонки × 2 рядки (як в оригіналі)
 .tmpl-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -110,7 +109,7 @@
   line-height: 1.4;
 
   @media (max-width: 480px) {
-    display: none; // на малих екранах прибираємо опис
+    display: none;
   }
 }
 
@@ -126,7 +125,7 @@
   }
 }
 
-// Мініатюри (маленькі прев'ю шаблонів)
+// Мініатюри
 .tmpl-mini {
   width: 68px;
   background: #fff;
@@ -172,7 +171,6 @@
   width: 65%;
 }
 
-// Modern
 .tmpl-mini-modern {
   display: flex;
   gap: 5px;
@@ -215,7 +213,6 @@
   }
 }
 
-// Minimalist
 .tmpl-mini-minimalist {
   padding: 8px 6px 4px;
 
@@ -249,7 +246,6 @@
   }
 }
 
-// Creative
 .tmpl-mini-creative {
   .t-line-1 {
     height: 8px;
@@ -281,7 +277,6 @@
   }
 }
 
-// Professional
 .tmpl-mini-professional {
   .t-line-1 {
     height: 6px;
@@ -314,7 +309,6 @@
   }
 }
 
-// Compact
 .tmpl-mini-compact {
   display: grid;
   grid-template-columns: 20px 1fr;
@@ -346,7 +340,6 @@
   }
 }
 
-// Elegant
 .tmpl-mini-elegant {
   padding: 8px 6px 4px;
 
@@ -382,7 +375,6 @@
   }
 }
 
-// IT-Special
 .tmpl-mini-it-special {
   .t-line-1 {
     height: 4px;
@@ -399,11 +391,7 @@
 
   .t-line-3 {
     height: 10px;
-    background: repeating-linear-gradient(90deg,
-        rgba(#fff, .25) 0px, rgba(#fff, .25) 18px,
-        transparent 18px, transparent 24px,
-        rgba(#fff, .15) 24px, rgba(#fff, .15) 36px,
-        transparent 36px, transparent 42px);
+    background: repeating-linear-gradient(90deg, rgba(#fff, .25) 0px, rgba(#fff, .25) 18px, transparent 18px, transparent 24px, rgba(#fff, .15) 24px, rgba(#fff, .15) 36px, transparent 36px, transparent 42px);
     border-radius: 2px;
     margin-bottom: 5px;
   }
@@ -419,10 +407,7 @@
   }
 }
 
-
-// =============================================
-// СТИЛІ ШАБЛОНІВ ДЛЯ A4
-// =============================================
+// Стилі для шаблонів
 
 // 1. Classic
 .a4.tmpl-classic {
@@ -437,16 +422,18 @@
     background: $surface;
     color: $ink;
     border-bottom: 3px solid $copper;
-    display: block;
   }
 
   .a4-name {
     color: $ink;
   }
 
-  .a4-title,
-  .a4-contact {
+  .a4-title {
     color: $ink-2;
+  }
+
+  .a4-contact {
+    color: $ink-3;
   }
 
   .a4-left {
@@ -454,6 +441,10 @@
     background: #f5f5f5;
     border-right: none;
     border-left: 1px solid $line;
+  }
+
+  .a4-body {
+    flex-direction: row-reverse;
   }
 
   .a4-right {
@@ -464,39 +455,35 @@
 // 3. Minimalist
 .a4.tmpl-minimalist {
   @include tmpl-sans;
-  flex-direction: column;
 
   .a4-head {
     background: #fff;
     color: $ink;
     border-bottom: 1px solid $line;
-    padding: 30px 40px;
-    display: block;
+    padding: 26px 22px;
   }
 
   .a4-name {
     color: $ink;
-    font-size: 24px;
+    font-size: 22px;
   }
 
-  .a4-title,
-  .a4-contact {
+  .a4-title {
     color: $ink-2;
   }
 
-  .a4-left {
-    display: none;
+  .a4-contact {
+    color: $ink-3;
   }
 
-  .a4-right {
-    padding: 30px 40px;
-    width: 100%;
+  .a4-left {
+    background: #f8f8f8;
+    border-right: 1px solid #eee;
   }
 
   .a4-sec-title {
     color: $ink;
-    border-bottom: none;
-    font-size: 10px;
+    border-bottom: 1px solid $line;
     letter-spacing: .15em;
   }
 }
@@ -504,27 +491,14 @@
 // 4. Creative
 .a4.tmpl-creative {
   @include tmpl-sans;
-  flex-direction: column;
 
   .a4-head {
     background: linear-gradient(135deg, #2563EB, #1D4ED8);
-    padding: 26px 30px;
-    display: block;
-  }
-
-  .a4-name,
-  .a4-title,
-  .a4-contact {
-    color: #fff;
   }
 
   .a4-left {
-    display: none;
-  }
-
-  .a4-right {
-    padding: 24px 30px;
-    width: 100%;
+    background: #f0f4ff;
+    border-right: 1px solid #d0dffc;
   }
 
   .a4-sec-title {
@@ -536,35 +510,33 @@
     background: #EEF0FF;
     color: #2563EB;
   }
+
+  .a4-exp-company {
+    color: #2563EB;
+  }
+
+  .a4-edu-school {
+    color: #2563EB;
+  }
+
+  .a4-link-url {
+    color: #2563EB;
+  }
 }
 
 // 5. Professional
 .a4.tmpl-professional {
   @include tmpl-serif;
-  @include tmpl-bold-headings;
-  flex-direction: column;
-
-  .a4-head {
-    background: $ink;
-    color: #fff;
-    padding: 30px 35px;
-    display: block;
-  }
-
-  .a4-left {
-    display: none;
-  }
-
-  .a4-right {
-    padding: 28px 35px;
-    width: 100%;
-  }
 
   .a4-sec-title {
     color: $ink;
     border-bottom: 2px solid $ink;
-    padding-bottom: 6px;
-    margin-bottom: 14px;
+    padding-bottom: 4px;
+    font-size: 10px;
+  }
+
+  .a4-exp-title {
+    font-size: 11.5px;
   }
 }
 
@@ -573,80 +545,92 @@
   @include tmpl-sans;
 
   .a4-head {
-    background: $ink;
-    padding: 16px 24px;
-    display: block;
+    padding: 14px 18px;
   }
 
   .a4-name {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .a4-title {
-    font-size: 10px;
+    font-size: 9px;
+  }
+
+  .a4-contact {
+    font-size: 7.5px;
   }
 
   .a4-left {
-    background: #f8f7f5;
-    padding: 12px 14px;
-    width: 140px;
-  }
-
-  .a4-right {
-    padding: 12px 16px;
-    font-size: 8.5px;
+    width: 148px;
+    min-width: 148px;
+    max-width: 148px;
+    padding: 14px 11px;
   }
 
   .a4-skill-pill {
-    font-size: 7px;
-    padding: 2px 6px;
+    font-size: 7.5px;
+    padding: 2px 5px;
   }
 
   .a4-sec-title {
     font-size: 7px;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
+  }
+
+  .a4-exp {
+    margin-bottom: 8px;
+  }
+
+  .a4-exp-title {
+    font-size: 9.5px;
+  }
+
+  .a4-exp-company {
+    font-size: 8px;
+  }
+
+  .a4-sec {
+    margin-top: 10px;
   }
 }
 
 // 7. Elegant
 .a4.tmpl-elegant {
   @include tmpl-serif;
-  @include tmpl-thin;
-  flex-direction: column;
 
   .a4-head {
     background: #fafaf8;
     color: $ink;
-    border-bottom: 1px solid $line;
-    padding: 40px 50px 30px;
-    display: block;
+    border-bottom: 1px solid $copper-lt;
+    padding: 26px 22px;
   }
 
   .a4-name {
-    font-size: 28px;
-    font-weight: 300;
+    font-size: 22px;
+    font-weight: 400;
     color: $ink;
   }
 
   .a4-title {
-    font-size: 13px;
+    font-size: 11px;
     color: $copper;
     font-weight: 400;
   }
 
-  .a4-left {
-    display: none;
+  .a4-contact {
+    color: $ink-3;
   }
 
-  .a4-right {
-    padding: 30px 50px;
-    width: 100%;
+  .a4-left {
+    background: #faf9f7;
+    border-right: 1px solid $copper-lt;
   }
 
   .a4-sec-title {
     font-weight: 400;
     color: $copper;
     border-bottom: 1px solid $copper-lt;
+    letter-spacing: .08em;
   }
 }
 
@@ -657,28 +641,19 @@
 
   .a4-head {
     background: #1a1f2e;
-    color: #e0e0e0;
-    padding: 22px 28px;
-    display: block;
     border-left: 4px solid $teal;
-  }
-
-  .a4-name {
-    font-family: $font-mono;
-    color: $teal-lt;
   }
 
   .a4-left {
     background: #f0f4f8;
     border-right: 1px solid #dde4ed;
-    width: 170px;
   }
 
   .a4-skill-pill {
     background: #e8f0fe;
     color: #1a56db;
     font-family: $font-mono;
-    font-size: 8px;
+    font-size: 7.5px;
     border: 1px solid #d0dffc;
     border-radius: 3px;
   }
@@ -687,6 +662,14 @@
     font-family: $font-mono;
     color: $ink;
     border-bottom: 1px solid $ink;
-    font-size: 9px;
+    font-size: 8px;
+  }
+
+  .a4-exp-company {
+    color: $teal;
+  }
+
+  .a4-edu-school {
+    color: $teal;
   }
 }
