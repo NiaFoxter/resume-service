@@ -1,52 +1,53 @@
 """
-Запуск вебсервісу «Автоматизоване Резюме»
+Запуск вебсервісу «Автоматизоване Резюме».
 
-Використання:
+Перед першим запуском зберіть фронтенд:
+    cd frontend
+    npm install
+    npm run build
+
+Після цього з кореня проєкту:
     python run.py
 
 Для ngrok:
     ngrok http 5000
 """
 
-import sys
 import os
+import sys
 
 BASE = os.path.dirname(os.path.abspath(__file__))
+BACKEND_DIR = os.path.join(BASE, 'backend')
+BACKEND_APP = os.path.join(BACKEND_DIR, 'app.py')
+REACT_BUILD = os.path.join(BASE, 'dist', 'index.html')
 
 if sys.version_info < (3, 9):
-    print("X Потрібен Python 3.9 або новіший.")
+    print('X Потрібен Python 3.9 або новіший.')
     sys.exit(1)
 
-# Перевірка бекенду
-backend_app = os.path.join(BASE, 'backend', 'app.py')
-if not os.path.exists(backend_app):
-    print(f"X Файл не знайдено: backend/app.py")
+if not os.path.exists(BACKEND_APP):
+    print('X Файл не знайдено: backend/app.py')
     sys.exit(1)
 
-# Перевірка фронтенду
-react_build = os.path.join(BASE, 'dist', 'index.html')
-
-if os.path.exists(react_build):
-    frontend_mode = 'react-build'
-    frontend_path = os.path.join(BASE, 'dist')
-else:
-    print("X Збірку фронтенду не знайдено. Запустіть: cd frontend && npm run build")
+if not os.path.exists(REACT_BUILD):
+    print('X Збірку фронтенду не знайдено.')
+    print('  Виконайте: cd frontend && npm install && npm run build')
     sys.exit(1)
 
-# Запуск бекенду
-backend_dir = os.path.join(BASE, 'backend')
-os.chdir(backend_dir)
-if backend_dir not in sys.path:
-    sys.path.insert(0, backend_dir)
+os.chdir(BACKEND_DIR)
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
 
-print("=" * 52)
-print("  Вебсервіс «Автоматизоване Резюме»")
-print("=" * 52)
-print(f"  Сайт:      http://localhost:5000")
-print(f"  Фронтенд:  {frontend_mode}  ({frontend_path})")
-print(f"  Для ngrok: ngrok http 5000")
-print("  Зупинити:  Ctrl+C")
-print("=" * 52)
+print('=' * 52)
+print('  Вебсервіс «Автоматизоване Резюме»')
+print('=' * 52)
+print('  Сайт:      http://localhost:5000')
+print(f'  Фронтенд:  react-build  ({os.path.dirname(REACT_BUILD)})')
+print('  Health:    http://localhost:5000/api/health')
+print('  Для ngrok: ngrok http 5000')
+print('  Зупинити:  Ctrl+C')
+print('=' * 52)
 
 from app import app
-app.run(host='0.0.0.0', port=5000, debug=False)
+
+app.run(host='0.0.0.0', port=int(os.environ.get('PORT', '5000')), debug=False)
