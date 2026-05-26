@@ -17,12 +17,17 @@ export function useAutosave(onStatus) {
     }, [currentId, toPayload, onStatus])
 
     const schedule = useCallback(() => {
-        clearTimeout(timerRef.current)
+        if (timerRef.current) clearTimeout(timerRef.current)
         onStatus?.('збереження...')
-        timerRef.current = setTimeout(autosave, 1200)
+        timerRef.current = setTimeout(() => {
+            timerRef.current = null
+            autosave()
+        }, 1200)
     }, [autosave, onStatus])
 
-    useEffect(() => () => clearTimeout(timerRef.current), [])
+    useEffect(() => () => {
+        if (timerRef.current) clearTimeout(timerRef.current)
+    }, [])
 
     return { schedule, autosave }
 }

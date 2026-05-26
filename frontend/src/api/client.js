@@ -17,6 +17,10 @@ client.interceptors.request.use(cfg => {
 client.interceptors.response.use(
     res => res.data?.data ?? res.data,
     err => {
+        if (err.response?.status === 401) {
+            useAuthStore.getState().clearAuth()
+        }
+
         const msg = err.response?.data?.error || err.message || 'Помилка сервера'
         throw new Error(msg)
     }

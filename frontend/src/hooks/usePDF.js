@@ -9,13 +9,18 @@ export function usePDF(previewRef) {
     const downloadPDF = useCallback(async () => {
         if (!currentId) { toast('Спочатку збережіть резюме', 'warn'); return false }
         if (!previewRef?.current) { toast('Немає прев\'ю', 'bad'); return false }
+        if (!window.html2pdf) { toast('Бібліотеку PDF не завантажено', 'bad'); return false }
+
+        let wrap = null
 
         try {
             await updateResume(currentId, toPayload())
             await new Promise(r => setTimeout(r, 120))
 
             const fname = (title || 'resume')
-                .replace(/[^\wа-яА-ЯіїєґІЇЄҐ\-\s]/g, '').trim() || 'resume'
+                .replace(/[^\wа-яА-ЯіїєґІЇЄҐ\-\s]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim() || 'resume'
 
             const allCSS = [...document.styleSheets].map(sheet => {
                 try { return [...sheet.cssRules].map(r => r.cssText).join('\n') } catch { return '' }
@@ -28,10 +33,15 @@ export function usePDF(previewRef) {
         .empty-section { display: none !important; }
       `
 
-            const wrap = document.createElement('div')
+            wrap = document.createElement('div')
             wrap.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;background:#fff;z-index:-1;'
             wrap.innerHTML = `<style>${allCSS}\n${pdfOverride}</style>${previewRef.current.outerHTML}`
             document.body.appendChild(wrap)
+
+            const pdfTarget = wrap.querySelector('.a4')
+            if (!pdfTarget) {
+                throw new Error('Не знайдено блок прев\'ю для PDF')
+            }
 
             await window.html2pdf().set({
                 margin: 0,
@@ -39,14 +49,17 @@ export function usePDF(previewRef) {
                 image: { type: 'jpeg', quality: 0.97 },
                 html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
                 jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            }).from(wrap.querySelector('.a4')).save()
+            }).from(pdfTarget).save()
 
-            document.body.removeChild(wrap)
             toast('PDF завантажено ✓', 'ok')
             return true
         } catch (e) {
             toast('Помилка PDF: ' + e.message, 'bad')
             return false
+        } finally {
+            if (wrap?.parentNode) {
+                wrap.parentNode.removeChild(wrap)
+            }
         }
     }, [currentId, title, toPayload, previewRef])
 

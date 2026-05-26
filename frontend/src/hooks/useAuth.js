@@ -10,11 +10,16 @@ export function useAuth() {
 
     useEffect(() => {
         if (!token) return
+
+        let ignore = false
         authApi.me().catch(() => {
+            if (ignore) return
             clearAuth()
             toast('Сесія закінчилась, увійдіть знову', 'warn')
         })
-    }, [])
+
+        return () => { ignore = true }
+    }, [token, clearAuth])
 
     async function doLogin(email, password) {
         const d = await authApi.login(email, password)

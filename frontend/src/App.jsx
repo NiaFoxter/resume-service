@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Navbar from './components/layout/Navbar'
 import ToastContainer from './components/ui/ToastContainer'
@@ -16,10 +17,15 @@ import { useAuthStore } from './store/authStore'
 function PrivateRoute({ children }) {
   const token = useAuthStore(s => s.token)
   const openLogin = useAuthStore(s => s.openLogin)
+
+  useEffect(() => {
+    if (!token) openLogin()
+  }, [token, openLogin])
+
   if (!token) {
-    openLogin()
     return <Navigate to="/" replace />
   }
+
   return children
 }
 
