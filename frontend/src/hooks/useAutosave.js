@@ -4,20 +4,25 @@ import { updateResume } from '../api/resumes'
 
 export function useAutosave(onStatus) {
     const timerRef = useRef(null)
-    const { currentId, toPayload } = useResumeStore()
+    const pendingRef = useRef(false)
+
+    const currentId = useResumeStore((s) => s.currentId)
+    const getPayload = useResumeStore((s) => s.getPayload)
 
     const autosave = useCallback(async () => {
         if (!currentId) return
+        pendingRef.current = false
         try {
-            await updateResume(currentId, toPayload())
+            await updateResume(currentId, getPayload())
             onStatus?.('збережено', true)
         } catch {
             onStatus?.('помилка збереження', false)
         }
-    }, [currentId, toPayload, onStatus])
+    }, [currentId, getPayload, onStatus])
 
     const schedule = useCallback(() => {
         if (timerRef.current) clearTimeout(timerRef.current)
+        pendingRef.current = true
         onStatus?.('збереження...')
         timerRef.current = setTimeout(() => {
             timerRef.current = null
@@ -25,9 +30,34 @@ export function useAutosave(onStatus) {
         }, 1200)
     }, [autosave, onStatus])
 
-    useEffect(() => () => {
-        if (timerRef.current) clearTimeout(timerRef.current)
-    }, [])
+    useEffect(() => {
+        return () => {
+            if (timerRef.current) {
+                clearTimeout(timerRef.current)
+                timerRef.current = null
+            }
+            if (pendingRef.current) {
+                autosave()
+            }
+        }
+    }, [autosave])
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (!pendingRef.current) return
+            if (currentId) {
+                const payload = JSON.stringify(getPayload())
+                navigator.sendBeacon?.(
+                    `/resumes/${currentId}`,
+                    new Blob([payload], { type: 'application/json' })
+                )
+            }
+            e.preventDefault()
+            e.returnValue = ''
+        }
+        window.addEventListener('beforeunload', handleBeforeUnload)
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload)
+    }, [currentId, getPayload])
 
     return { schedule, autosave }
 }
