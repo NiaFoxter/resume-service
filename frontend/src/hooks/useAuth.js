@@ -1,25 +1,25 @@
+import { useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../store/authStore'
 import { toast } from '../store/toastStore'
 import * as authApi from '../api/auth'
-import { useEffect } from 'react'
 
 export function useAuth() {
     const { token, user, setAuth, clearAuth, closeLogin, closeRegister } = useAuthStore()
     const navigate = useNavigate()
 
-    useEffect(() => {
+    const validateToken = useCallback(() => {
         if (!token) return
-
-        let ignore = false
         authApi.me().catch(() => {
-            if (ignore) return
             clearAuth()
             toast('Сесія закінчилась, увійдіть знову', 'warn')
         })
-
-        return () => { ignore = true }
     }, [token, clearAuth])
+
+    useEffect(() => {
+        window.addEventListener('focus', validateToken)
+        return () => window.removeEventListener('focus', validateToken)
+    }, [validateToken])
 
     async function doLogin(email, password) {
         const d = await authApi.login(email, password)
