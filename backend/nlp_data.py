@@ -3,6 +3,7 @@
 """
 
 import re
+from collections import Counter
 
 STOPWORDS_UK = {
     'і', 'й', 'та', 'або', 'але', 'бо', 'щоб', 'якщо', 'коли', 'де', 'що', 'як',
@@ -26,19 +27,19 @@ STOPWORDS_UK = {
     'досить', 'доволі', 'надто', 'занадто',
     'всередині', 'навколо', 'поруч', 'поблизу',
     'протягом', 'впродовж', 'наприкінці', 'спочатку',
+    # Job-posting noise
     'досвід', 'досвіду', 'досвідом', 'досвіді',
     'знання', 'знань', 'знаннями', 'знаннях',
     'навички', 'навичок', 'навичками', 'навичках',
     'вміння', 'вмінь', 'вміннями',
     'вимоги', 'вимог', 'вимогами',
     'необхідні', 'необхідний', 'необхідна', 'необхідне', 'необхідних',
-    'обов\'язкові', 'обов\'язковий', 'обов\'язкова',
+    "обов'язкові", "обов'язковий", "обов'язкова",
     'бажані', 'бажаний', 'бажана',
     'років', 'роки', 'рік', 'місяців', 'місяць', 'місяці',
     'комерційний', 'комерційна', 'комерційне', 'комерційні', 'комерційного',
     'глибокі', 'глибокий', 'глибока', 'глибоке', 'глибоких',
-    'широкі', 'широкий',
-    'великий', 'велика', 'велике', 'великі',
+    'широкі', 'широкий', 'великий', 'велика', 'велике', 'великі',
     'буде', 'плюсом', 'перевагою',
     'пропонуємо', 'пропонує', 'пропонують',
     'кандидат', 'кандидата', 'претендент',
@@ -68,25 +69,21 @@ STOPWORDS_EN = {
     'although', 'though', 'because', 'since', 'unless', 'until',
     'already', 'always', 'usually', 'often', 'sometimes', 'never',
     'really', 'quite', 'almost', 'perhaps', 'maybe', 'probably',
-    'still', 'yet', 'even', 'ever', 'never',
+    'still', 'even', 'ever',
+    # Job-posting noise
     'experience', 'experienced', 'experiences',
-    'knowledge', 'knowledges',
-    'skill', 'skills', 'skilled',
+    'knowledge', 'skill', 'skills', 'skilled',
     'required', 'requirement', 'requirements', 'require',
-    'years', 'year', 'yearly',
-    'months', 'month', 'monthly',
-    'looking', 'seeking',
-    'must', 'should', 'need', 'needed',
+    'years', 'year', 'months', 'month',
+    'looking', 'seeking', 'needed',
     'plus', 'bonus', 'advantage',
     'good', 'great', 'strong', 'excellent',
     'deep', 'broad', 'extensive', 'solid',
-    'proficient', 'familiar',
-    'understanding', 'ability',
+    'proficient', 'familiar', 'understanding', 'ability',
     'work', 'working', 'team', 'company',
     'position', 'role', 'job', 'candidate', 'applicant',
     'office', 'remote', 'hybrid',
-    'salary', 'compensation', 'benefit',
-    'insurance', 'vacation', 'culture',
+    'salary', 'compensation', 'benefit', 'insurance', 'vacation', 'culture',
     'join', 'hiring', 'apply',
     'ideally', 'preferably', 'nice',
     'passion', 'passionate', 'motivated', 'talented', 'driven',
@@ -95,7 +92,7 @@ STOPWORDS_EN = {
 
 STOPWORDS_ALL = STOPWORDS_UK | STOPWORDS_EN
 
-SYNONYMS = {
+SYNONYMS: dict[str, str] = {
     'js': 'javascript', 'ts': 'typescript',
     'k8s': 'kubernetes', 'node': 'nodejs', 'node.js': 'nodejs',
     'react.js': 'react', 'reactjs': 'react',
@@ -104,8 +101,7 @@ SYNONYMS = {
     'pg': 'postgresql', 'postgres': 'postgresql',
     'mongo': 'mongodb', 'elastic': 'elasticsearch',
     'ml': 'machine learning', 'dl': 'deep learning',
-    'nlp': 'natural language processing',
-    'cv': 'computer vision',
+    'nlp': 'natural language processing', 'cv': 'computer vision',
     'llms': 'llm', 'rn': 'react native',
     'ci cd': 'ci/cd', 'cicd': 'ci/cd',
     'gh-actions': 'github actions', 'gha': 'github actions',
@@ -113,7 +109,7 @@ SYNONYMS = {
     'mui': 'materialui', 'tf': 'tensorflow',
     'sklearn': 'scikit-learn', 'sk': 'scikit-learn',
     'sb': 'springboot',
-    # Українські → англійські
+    # UK → EN
     'розробник': 'developer', 'розробниця': 'developer',
     'програмування': 'programming', 'програміст': 'programmer',
     'тестування': 'testing', 'тестувальник': 'tester',
@@ -121,8 +117,7 @@ SYNONYMS = {
     'бд': 'database', 'хмара': 'cloud',
     'контейнер': 'container', 'мікросервіс': 'microservices',
     'комунікація': 'communication', 'спілкування': 'communication',
-    'лідерство': 'leadership',
-    'менеджмент': 'management', 'управління': 'management',
+    'лідерство': 'leadership', 'менеджмент': 'management', 'управління': 'management',
     'англ': 'english', 'нім': 'german', 'фр': 'french',
     'ексель': 'excel', 'ворд': 'word',
     'фотошоп': 'photoshop', 'фігма': 'figma',
@@ -131,7 +126,7 @@ SYNONYMS = {
     'бакалавр': 'bachelor', 'магістр': 'master',
 }
 
-TECH_SKILLS = {
+TECH_SKILLS: set[str] = {
     # Languages
     'python', 'javascript', 'typescript', 'java', 'c#', 'c++', 'c', 'go', 'golang',
     'rust', 'swift', 'kotlin', 'scala', 'ruby', 'php', 'perl', 'r', 'matlab',
@@ -216,8 +211,7 @@ TECH_SKILLS = {
     'makefile', 'cmake', 'bazel', 'gradle', 'maven',
     # Blockchain
     'blockchain', 'web3', 'ipfs', 'ethereum', 'hyperledger',
-    'smart contracts', 'hardhat', 'foundry',
-    'defi', 'nft',
+    'smart contracts', 'hardhat', 'foundry', 'defi', 'nft',
     # IoT / Embedded
     'iot', 'embedded', 'rtos', 'freertos', 'zephyr',
     'raspberrypi', 'arduino', 'stm32', 'esp32',
@@ -228,7 +222,7 @@ TECH_SKILLS = {
     'zapier', 'make', 'n8n',
 }
 
-SOFT_SKILLS = {
+SOFT_SKILLS: set[str] = {
     'communication', 'комунікація',
     'teamwork', 'командна робота',
     'leadership', 'лідерство',
@@ -258,15 +252,13 @@ SOFT_SKILLS = {
     'fast learner', 'швидке навчання',
     'self-learning', 'самонавчання',
     'documentation', 'written communication',
-    'conflict resolution',
-    'cross-functional collaboration',
-    'ownership', 'accountability',
-    'proactivity', 'результативність',
+    'conflict resolution', 'cross-functional collaboration',
+    'ownership', 'accountability', 'proactivity', 'результативність',
     'english', 'german', 'french', 'spanish', 'italian',
     'polish', 'ukrainian', 'chinese', 'japanese',
 }
 
-BUSINESS_SKILLS = {
+BUSINESS_SKILLS: set[str] = {
     'agile', 'scrum', 'kanban', 'waterfall', 'lean', 'six sigma', 'okr', 'kpi',
     'product management', 'product owner',
     'project management', 'program management',
@@ -290,44 +282,37 @@ BUSINESS_SKILLS = {
     'go-to-market', 'market research', 'competitive analysis',
 }
 
+_ALL_SKILLS = TECH_SKILLS | SOFT_SKILLS | BUSINESS_SKILLS
 
-def tokenize(text: str) -> list:
-    tokens = re.findall(r'[a-zа-яіїєґ][a-zа-яіїєґ0-9+#\.\-]*', text.lower())
-    
+def tokenize(text: str) -> list[str]:
+    tokens = re.findall(r'[a-zа-яіїєґ][a-zа-яіїєґ0-9+#.\-]*', text.lower())
     result = []
     for t in tokens:
         t = t.strip('.-_')
         if len(t) < 2:
             continue
         t = SYNONYMS.get(t, t)
-        if t in STOPWORDS_ALL:
-            continue
-        result.append(t)
-    
+        if t not in STOPWORDS_ALL:
+            result.append(t)
     return result
-
-
-def is_stopword(word: str) -> bool:
-    return word.lower().strip('.-_') in STOPWORDS_ALL
 
 
 def normalize_word(word: str) -> str:
     w = word.lower().strip('.-_')
-    if w in SYNONYMS:
-        return SYNONYMS[w]
-    return w
+    return SYNONYMS.get(w, w)
 
 
-def extract_keywords(text: str, top_n: int = 15) -> list:
-    from collections import Counter
-    
+def is_stopword(word: str) -> bool:
+    return normalize_word(word) in STOPWORDS_ALL
+
+
+def extract_keywords(text: str, top_n: int = 15) -> list[dict]:
     tokens = tokenize(text)
-    freq = Counter(tokens)
+    freq: Counter = Counter(tokens)
 
     for i in range(len(tokens) - 1):
-        bigram = f"{tokens[i]} {tokens[i+1]}"
-        if bigram in TECH_SKILLS or bigram in SOFT_SKILLS or bigram in BUSINESS_SKILLS:
+        bigram = f'{tokens[i]} {tokens[i + 1]}'
+        if bigram in _ALL_SKILLS:
             freq[bigram] = freq.get(bigram, 0) + 2
-    
-    sorted_words = freq.most_common(top_n)
-    return [{'word': w, 'stemmed': w} for w, _ in sorted_words]
+
+    return [{'word': w, 'stemmed': w} for w, _ in freq.most_common(top_n)]
