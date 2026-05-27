@@ -25,93 +25,77 @@ from nlp_data import (
 # App config
 app = Flask(__name__, static_folder=None)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-change-in-prod')
-app.config['JWT_EXPIRE_HOURS'] = 24
-DB_PATH = os.path.join(os.path.dirname(__file__), 'resume.db')
+app.config['JWT_EXPIRE_HOURS'] = int(os.environ.get('JWT_EXPIRE_HOURS', '24'))
 
-# Шлях до зібраного фронтенду
-FRONTEND_DIR = os.path.join(os.path.dirname(__file__), '..', 'dist')
-
-# Gemini config
-GEMINI_KEY = os.environ.get('GEMINI_KEY', '')
-GEMINI_MODELS = [
+DB_PATH        = os.path.join(os.path.dirname(__file__), 'resume.db')
+FRONTEND_DIR   = os.path.join(os.path.dirname(__file__), '..', 'dist')
+GEMINI_KEY     = os.environ.get('GEMINI_KEY', '')
+GEMINI_MODELS  = [
     'gemini-2.5-flash',
     'gemini-2.5-flash-lite',
-    'gemini-3.1-flash-lite',
-    'gemini-3-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-flash',
 ]
 GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models'
 
-# Sentence-transformers model
-_model = None
-_MODEL_NAME = 'paraphrase-multilingual-MiniLM-L12-v2'
+# Semantic model (lazy)
+_model         = None
 _model_loading = False
-_model_loaded = False
+_model_loaded  = False
+_MODEL_NAME    = 'paraphrase-multilingual-MiniLM-L12-v2'
 
 
 def get_semantic_model():
-    """Lazy-load semantic model. If it is unavailable, local TF-IDF analysis is used."""
     global _model, _model_loading, _model_loaded
-
-    if _model is None and not _model_loading:
-        try:
-            from sentence_transformers import SentenceTransformer
-            _model_loading = True
-            print(f"[AI] Завантаження моделі {_MODEL_NAME}...")
-            _model = SentenceTransformer(_MODEL_NAME)
-            _model_loaded = True
-            print("[AI] Модель готова")
-        except ImportError:
-            print("[Система] sentence-transformers не встановлено. Використовується базовий аналіз.")
-            _model = None
-            _model_loaded = False
-        except Exception as exc:
-            print(f"[Система] Не вдалося завантажити semantic-модель: {exc}. Використовується TF-IDF.")
-            _model = None
-            _model_loaded = False
-        finally:
-            _model_loading = False
-
+    if _model is not None or _model_loading:
+        return _model
+    try:
+        from sentence_transformers import SentenceTransformer
+        _model_loading = True
+        print(f'[AI] Завантаження моделі {_MODEL_NAME}...')
+        _model = SentenceTransformer(_MODEL_NAME)
+        _model_loaded = True
+        print('[AI] Модель готова')
+    except ImportError:
+        print('[AI] sentence-transformers не встановлено — використовується TF-IDF.')
+    except Exception as exc:
+        print(f'[AI] Не вдалося завантажити модель: {exc} — використовується TF-IDF.')
+    finally:
+        _model_loading = False
     return _model
 
 
+# Frontend serving
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def serve_frontend(path):
-    full_path = os.path.join(FRONTEND_DIR, path)
-
-    if path and os.path.exists(full_path):
+    if path.startswith('api/') or path.startswith('auth/') or path.startswith('resumes/'):
+        return err('Not found', 404)
+    full = os.path.join(FRONTEND_DIR, path)
+    if path and os.path.isfile(full):
         return send_from_directory(FRONTEND_DIR, path)
-
-    index_path = os.path.join(FRONTEND_DIR, 'index.html')
-    if os.path.exists(index_path):
+    index = os.path.join(FRONTEND_DIR, 'index.html')
+    if os.path.isfile(index):
         return send_from_directory(FRONTEND_DIR, 'index.html')
-
-    return jsonify({
-        'ok': False,
-        'error': 'Збірку фронтенду не знайдено. Запустіть npm run build і перевірте папку dist.'
-    }), 404
+    return err('Збірку фронтенду не знайдено. Виконайте npm run build.', 404)
 
 
-# CORS
+# CORS & MIME
 @app.after_request
 def add_cors_and_mime(r: Response):
-    r.headers['Access-Control-Allow-Origin'] = '*'
+    r.headers['Access-Control-Allow-Origin']  = '*'
     r.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
     r.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,PATCH,DELETE,OPTIONS'
 
-    path = request.path
-
-    if path.endswith(('.js', '.mjs')):
-        r.headers['Content-Type'] = 'application/javascript'
-    elif path.endswith('.css'):
-        r.headers['Content-Type'] = 'text/css'
-    elif path.endswith('.wasm'):
-        r.headers['Content-Type'] = 'application/wasm'
-    elif path.endswith('.json'):
-        r.headers['Content-Type'] = 'application/json'
-    elif path.endswith('.html'):
-        r.headers['Content-Type'] = 'text/html'
-
+    ext_mime = {
+        '.js': 'application/javascript', '.mjs': 'application/javascript',
+        '.css': 'text/css', '.wasm': 'application/wasm',
+        '.json': 'application/json', '.html': 'text/html',
+    }
+    for ext, mime in ext_mime.items():
+        if request.path.endswith(ext):
+            r.headers['Content-Type'] = mime
+            break
     return r
 
 
@@ -162,7 +146,7 @@ def init_db():
         );
         CREATE INDEX IF NOT EXISTS idx_resumes_user ON resumes(user_id);
         """)
-    print(f"[DB] {DB_PATH}")
+    print(f'[DB] {DB_PATH}')
 
 
 init_db()
@@ -183,41 +167,38 @@ def make_token(uid, email):
 
 def require_auth(f):
     @wraps(f)
-    def d(*a, **kw):
+    def wrapper(*args, **kwargs):
         auth = request.headers.get('Authorization', '')
         if not auth.startswith('Bearer '):
-            return jsonify({'error': 'Токен відсутній'}), 401
-
+            return err('Токен відсутній', 401)
         try:
-            p = jwt.decode(auth[7:], app.config['SECRET_KEY'], algorithms=['HS256'])
-            g.user_id = int(p['sub'])
-            g.email = p['email']
+            payload = jwt.decode(auth[7:], app.config['SECRET_KEY'], algorithms=['HS256'])
+            g.user_id = int(payload['sub'])
+            g.email   = payload['email']
         except jwt.ExpiredSignatureError:
-            return jsonify({'error': 'Токен прострочено'}), 401
+            return err('Токен прострочено', 401)
         except jwt.InvalidTokenError:
-            return jsonify({'error': 'Недійсний токен'}), 401
-
-        return f(*a, **kw)
-
-    return d
+            return err('Недійсний токен', 401)
+        return f(*args, **kwargs)
+    return wrapper
 
 
+# Response helpers
 def ok(data=None, **kw):
-    b = {'ok': True}
+    body = {'ok': True}
     if data is not None:
-        b['data'] = data
-    b.update(kw)
-    return jsonify(b)
+        body['data'] = data
+    body.update(kw)
+    return jsonify(body)
 
 
 def err(msg, code=400):
     return jsonify({'ok': False, 'error': msg}), code
 
 
-def parse_row(row):
+def parse_resume_row(row):
     if not row:
         return None
-
     r = dict(row)
     try:
         r['data'] = json.loads(r['data'])
@@ -226,16 +207,30 @@ def parse_row(row):
     return r
 
 
+# Health
+@app.route('/api/health')
+def health():
+    return ok({
+        'status': 'ok',
+        'gemini': bool(GEMINI_KEY),
+        'model_ready': _model_loaded,
+        'model_loading': _model_loading,
+    })
+
+
 # Auth routes
+_EMAIL_RE = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
+
+
 @app.route('/auth/register', methods=['POST'])
 def register():
-    b = request.get_json(silent=True) or {}
-    email = (b.get('email') or '').strip().lower()
-    password = (b.get('password') or '').strip()
+    b          = request.get_json(silent=True) or {}
+    email      = (b.get('email') or '').strip().lower()
+    password   = (b.get('password') or '').strip()
     first_name = (b.get('firstName') or '').strip()
-    last_name = (b.get('lastName') or '').strip()
+    last_name  = (b.get('lastName') or '').strip()
 
-    if not email or not re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email):
+    if not email or not _EMAIL_RE.match(email):
         return err('Некоректна електронна пошта')
     if len(password) < 8:
         return err('Пароль: мінімум 8 символів')
@@ -252,41 +247,40 @@ def register():
     )
     db.commit()
     uid = cur.lastrowid
-
     return ok({
-        'token': make_token(uid, email),
-        'userId': uid,
+        'token':     make_token(uid, email),
+        'userId':    uid,
         'firstName': first_name,
-        'lastName': last_name,
+        'lastName':  last_name,
     }), 201
 
 
 @app.route('/auth/login', methods=['POST'])
 def login():
-    b = request.get_json(silent=True) or {}
-    email = (b.get('email') or '').strip().lower()
+    b        = request.get_json(silent=True) or {}
+    email    = (b.get('email') or '').strip().lower()
     password = (b.get('password') or '').strip()
 
     if not email or not password:
         return err('Вкажіть пошту та пароль')
 
-    db = get_db()
+    db   = get_db()
     user = db.execute('SELECT * FROM users WHERE email=?', (email,)).fetchone()
     if not user or not check_password_hash(user['password'], password):
         return err('Невірна пошта або пароль', 401)
 
     return ok({
-        'token': make_token(user['id'], email),
-        'userId': user['id'],
+        'token':     make_token(user['id'], email),
+        'userId':    user['id'],
         'firstName': user['first_name'],
-        'lastName': user['last_name'],
+        'lastName':  user['last_name'],
     })
 
 
 @app.route('/auth/me', methods=['GET'])
 @require_auth
 def me():
-    db = get_db()
+    db   = get_db()
     user = db.execute(
         'SELECT id,email,first_name,last_name,created_at FROM users WHERE id=?',
         (g.user_id,),
@@ -300,9 +294,10 @@ def me():
 @app.route('/resumes', methods=['GET'])
 @require_auth
 def list_resumes():
-    db = get_db()
+    db   = get_db()
     rows = db.execute(
-        'SELECT id,title,template,updated_at,created_at FROM resumes WHERE user_id=? ORDER BY updated_at DESC',
+        'SELECT id,title,template,updated_at,created_at FROM resumes'
+        ' WHERE user_id=? ORDER BY updated_at DESC',
         (g.user_id,),
     ).fetchall()
     return ok([dict(r) for r in rows])
@@ -311,63 +306,79 @@ def list_resumes():
 @app.route('/resumes', methods=['POST'])
 @require_auth
 def create_resume():
-    b = request.get_json(silent=True) or {}
-    title = (b.get('title') or 'Нове резюме').strip()
+    b        = request.get_json(silent=True) or {}
+    title    = (b.get('title') or 'Нове резюме').strip()
     template = (b.get('template') or 'classic').strip()
-    data = json.dumps(b.get('data') or {}, ensure_ascii=False)
+    data     = json.dumps(b.get('data') or {}, ensure_ascii=False)
 
-    db = get_db()
+    db  = get_db()
     cur = db.execute(
         'INSERT INTO resumes (user_id,title,template,data) VALUES (?,?,?,?)',
         (g.user_id, title, template, data),
     )
     db.commit()
-    return ok(parse_row(db.execute('SELECT * FROM resumes WHERE id=?', (cur.lastrowid,)).fetchone())), 201
+    row = db.execute('SELECT * FROM resumes WHERE id=?', (cur.lastrowid,)).fetchone()
+    return ok(parse_resume_row(row)), 201
 
 
 @app.route('/resumes/<int:rid>', methods=['GET'])
 @require_auth
 def get_resume(rid):
-    db = get_db()
-    row = db.execute('SELECT * FROM resumes WHERE id=? AND user_id=?', (rid, g.user_id)).fetchone()
+    db  = get_db()
+    row = db.execute(
+        'SELECT * FROM resumes WHERE id=? AND user_id=?', (rid, g.user_id)
+    ).fetchone()
     if not row:
         return err('Не знайдено', 404)
-    return ok(parse_row(row))
+    return ok(parse_resume_row(row))
 
 
 @app.route('/resumes/<int:rid>', methods=['PUT', 'PATCH'])
 @require_auth
 def update_resume(rid):
-    db = get_db()
-    row = db.execute('SELECT * FROM resumes WHERE id=? AND user_id=?', (rid, g.user_id)).fetchone()
+    db  = get_db()
+    row = db.execute(
+        'SELECT * FROM resumes WHERE id=? AND user_id=?', (rid, g.user_id)
+    ).fetchone()
     if not row:
         return err('Не знайдено', 404)
 
-    b = request.get_json(silent=True) or {}
-    title = b.get('title', row['title'])
+    b        = request.get_json(silent=True) or {}
+    title    = b.get('title', row['title'])
     template = b.get('template', row['template'])
 
-    try:
-        existing = json.loads(row['data'])
-    except Exception:
-        existing = {}
-
     if 'data' in b and isinstance(b['data'], dict):
-        existing.update(b['data'])
+        if request.method == 'PUT':
+            new_data = b['data']
+        else:
+            try:
+                existing = json.loads(row['data'])
+            except Exception:
+                existing = {}
+            existing.update(b['data'])
+            new_data = existing
+    else:
+        try:
+            new_data = json.loads(row['data'])
+        except Exception:
+            new_data = {}
 
     db.execute(
         'UPDATE resumes SET title=?,template=?,data=?,updated_at=datetime("now") WHERE id=?',
-        (title, template, json.dumps(existing, ensure_ascii=False), rid),
+        (title, template, json.dumps(new_data, ensure_ascii=False), rid),
     )
     db.commit()
-    return ok(parse_row(db.execute('SELECT * FROM resumes WHERE id=?', (rid,)).fetchone()))
+    row = db.execute('SELECT * FROM resumes WHERE id=?', (rid,)).fetchone()
+    return ok(parse_resume_row(row))
 
 
 @app.route('/resumes/<int:rid>', methods=['DELETE'])
 @require_auth
 def delete_resume(rid):
-    db = get_db()
-    row = db.execute('SELECT id FROM resumes WHERE id=? AND user_id=?', (rid, g.user_id)).fetchone()
+    db  = get_db()
+    row = db.execute(
+        'SELECT id FROM resumes WHERE id=? AND user_id=?', (rid, g.user_id)
+    ).fetchone()
     if not row:
         return err('Не знайдено', 404)
     db.execute('DELETE FROM resumes WHERE id=?', (rid,))
@@ -376,18 +387,16 @@ def delete_resume(rid):
 
 
 # NLP helpers
-
 def tokenize(text):
-    tokens = re.findall(r'[a-zа-яіїєґ][a-zа-яіїєґ0-9+#\.\-]*', text.lower())
+    tokens = re.findall(r'[a-zа-яіїєґ][a-zа-яіїєґ0-9+#.\-]*', text.lower())
     result = []
     for t in tokens:
         t = t.strip('.-_')
         if len(t) < 2:
             continue
         t = SYNONYMS.get(t, t)
-        if t in STOPWORDS_ALL:
-            continue
-        result.append(t)
+        if t not in STOPWORDS_ALL:
+            result.append(t)
     return result
 
 
@@ -396,229 +405,188 @@ def resume_to_text(data):
     p = data.get('personal', {})
     parts.append(p.get('jobTitle', ''))
     parts.append(data.get('summary', ''))
-
     for e in data.get('experience', []):
         parts += [e.get('position', ''), e.get('company', ''), e.get('description', '')]
     for e in data.get('education', []):
         parts += [e.get('institution', ''), e.get('degree', ''), e.get('field', '')]
-
     parts += data.get('skills', [])
-
-    for l in data.get('languages', []):
-        parts.append(l.get('language', ''))
+    for lang in data.get('languages', []):
+        parts.append(lang.get('language', ''))
     for pr in data.get('projects', []):
         parts += [pr.get('name', ''), pr.get('description', '')]
-
-    lks = data.get('links', {})
-    parts += list(lks.values())
+    parts += list((data.get('links') or {}).values())
     return ' '.join(str(x) for x in parts if x)
 
 
 def get_verdict(score):
-    if score >= 80:
-        return 'Ідеальний збіг'
-    if score >= 65:
-        return 'Гарна відповідність'
-    if score >= 50:
-        return 'Середня відповідність'
-    if score >= 35:
-        return 'Низька відповідність'
+    if score >= 80: return 'Ідеальний збіг'
+    if score >= 65: return 'Гарна відповідність'
+    if score >= 50: return 'Середня відповідність'
+    if score >= 35: return 'Низька відповідність'
     return 'Потребує доопрацювання'
 
 
-def _is_valid_keyword(kw):
-    return bool(
-        kw
-        and len(kw) > 2
-        and not kw.isdigit()
-        and not re.match(r'^\d+[+-]?\d*$', kw)
-    )
+def _valid_keyword(kw):
+    return bool(kw and len(kw) > 2 and not re.match(r'^\d+[+\-]?\d*$', kw))
 
 
 def build_keyword_candidates(job_text, limit=15):
-    candidates = []
-
+    candidates, seen = [], set()
     for item in extract_keywords(job_text, top_n=limit * 2):
-        word = (item.get('word') or '').strip()
-        if _is_valid_keyword(word) and word not in candidates:
-            candidates.append(word)
-
-    for word, _count in Counter(tokenize(job_text)).most_common(limit * 2):
-        if _is_valid_keyword(word) and word not in candidates:
-            candidates.append(word)
-
+        w = (item.get('word') or '').strip()
+        if _valid_keyword(w) and w not in seen:
+            candidates.append(w); seen.add(w)
+    for w, _ in Counter(tokenize(job_text)).most_common(limit * 2):
+        if _valid_keyword(w) and w not in seen:
+            candidates.append(w); seen.add(w)
     return candidates[:limit]
 
 
-def keyword_in_resume(keyword, resume_tokens, normalized_resume_text):
-    normalized_keyword = ' '.join(tokenize(keyword))
-    if not normalized_keyword:
+def keyword_in_resume(keyword, resume_tokens, resume_text_joined):
+    normalized = ' '.join(tokenize(keyword))
+    if not normalized:
         return False
-    if ' ' in normalized_keyword:
-        return normalized_keyword in normalized_resume_text
-    return normalized_keyword in resume_tokens
+    if ' ' in normalized:
+        return normalized in resume_text_joined
+    return normalized in resume_tokens
 
 
-def safe_cosine_percent(v1, v2):
+def safe_cosine(v1, v2):
     denom = np.linalg.norm(v1) * np.linalg.norm(v2)
     if denom == 0:
         return 0
-    sim = np.dot(v1, v2) / denom
-    return int(max(0, sim) * 100)
+    return int(max(0, np.dot(v1, v2) / denom) * 100)
 
 
-# Локальний аналіз
+def _classify_keywords(kw_list):
+    return {
+        'tech':     [k for k in kw_list if k['word'] in TECH_SKILLS],
+        'soft':     [k for k in kw_list if k['word'] in SOFT_SKILLS],
+        'business': [k for k in kw_list if k['word'] in BUSINESS_SKILLS],
+    }
+
+
+def _build_recommendations(score, found_cat, missing_cat):
+    recs, seen = [], set()
+
+    def add(level, word, text):
+        if text not in seen:
+            recs.append({'level': level, 'word': word, 'text': text})
+            seen.add(text)
+
+    for m in missing_cat['tech'][:3]:
+        add('red', m['word'], f'Додайте "{m["word"]}" у розділ навичок — це ключова вимога')
+    for m in missing_cat['soft'][:2]:
+        add('yellow', m['word'], f'Згадайте "{m["word"]}" в описі досвіду або «Про себе»')
+    for m in missing_cat['business'][:1]:
+        add('yellow', m['word'], f'Додайте "{m["word"]}" — це важливо для цієї позиції')
+
+    if found_cat['tech']:
+        skills = ', '.join(f['word'] for f in found_cat['tech'][:4])
+        add('green', '', f'Ваші технічні навички ({skills}) відповідають вакансії')
+
+    score_advice = {
+        80: ('green', 'Ваше резюме має дуже високу відповідність вакансії.'),
+        65: ('green', 'Хороша відповідність — резюме можна використовувати для відгуку.'),
+        50: ('yellow', 'Додайте більше ключових навичок і конкретики з вимог вакансії.'),
+        35: ('yellow', 'Адаптуйте резюме під вимоги вакансії.'),
+         0: ('red',    'Резюме потребує значного доопрацювання під цю вакансію.'),
+    }
+    for threshold in sorted(score_advice, reverse=True):
+        if score >= threshold:
+            level, text = score_advice[threshold]
+            add(level, '', text)
+            break
+
+    return recs
+
+
+def _load_resume_data(rid, user_id):
+    db  = get_db()
+    row = db.execute(
+        'SELECT data FROM resumes WHERE id=? AND user_id=?', (rid, user_id)
+    ).fetchone()
+    if not row:
+        return None, None
+    try:
+        data = json.loads(row['data'])
+    except Exception:
+        data = {}
+    return data, resume_to_text(data)
+
+
+# Local analysis
 @app.route('/resumes/<int:rid>/analyze', methods=['POST'])
 @require_auth
 def analyze_resume(rid):
-    db = get_db()
-    row = db.execute(
-        'SELECT data FROM resumes WHERE id=? AND user_id=?',
-        (rid, g.user_id),
-    ).fetchone()
-
-    if not row:
+    resume_data, resume_text = _load_resume_data(rid, g.user_id)
+    if resume_data is None:
         return err('Резюме не знайдено', 404)
 
-    b = request.get_json(silent=True) or {}
+    b        = request.get_json(silent=True) or {}
     job_text = (b.get('jobText') or '').strip()
-
     if len(job_text) < 20:
         return err('Текст вакансії занадто короткий')
-
-    try:
-        resume_data = json.loads(row['data'])
-    except Exception:
-        resume_data = {}
-
-    resume_text = resume_to_text(resume_data)
-
     if len(resume_text.strip()) < 20:
         return err('Резюме майже пусте. Заповніть дані.')
 
     model = get_semantic_model()
-
     if model:
-        embeddings = model.encode([resume_text, job_text])
-        score = safe_cosine_percent(embeddings[0], embeddings[1])
+        emb    = model.encode([resume_text, job_text])
+        score  = safe_cosine(emb[0], emb[1])
         method = 'semantic'
     else:
         from sklearn.feature_extraction.text import TfidfVectorizer
         from sklearn.metrics.pairwise import cosine_similarity
-
-        norm_resume = ' '.join(tokenize(resume_text))
-        norm_job = ' '.join(tokenize(job_text))
-
-        vectorizer = TfidfVectorizer(ngram_range=(1, 2), max_features=1000)
+        norm_r = ' '.join(tokenize(resume_text))
+        norm_j = ' '.join(tokenize(job_text))
         try:
-            tfidf = vectorizer.fit_transform([norm_resume, norm_job])
-            sim = cosine_similarity(tfidf[0:1], tfidf[1:2])[0][0]
-            score = int(sim * 100)
+            tfidf = TfidfVectorizer(ngram_range=(1, 2), max_features=1000).fit_transform([norm_r, norm_j])
+            score = int(cosine_similarity(tfidf[0:1], tfidf[1:2])[0][0] * 100)
         except Exception:
             score = 0
         method = 'tfidf'
 
-    top_keywords = build_keyword_candidates(job_text, limit=15)
-    resume_tokens = set(tokenize(resume_text))
-    normalized_resume_text = ' '.join(resume_tokens)
+    top_kw             = build_keyword_candidates(job_text, limit=15)
+    resume_tokens      = set(tokenize(resume_text))
+    resume_text_joined = ' '.join(resume_tokens)
 
     found, missing = [], []
-    for kw in top_keywords:
-        target = found if keyword_in_resume(kw, resume_tokens, normalized_resume_text) else missing
-        target.append({'word': kw})
+    for kw in top_kw:
+        (found if keyword_in_resume(kw, resume_tokens, resume_text_joined) else missing).append({'word': kw})
 
-    found_categorized = {
-        'tech': [f for f in found if f['word'] in TECH_SKILLS],
-        'soft': [f for f in found if f['word'] in SOFT_SKILLS],
-        'business': [f for f in found if f['word'] in BUSINESS_SKILLS],
-    }
-
-    missing_categorized = {
-        'tech': [m for m in missing if m['word'] in TECH_SKILLS],
-        'soft': [m for m in missing if m['word'] in SOFT_SKILLS],
-        'business': [m for m in missing if m['word'] in BUSINESS_SKILLS],
-    }
-
-    recs = []
-
-    for m in missing_categorized['tech'][:3]:
-        recs.append({
-            'level': 'red',
-            'word': m['word'],
-            'text': f'Додайте "{m["word"]}" у розділ навичок — це ключова вимога',
-        })
-
-    for m in missing_categorized['soft'][:2]:
-        recs.append({
-            'level': 'yellow',
-            'word': m['word'],
-            'text': f'Згадайте "{m["word"]}" в описі досвіду або "Про себе"',
-        })
-
-    for m in missing_categorized['business'][:1]:
-        recs.append({
-            'level': 'yellow',
-            'word': m['word'],
-            'text': f'Додайте "{m["word"]}" — це важливо для цієї позиції',
-        })
-
-    if found_categorized['tech']:
-        skills_list = ', '.join(f['word'] for f in found_categorized['tech'][:4])
-        recs.append({
-            'level': 'green',
-            'word': '',
-            'text': f'Ваші технічні навички ({skills_list}) відповідають вакансії',
-        })
-
-    if score >= 80:
-        recs.append({'level': 'green', 'word': '', 'text': 'Ваше резюме має дуже високу відповідність вакансії.'})
-    elif score >= 65:
-        recs.append({'level': 'green', 'word': '', 'text': 'Хороша відповідність — резюме можна використовувати для відгуку.'})
-    elif score >= 50:
-        recs.append({'level': 'yellow', 'word': '', 'text': 'Додайте більше ключових навичок і конкретики з вимог вакансії.'})
-    elif score >= 35:
-        recs.append({'level': 'yellow', 'word': '', 'text': 'Адаптуйте резюме під вимоги вакансії.'})
-    else:
-        recs.append({'level': 'red', 'word': '', 'text': 'Резюме потребує значного доопрацювання під цю вакансію.'})
-
-    unique_recs = []
-    seen_texts = set()
-    for rec in recs:
-        if rec['text'] not in seen_texts:
-            unique_recs.append(rec)
-            seen_texts.add(rec['text'])
+    found_cat   = _classify_keywords(found)
+    missing_cat = _classify_keywords(missing)
+    recs        = _build_recommendations(score, found_cat, missing_cat)
 
     return ok({
-        'score': score,
-        'verdict': get_verdict(score),
-        'found': found[:8],
-        'missing': missing[:8],
-        'found_tech': found_categorized['tech'],
-        'found_soft': found_categorized['soft'],
-        'found_business': found_categorized['business'],
-        'missing_tech': missing_categorized['tech'],
-        'missing_soft': missing_categorized['soft'],
-        'recommendations': unique_recs,
-        'method': method,
+        'score':            score,
+        'verdict':          get_verdict(score),
+        'found':            found[:8],
+        'missing':          missing[:8],
+        'found_tech':       found_cat['tech'],
+        'found_soft':       found_cat['soft'],
+        'found_business':   found_cat['business'],
+        'missing_tech':     missing_cat['tech'],
+        'missing_soft':     missing_cat['soft'],
+        'recommendations':  recs,
+        'method':           method,
         'modelStatus': {
             'loading': _model_loading,
-            'ready': _model_loaded,
+            'ready':   _model_loaded,
             'warning': 'ШІ-модель завантажується вперше. Наступний аналіз буде швидшим.' if _model_loading else None,
         },
     })
 
 
-# Аналіз ШІ
-
-def call_gemini_api(prompt):
-    import requests
-
+# Gemini analysis
+def _call_gemini(prompt):
+    import requests as req_lib
     for model in GEMINI_MODELS:
         url = f'{GEMINI_BASE_URL}/{model}:generateContent?key={GEMINI_KEY}'
-
         try:
-            print(f"Спроба моделі: {model}...")
-            response = requests.post(
+            print(f'[Gemini] Спроба {model}...')
+            resp = req_lib.post(
                 url,
                 json={
                     'contents': [{'parts': [{'text': prompt}]}],
@@ -630,50 +598,67 @@ def call_gemini_api(prompt):
                 },
                 timeout=30,
             )
-
-            if response.status_code == 429:
-                print(f"{model}: ліміт вичерпано")
+            if resp.status_code in (429, 404):
+                print(f'[Gemini] {model}: {resp.status_code}')
                 continue
-
-            if response.status_code == 404:
-                print(f"{model}: модель недоступна")
-                continue
-
-            if response.ok:
-                print(f"Використано модель: {model}")
-                return response.json(), model
-
+            if resp.ok:
+                print(f'[Gemini] Успішно: {model}')
+                return resp.json(), model
         except Exception as e:
-            print(f"{model}: {e}")
-            continue
-
+            print(f'[Gemini] {model}: {e}')
     return None, None
 
 
-def parse_gemini_response(data):
-    text = data.get('candidates', [{}])[0].get('content', {}).get('parts', [{}])[0].get('text', '')
-
+def _parse_gemini(data):
+    text = (
+        data.get('candidates', [{}])[0]
+            .get('content', {})
+            .get('parts', [{}])[0]
+            .get('text', '')
+    )
     if not text:
         raise ValueError('Gemini повернув порожню відповідь')
 
-    json_str = text
-    md_match = re.search(r'```(?:json)?\s*(\{[\s\S]*?\})\s*```', text)
-    if md_match:
-        json_str = md_match.group(1)
-
-    json_match = re.search(r'\{[\s\S]*\}', json_str)
-    if not json_match:
+    md = re.search(r'```(?:json)?\s*(\{[\s\S]*?\})\s*```', text)
+    json_str = md.group(1) if md else text
+    raw = re.search(r'\{[\s\S]*\}', json_str)
+    if not raw:
         raise ValueError('Gemini повернув некоректну відповідь')
 
-    result = json.loads(json_match.group(0))
-
-    result['score'] = max(0, min(100, round(result.get('score', 0))))
-    result['verdict'] = result.get('verdict', 'OK')
-    result['found'] = (result.get('found') or [])[:10]
-    result['missing'] = (result.get('missing') or [])[:8]
+    result = json.loads(raw.group(0))
+    result['score']           = max(0, min(100, round(result.get('score', 0))))
+    result['verdict']         = result.get('verdict', 'OK')
+    result['found']           = (result.get('found') or [])[:10]
+    result['missing']         = (result.get('missing') or [])[:8]
     result['recommendations'] = result.get('recommendations') or []
-
     return result
+
+
+_GEMINI_PROMPT = """Ти — експерт з HR та ATS-систем. Проаналізуй відповідність резюме до вакансії.
+
+РЕЗЮМЕ:
+{resume}
+
+ВАКАНСІЯ:
+{job}
+
+Дай відповідь ТІЛЬКИ валідним JSON (без markdown, без пояснень):
+{{
+  "score": число від 0 до 100,
+  "verdict": "коротка оцінка 3-5 слів українською",
+  "found": [{{"word": "ключове слово"}}],
+  "missing": [{{"word": "ключове слово"}}],
+  "recommendations": [
+    {{"level": "red|yellow|green", "word": "слово або ''", "text": "конкретна порада українською"}}
+  ]
+}}
+
+Правила:
+- score: технічні навички (50%), досвід (30%), освіта (10%), м'які навички (10%)
+- found: до 10 найважливіших слів/навичок, що РЕАЛЬНО є в резюме
+- missing: до 8 важливих вимог вакансії, яких НЕМАЄ в резюме
+- recommendations: 3-6 конкретних порад (red=критично, yellow=бажано, green=добре)
+- НЕ вигадуй навички, яких немає в резюме"""
 
 
 @app.route('/resumes/<int:rid>/analyze/gemini', methods=['POST'])
@@ -682,77 +667,35 @@ def analyze_resume_gemini(rid):
     if not GEMINI_KEY:
         return err('Gemini API ключ не налаштовано на сервері', 503)
 
-    db = get_db()
-    row = db.execute(
-        'SELECT data FROM resumes WHERE id=? AND user_id=?',
-        (rid, g.user_id),
-    ).fetchone()
-
-    if not row:
+    resume_data, resume_text = _load_resume_data(rid, g.user_id)
+    if resume_data is None:
         return err('Резюме не знайдено', 404)
 
-    b = request.get_json(silent=True) or {}
+    b        = request.get_json(silent=True) or {}
     job_text = (b.get('jobText') or '').strip()
-
     if len(job_text) < 20:
         return err('Текст вакансії занадто короткий')
-
-    try:
-        resume_data = json.loads(row['data'])
-    except Exception:
-        resume_data = {}
-
-    resume_text = resume_to_text(resume_data)
-
     if len(resume_text.strip()) < 20:
         return err('Резюме майже пусте. Заповніть дані.')
 
-    prompt = f"""Ти — експерт з HR та ATS-систем. Проаналізуй відповідність резюме до вакансії.
-        РЕЗЮМЕ:
-        {resume_text}
-
-        ВАКАНСІЯ:
-        {job_text}
-
-        Дай відповідь ТІЛЬКИ у форматі JSON (без markdown, без ```json, без пояснень поза JSON):
-        {{
-        "score": число від 0 до 100,
-        "verdict": "коротка оцінка 3-5 слів українською",
-        "found": [{{"word": "ключове слово"}}],
-        "missing": [{{"word": "ключове слово"}}],
-        "recommendations": [
-            {{"level": "red|yellow|green", "word": "слово або ''", "text": "конкретна порада українською"}}
-        ]
-        }}
-
-        Правила:
-        - score: враховуй технічні навички (50%), досвід (30%), освіту (10%), м'які навички (10%)
-        - found: до 10 найважливіших слів/навичок, що РЕАЛЬНО є в резюме
-        - missing: до 8 важливих вимог вакансії, яких НЕМАЄ в резюме
-        - recommendations: 3-6 конкретних порад (red=критично, yellow=бажано, green=добре)
-        - НЕ вигадуй навички, яких немає в резюме
-        - Відповідай ТІЛЬКИ валідним JSON, без коментарів"""
-
-    data, used_model = call_gemini_api(prompt)
-
+    prompt       = _GEMINI_PROMPT.format(resume=resume_text, job=job_text)
+    data, model  = _call_gemini(prompt)
     if not data:
         return err('Усі моделі Gemini недоступні. Спробуйте локальний аналіз.', 503)
 
     try:
-        result = parse_gemini_response(data)
-    except ValueError as e:
+        result = _parse_gemini(data)
+    except (ValueError, json.JSONDecodeError) as e:
         return err(str(e), 502)
-    except json.JSONDecodeError:
-        return err('Gemini повернув невалідний JSON', 502)
 
-    result['method'] = f'gemini-{used_model}' if used_model else 'gemini'
-
+    result['method'] = f'gemini-{model}' if model else 'gemini'
     return ok(result)
 
 
+# Entry point
 if __name__ == '__main__':
     print('=' * 52)
     print('  Сервер: http://localhost:5000')
     print(f"  Gemini: {'активовано' if GEMINI_KEY else 'не налаштовано'}")
     print('=' * 52)
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', '5000')), debug=False)
