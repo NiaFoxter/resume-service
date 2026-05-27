@@ -17,9 +17,9 @@ export default function Navbar() {
         { label: 'Аналіз', to: '/analysis', auth: true },
     ]
 
-    function handleNav(link) {
-        if (link.auth && !token) { openLogin(); close(); return }
-        navigate(link.to)
+    function handleNav(navLink) {
+        if (navLink.auth && !token) { openLogin(); close(); return }
+        navigate(navLink.to)
         close()
     }
 
@@ -37,8 +37,10 @@ export default function Navbar() {
                 </div>
 
                 <div className="nav-links">
-                    {navLinks.filter(l => !l.auth || token).map(l => (
-                        <button key={l.to} className="nav-link" onClick={() => handleNav(l)}>{l.label}</button>
+                    {navLinks.filter((navLink) => !navLink.auth || token).map((navLink) => (
+                        <button key={navLink.to} className="nav-link" onClick={() => handleNav(navLink)}>
+                            {navLink.label}
+                        </button>
                     ))}
                 </div>
 
@@ -58,7 +60,7 @@ export default function Navbar() {
                         className={`nav-burger ${menuOpen ? 'open' : ''}`}
                         id="navBurger"
                         aria-label="Меню"
-                        onClick={() => setMenuOpen(v => !v)}
+                        onClick={() => setMenuOpen((isOpen) => !isOpen)}
                     >
                         <span /><span /><span />
                     </button>
@@ -68,8 +70,10 @@ export default function Navbar() {
             <div className={`nav-overlay ${menuOpen ? 'open' : ''}`} id="navOverlay" onClick={close} />
             <div className={`nav-menu ${menuOpen ? 'open' : ''}`} id="navMenu">
                 <div className="nav-links">
-                    {navLinks.filter(l => !l.auth || token).map(l => (
-                        <button key={l.to} className="nav-link" onClick={() => handleNav(l)}>{l.label}</button>
+                    {navLinks.filter((navLink) => !navLink.auth || token).map((navLink) => (
+                        <button key={navLink.to} className="nav-link" onClick={() => handleNav(navLink)}>
+                            {navLink.label}
+                        </button>
                     ))}
                 </div>
                 <div className="nav-auth" style={{ flexDirection: 'column', alignItems: 'stretch', marginTop: 8 }}>

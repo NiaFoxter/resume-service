@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware'
 
 export const useAuthStore = create(
     persist(
-        (set, get) => ({
+        (set) => ({
             token: null,
             user: null,
 
@@ -16,16 +16,11 @@ export const useAuthStore = create(
             closeRegister: () => set({ registerOpen: false }),
 
             setAuth: (token, user) => set({ token, user }),
-
-            clearAuth: () => {
-                set({ token: null, user: null })
-            },
-
-            isAuthed: () => !!get().token,
+            clearAuth: () => set({ token: null, user: null }),
         }),
         {
             name: 'auth-storage',
-            partialize: state => ({ token: state.token, user: state.user }),
+            partialize: (state) => ({ token: state.token, user: state.user }),
         }
     )
 )

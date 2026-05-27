@@ -22,18 +22,26 @@ export function useAuth() {
     }, [validateToken])
 
     async function doLogin(email, password) {
-        const d = await authApi.login(email, password)
-        setAuth(d.token, { firstName: d.firstName, lastName: d.lastName, userId: d.userId })
+        const authData = await authApi.login(email, password)
+        setAuth(authData.token, {
+            firstName: authData.firstName,
+            lastName: authData.lastName,
+            userId: authData.userId,
+        })
         closeLogin()
-        toast(`Вітаємо, ${d.firstName}!`, 'ok')
+        toast(`Вітаємо, ${authData.firstName}!`, 'ok')
         navigate('/dashboard')
     }
 
     async function doRegister(email, password, firstName, lastName) {
-        const d = await authApi.register(email, password, firstName, lastName)
-        setAuth(d.token, { firstName: d.firstName, lastName: d.lastName, userId: d.userId })
+        const authData = await authApi.register(email, password, firstName, lastName)
+        setAuth(authData.token, {
+            firstName: authData.firstName,
+            lastName: authData.lastName,
+            userId: authData.userId,
+        })
         closeRegister()
-        toast(`Акаунт створено! Вітаємо, ${d.firstName} 🎉`, 'ok')
+        toast(`Акаунт створено! Вітаємо, ${authData.firstName} 🎉`, 'ok')
         navigate('/dashboard')
     }
 

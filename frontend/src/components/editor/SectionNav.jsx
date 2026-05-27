@@ -16,18 +16,18 @@ export default function SectionNav({ active, onChange }) {
 
     return (
         <nav className="sec-nav">
-            {SECTIONS.map(s => (
+            {SECTIONS.map((section) => (
                 <div
-                    key={s.id}
-                    className={`sec-item ${active === s.id ? 'active' : ''}`}
-                    onClick={() => onChange(s.id)}
+                    key={section.id}
+                    className={`sec-item ${active === section.id ? 'active' : ''}`}
+                    onClick={() => onChange(section.id)}
                     tabIndex={0}
                     role="button"
-                    onKeyDown={e => e.key === 'Enter' && onChange(s.id)}
+                    onKeyDown={(e) => e.key === 'Enter' && onChange(section.id)}
                 >
-                    <span className="sec-icon">{s.icon}</span>
-                    <span className="sec-label">{s.label}</span>
-                    <span className="sec-check" id={`chk-${s.id}`}>{sections[s.id] ? '✓' : ''}</span>
+                    <span className="sec-icon">{section.icon}</span>
+                    <span className="sec-label">{section.label}</span>
+                    <span className="sec-check" id={`chk-${section.id}`}>{sections[section.id] ? '✓' : ''}</span>
                 </div>
             ))}
         </nav>

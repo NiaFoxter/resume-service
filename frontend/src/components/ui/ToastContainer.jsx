@@ -7,9 +7,9 @@ export default function ToastContainer() {
 
     return (
         <div id="toasts" style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {toasts.map(t => (
-                <div key={t.id} className={`toast ${t.type}`.trim()} onClick={() => dismiss(t.id)}>
-                    <span>{ICONS[t.type] || 'ℹ'}</span> {t.msg}
+            {toasts.map((toastItem) => (
+                <div key={toastItem.id} className={`toast ${toastItem.type}`.trim()} onClick={() => dismiss(toastItem.id)}>
+                    <span>{ICONS[toastItem.type] || 'ℹ'}</span> {toastItem.msg}
                 </div>
             ))}
         </div>

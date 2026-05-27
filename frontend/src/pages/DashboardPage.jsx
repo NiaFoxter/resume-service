@@ -7,12 +7,20 @@ import { toast } from '../store/toastStore'
 import { showConfirm } from '../store/confirmStore'
 
 const TEMPLATE_NAMES = {
-    classic: 'Класичний', modern: 'Сучасний', minimalist: 'Мінімалістичний',
-    creative: 'Креативний', professional: 'Професійний', compact: 'Компактний',
-    elegant: 'Елегантний', 'it-special': 'IT',
+    classic: 'Класичний',
+    modern: 'Сучасний',
+    minimalist: 'Мінімалістичний',
+    creative: 'Креативний',
+    professional: 'Професійний',
+    compact: 'Компактний',
+    elegant: 'Елегантний',
+    'it-special': 'IT',
 }
 
-const THUMB_CLASSES = ['ct-classic', 'ct-modern', 'ct-minimalist', 'ct-creative', 'ct-professional', 'ct-compact', 'ct-elegant', 'ct-it-special']
+const THUMB_CLASSES = [
+    'ct-classic', 'ct-modern', 'ct-minimalist', 'ct-creative',
+    'ct-professional', 'ct-compact', 'ct-elegant', 'ct-it-special',
+]
 
 export default function DashboardPage() {
     const [resumes, setResumes] = useState([])
@@ -23,30 +31,37 @@ export default function DashboardPage() {
 
     async function load() {
         try { setResumes(await getResumes()) }
-        catch (e) { toast(e.message, 'bad') }
+        catch (error) { toast(error.message, 'bad') }
         finally { setLoading(false) }
     }
 
     useEffect(() => { load() }, [])
 
-    async function openResume(r) {
-        setResume(r)
-        navigate(`/editor/${r.id}`)
+    async function openResume(resume) {
+        setResume(resume)
+        navigate(`/editor/${resume.id}`)
     }
 
-    async function handleDelete(id, title) {
-        showConfirm('Видалити резюме?', `«${title}» буде видалено назавжди.`, async () => {
-            try { await apiDelete(id); toast('Резюме видалено 🗑️', 'ok'); load() }
-            catch (e) { toast(e.message, 'bad') }
+    async function handleDelete(resumeId, resumeTitle) {
+        showConfirm('Видалити резюме?', `«${resumeTitle}» буде видалено назавжди.`, async () => {
+            try {
+                await apiDelete(resumeId)
+                toast('Резюме видалено 🗑️', 'ok')
+                load()
+            } catch (error) {
+                toast(error.message, 'bad')
+            }
         })
     }
 
     async function handleCreate() {
         try {
-            const r = await createResume({ title: 'Нове резюме', template: 'classic', data: {} })
-            setResume(r)
-            navigate(`/editor/${r.id}`)
-        } catch (e) { toast(e.message, 'bad') }
+            const newResume = await createResume({ title: 'Нове резюме', template: 'classic', data: {} })
+            setResume(newResume)
+            navigate(`/editor/${newResume.id}`)
+        } catch (error) {
+            toast(error.message, 'bad')
+        }
     }
 
     return (
@@ -59,9 +74,8 @@ export default function DashboardPage() {
                 <button className="btn btn-copper" onClick={() => navigate('/templates')}>+ Нове резюме</button>
             </div>
 
-            {loading ? (
-                <div className="dash-loading"><div className="spinner-large" /></div>
-            ) : resumes.length === 0 ? (
+            {loading ? (<div className="dash-loading"><div className="spinner-large" /></div>)
+            : resumes.length === 0 ? (
                 <div className="empty-state">
                     <div className="empty-state-icon">📄</div>
                     <h3>Ще немає резюме</h3>
@@ -70,13 +84,15 @@ export default function DashboardPage() {
                 </div>
             ) : (
                 <div className="resume-grid" id="resumeGrid">
-                    {resumes.map((r, i) => {
-                        const tc = THUMB_CLASSES[i % THUMB_CLASSES.length]
-                        const dt = new Date(r.updated_at).toLocaleDateString('uk-UA', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
-                        const tmplName = TEMPLATE_NAMES[r.template] || r.template || 'Класичний'
+                    {resumes.map((resume, index) => {
+                        const thumbClass = THUMB_CLASSES[index % THUMB_CLASSES.length]
+                        const updatedAt = new Date(resume.updated_at).toLocaleDateString('uk-UA', {
+                            day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
+                        })
+                        const templateName = TEMPLATE_NAMES[resume.template] || resume.template || 'Класичний'
                         return (
-                            <div key={r.id} className="resume-card" onClick={() => openResume(r)}>
-                                <div className={`card-thumb ${tc}`}>
+                            <div key={resume.id} className="resume-card" onClick={() => openResume(resume)}>
+                                <div className={`card-thumb ${thumbClass}`}>
                                     <div className="card-thumb-pattern" />
                                     <div className="card-thumb-doc">
                                         <div className="doc-bar" /><div className="doc-bar sm" />
@@ -85,14 +101,18 @@ export default function DashboardPage() {
                                     </div>
                                 </div>
                                 <div className="card-body">
-                                    <div className="card-name">{r.title}</div>
-                                    <div className="card-meta">{tmplName} · {dt}</div>
+                                    <div className="card-name">{resume.title}</div>
+                                    <div className="card-meta">{templateName} · {updatedAt}</div>
                                 </div>
                                 <div className="card-actions">
                                     <button className="btn btn-ghost btn-sm" style={{ flex: 1 }}
-                                        onClick={e => { e.stopPropagation(); openResume(r) }}>Редагувати</button>
-                                    <button className="btn btn-danger btn-sm btn-icon"
-                                        onClick={e => { e.stopPropagation(); handleDelete(r.id, r.title) }}>✕</button>
+                                        onClick={(e) => { e.stopPropagation(); openResume(resume) }}>
+                                        Редагувати
+                                    </button>
+                                    <button className="btn btn-danger btn-sm btn-icon" 
+                                        onClick={(e) => { e.stopPropagation(); handleDelete(resume.id, resume.title) }}>
+                                        ✕
+                                    </button>
                                 </div>
                             </div>
                         )

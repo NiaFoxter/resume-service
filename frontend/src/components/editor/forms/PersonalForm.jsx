@@ -3,10 +3,10 @@ import PhotoUpload from '../PhotoUpload'
 
 export default function PersonalForm({ onChange }) {
     const { data, setPersonal } = useResumeStore()
-    const p = data.personal
+    const personal = data.personal
 
     function set(field, value) {
-        setPersonal({ ...p, [field]: value })
+        setPersonal({ ...personal, [field]: value })
         onChange?.()
     }
 
@@ -15,23 +15,23 @@ export default function PersonalForm({ onChange }) {
             <PhotoUpload onChange={onChange} />
             <div className="form-row">
                 <div className="fg"><label>Ім'я</label>
-                    <input id="f-firstName" value={p.firstName} onChange={e => set('firstName', e.target.value)} /></div>
+                    <input id="f-firstName" value={personal.firstName} onChange={(e) => set('firstName', e.target.value)} /></div>
                 <div className="fg"><label>Прізвище</label>
-                    <input id="f-lastName" value={p.lastName} onChange={e => set('lastName', e.target.value)} /></div>
+                    <input id="f-lastName" value={personal.lastName} onChange={(e) => set('lastName', e.target.value)} /></div>
             </div>
             <div className="fg"><label>Посада / Спеціальність</label>
-                <input id="f-jobTitle" value={p.jobTitle} onChange={e => set('jobTitle', e.target.value)} /></div>
+                <input id="f-jobTitle" value={personal.jobTitle} onChange={(e) => set('jobTitle', e.target.value)} /></div>
             <div className="form-row">
                 <div className="fg"><label>Email</label>
-                    <input id="f-email" type="email" value={p.email} onChange={e => set('email', e.target.value)} /></div>
+                    <input id="f-email" type="email" value={personal.email} onChange={(e) => set('email', e.target.value)} /></div>
                 <div className="fg"><label>Телефон</label>
-                    <input id="f-phone" value={p.phone} onChange={e => set('phone', e.target.value)} /></div>
+                    <input id="f-phone" value={personal.phone} onChange={(e) => set('phone', e.target.value)} /></div>
             </div>
             <div className="form-row">
                 <div className="fg"><label>Місто</label>
-                    <input id="f-city" value={p.city} onChange={e => set('city', e.target.value)} /></div>
+                    <input id="f-city" value={personal.city} onChange={(e) => set('city', e.target.value)} /></div>
                 <div className="fg"><label>LinkedIn</label>
-                    <input id="f-linkedin" value={p.linkedin} onChange={e => set('linkedin', e.target.value)} /></div>
+                    <input id="f-linkedin" value={personal.linkedin} onChange={(e) => set('linkedin', e.target.value)} /></div>
             </div>
         </div>
     )

@@ -4,64 +4,71 @@ import { updateResume } from '../api/resumes'
 import { toast } from '../store/toastStore'
 
 export function usePDF(previewRef) {
-    const { currentId, title, toPayload } = useResumeStore()
+    const currentId = useResumeStore((s) => s.currentId)
+    const title = useResumeStore((s) => s.title)
+    const getPayload = useResumeStore((s) => s.getPayload)
 
     const downloadPDF = useCallback(async () => {
         if (!currentId) { toast('Спочатку збережіть резюме', 'warn'); return false }
-        if (!previewRef?.current) { toast('Немає прев\'ю', 'bad'); return false }
+        if (!previewRef?.current) { toast("Немає прев'ю", 'bad'); return false }
         if (!window.html2pdf) { toast('Бібліотеку PDF не завантажено', 'bad'); return false }
 
-        let wrap = null
+        let cloneWrapper = null
 
         try {
-            await updateResume(currentId, toPayload())
-            await new Promise(r => setTimeout(r, 120))
+            await updateResume(currentId, getPayload())
+            await new Promise((resolve) => setTimeout(resolve, 120))
 
-            const fname = (title || 'resume')
+            const fileName = (title || 'resume')
                 .replace(/[^\wа-яА-ЯіїєґІЇЄҐ\-\s]/g, '')
                 .replace(/\s+/g, ' ')
                 .trim() || 'resume'
 
-            const allCSS = [...document.styleSheets].map(sheet => {
-                try { return [...sheet.cssRules].map(r => r.cssText).join('\n') } catch { return '' }
-            }).join('\n')
+            const allCSS = [...document.styleSheets]
+                .map((sheet) => {
+                    try {
+                        return [...sheet.cssRules].map((cssRule) => cssRule.cssText).join('\n')
+                    } catch {
+                        return ''
+                    }
+                })
+                .join('\n')
 
             const pdfOverride = `
-        * { transition: none !important; animation: none !important; }
-        .a4 { box-shadow: none !important; border-radius: 0 !important; width: 794px !important; }
-        .a4-left { min-height: 100vh; }
-        .empty-section { display: none !important; }
-      `
+                * { transition: none !important; animation: none !important; }
+                .a4 { box-shadow: none !important; border-radius: 0 !important; width: 794px !important; }
+                .a4-left { min-height: 100vh; }
+                .empty-section { display: none !important; }
+            `
 
-            wrap = document.createElement('div')
-            wrap.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;background:#fff;z-index:-1;'
-            wrap.innerHTML = `<style>${allCSS}\n${pdfOverride}</style>${previewRef.current.outerHTML}`
-            document.body.appendChild(wrap)
+            cloneWrapper = document.createElement('div')
+            cloneWrapper.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;background:#fff;z-index:-1;'
+            cloneWrapper.innerHTML = `<style>${allCSS}\n${pdfOverride}</style>${previewRef.current.outerHTML}`
+            document.body.appendChild(cloneWrapper)
 
-            const pdfTarget = wrap.querySelector('.a4')
-            if (!pdfTarget) {
-                throw new Error('Не знайдено блок прев\'ю для PDF')
-            }
+            const pdfTarget = cloneWrapper.querySelector('.a4')
+            if (!pdfTarget) throw new Error("Не знайдено блок прев'ю для PDF")
 
-            await window.html2pdf().set({
-                margin: 0,
-                filename: fname + '.pdf',
-                image: { type: 'jpeg', quality: 0.97 },
-                html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            }).from(pdfTarget).save()
+            await window.html2pdf()
+                .set({
+                    margin: 0,
+                    filename: `${fileName}.pdf`,
+                    image: { type: 'jpeg', quality: 0.97 },
+                    html2canvas: { scale: 2, useCORS: true, logging: false, allowTaint: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                })
+                .from(pdfTarget)
+                .save()
 
             toast('PDF завантажено ✓', 'ok')
             return true
-        } catch (e) {
-            toast('Помилка PDF: ' + e.message, 'bad')
+        } catch (error) {
+            toast('Помилка PDF: ' + error.message, 'bad')
             return false
         } finally {
-            if (wrap?.parentNode) {
-                wrap.parentNode.removeChild(wrap)
-            }
+            cloneWrapper?.parentNode?.removeChild(cloneWrapper)
         }
-    }, [currentId, title, toPayload, previewRef])
+    }, [currentId, title, getPayload, previewRef])
 
     return { downloadPDF }
 }

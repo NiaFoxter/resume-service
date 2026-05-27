@@ -10,6 +10,8 @@ const FEATURES = [
     { icon: '📱', cls: 'fi-t', title: 'Адаптивний дизайн', desc: 'Працює на телефоні, планшеті та десктопі.' },
 ]
 
+const HERO_SKILLS = ['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'Docker', 'AWS']
+
 export default function LandingPage() {
     const navigate = useNavigate()
     const { token, openRegister } = useAuthStore()
@@ -51,18 +53,18 @@ export default function LandingPage() {
                                     <div className="hrf-block">
                                         <div className="hrf-block-title">Навички</div>
                                         <div className="hrf-tags">
-                                            {['React', 'Node.js', 'TypeScript', 'PostgreSQL', 'Docker', 'AWS'].map(s => (
-                                                <span key={s} className="hrf-tag">{s}</span>
+                                            {HERO_SKILLS.map((skillName) => (
+                                                <span key={skillName} className="hrf-tag">{skillName}</span>
                                             ))}
                                         </div>
                                     </div>
 
                                     <div className="hrf-block">
                                         <div className="hrf-block-title">Мови</div>
-                                        {[['Англійська', 'B2'], ['Українська', 'C1']].map(([lang, lvl]) => (
+                                        {[['Англійська', 'B2'], ['Українська', 'C1']].map(([lang, level]) => (
                                             <div key={lang} className="hrf-lang-row">
                                                 <span className="hrf-lang-name">{lang}</span>
-                                                <span className="hrf-lang-lvl">{lvl}</span>
+                                                <span className="hrf-lang-lvl">{level}</span>
                                             </div>
                                         ))}
                                     </div>
@@ -134,11 +136,11 @@ export default function LandingPage() {
                         <h2>Все необхідне - в одному місці</h2>
                     </div>
                     <div className="features-grid">
-                        {FEATURES.map((f, i) => (
-                            <div key={i} className="feature-cell">
-                                <div className={`fi ${f.cls}`}>{f.icon}</div>
-                                <div className="feature-title">{f.title}</div>
-                                <div className="feature-desc">{f.desc}</div>
+                        {FEATURES.map((feature, index) => (
+                            <div key={index} className="feature-cell">
+                                <div className={`fi ${feature.cls}`}>{feature.icon}</div>
+                                <div className="feature-title">{feature.title}</div>
+                                <div className="feature-desc">{feature.desc}</div>
                             </div>
                         ))}
                     </div>

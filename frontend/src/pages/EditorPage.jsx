@@ -24,7 +24,7 @@ const TEMPLATE_NAMES = {
     modern: 'Сучасний',
     minimalist: 'Мінімалістичний',
     creative: 'Креативний',
-    professional: 'Професійний',
+    professional: 'Профессійний',
     compact: 'Компактний',
     elegant: 'Елегантний',
     'it-special': 'IT-Спеціаліст',
@@ -58,17 +58,17 @@ export default function EditorPage() {
     const shellRef = useRef(null)
     const sidebarRef = useRef(null)
 
-    const onStatus = useCallback((text, ok) => setSaveStatus(ok ? '✓ ' + text : text), [])
+    const onStatus = useCallback((text, isSaved) => setSaveStatus(isSaved ? '✓ ' + text : text), [])
     const { schedule } = useAutosave(onStatus)
     const { downloadPDF } = usePDF(previewRef)
 
     useEffect(() => {
         if (!id) return
-        const numId = Number(id)
-        if (currentId === numId) return
+        const numericId = Number(id)
+        if (currentId === numericId) return
         getResume(id)
             .then(setResume)
-            .catch((e) => { toast(e.message, 'bad'); navigate('/dashboard') })
+            .catch((error) => { toast(error.message, 'bad'); navigate('/dashboard') })
     }, [id])
 
     async function handlePDF() {
@@ -86,38 +86,38 @@ export default function EditorPage() {
         handle.className = 'sidebar-resizer'
         sidebar.appendChild(handle)
 
-        const MIN_W = 240, MAX_W = 540
-        let dragging = false, startX = 0, startW = 0
+        const MIN_WIDTH = 240, MAX_WIDTH = 540
+        let isDragging = false, startX = 0, startWidth = 0
 
-        const onDown = (e) => {
-            e.preventDefault()
-            dragging = true
-            startX = e.clientX
-            startW = sidebar.getBoundingClientRect().width
+        const onMouseDown = (mouseEvent) => {
+            mouseEvent.preventDefault()
+            isDragging = true
+            startX = mouseEvent.clientX
+            startWidth = sidebar.getBoundingClientRect().width
             handle.classList.add('active')
             document.documentElement.style.cursor = 'col-resize'
             document.documentElement.style.userSelect = 'none'
         }
-        const onMove = (e) => {
-            if (!dragging) return
-            const w = Math.min(MAX_W, Math.max(MIN_W, startW + (e.clientX - startX)))
-            shell.style.gridTemplateColumns = `${w}px 1fr`
+        const onMouseMove = (mouseEvent) => {
+            if (!isDragging) return
+            const newWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + (mouseEvent.clientX - startX)))
+            shell.style.gridTemplateColumns = `${newWidth}px 1fr`
         }
-        const onUp = () => {
-            if (!dragging) return
-            dragging = false
+        const onMouseUp = () => {
+            if (!isDragging) return
+            isDragging = false
             handle.classList.remove('active')
             document.documentElement.style.cursor = ''
             document.documentElement.style.userSelect = ''
         }
 
-        handle.addEventListener('mousedown', onDown)
-        document.addEventListener('mousemove', onMove)
-        document.addEventListener('mouseup', onUp)
+        handle.addEventListener('mousedown', onMouseDown)
+        document.addEventListener('mousemove', onMouseMove)
+        document.addEventListener('mouseup', onMouseUp)
         return () => {
-            handle.removeEventListener('mousedown', onDown)
-            document.removeEventListener('mousemove', onMove)
-            document.removeEventListener('mouseup', onUp)
+            handle.removeEventListener('mousedown', onMouseDown)
+            document.removeEventListener('mousemove', onMouseMove)
+            document.removeEventListener('mouseup', onMouseUp)
             document.documentElement.style.cursor = ''
             document.documentElement.style.userSelect = ''
             sidebar.contains(handle) && sidebar.removeChild(handle)
@@ -128,14 +128,8 @@ export default function EditorPage() {
 
     return (
         <main className="page active editor-page" id="page-editor">
-            {/* Toolbar */}
             <div className="editor-toolbar">
-                <input
-                    className="resume-title-input"
-                    id="resumeTitle"
-                    value={title}
-                    onChange={(e) => { setTitle(e.target.value); schedule() }}
-                />
+                <input className="resume-title-input" id="resumeTitle" value={title} onChange={(e) => { setTitle(e.target.value); schedule() }} />
                 <div className="toolbar-right">
                     <span className={`save-status ${saveStatus.startsWith('✓') ? 'saved' : ''}`}>
                         {saveStatus}
@@ -143,18 +137,12 @@ export default function EditorPage() {
                     <button className="btn btn-ghost btn-sm" onClick={() => navigate('/templates')}>
                         {TEMPLATE_NAMES[template] || template} ▾
                     </button>
-                    <button
-                        id="pdfBtn"
-                        className="btn btn-copper btn-sm"
-                        onClick={handlePDF}
-                        disabled={pdfLoading}
-                    >
+                    <button id="pdfBtn" className="btn btn-copper btn-sm" onClick={handlePDF} disabled={pdfLoading}>
                         {pdfLoading ? <span className="spinner" /> : '↓ PDF'}
                     </button>
                 </div>
             </div>
 
-            {/* Shell */}
             <div className="editor-shell" ref={shellRef}>
                 <div className="editor-sidebar" ref={sidebarRef}>
                     <ProgressRing />
@@ -163,7 +151,6 @@ export default function EditorPage() {
                         {ActiveForm && <ActiveForm onChange={schedule} />}
                     </div>
                 </div>
-
                 <div className="editor-preview">
                     <A4Preview ref={previewRef} />
                 </div>

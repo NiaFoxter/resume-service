@@ -1,7 +1,7 @@
 import { forwardRef } from 'react'
 import { useResumeStore } from '../../store/resumeStore'
 
-function esc(str) {
+function escapeText(str) {
     if (str == null) return ''
     return String(str)
 }
@@ -17,32 +17,32 @@ function linkHref(value) {
     return `https://${url}`
 }
 
-const hasExp = e => e.position?.trim() || e.company?.trim()
-const hasEdu = e => e.institution?.trim() || e.degree?.trim()
-const hasProj = pr => pr.name?.trim()
-const hasLang = l => l.language?.trim()
+const hasValidExp = (exp) => exp.position?.trim() || exp.company?.trim()
+const hasValidEdu = (edu) => edu.institution?.trim() || edu.degree?.trim()
+const hasValidProj = (proj) => proj.name?.trim()
+const hasValidLang = (lang) => lang.language?.trim()
 
 function SkillPills({ skills }) {
-    const list = (skills || []).filter(s => s?.trim())
+    const list = (skills || []).filter((skill) => skill?.trim())
     if (!list.length) return null
     return (
         <div className="a4-skills-wrap">
-            {list.slice(0, 12).map((sk, i) => (
-                <span key={i} className="a4-skill-pill">{esc(sk)}</span>
+            {list.slice(0, 12).map((skill, index) => (
+                <span key={index} className="a4-skill-pill">{escapeText(skill)}</span>
             ))}
         </div>
     )
 }
 
 function LangList({ languages }) {
-    const list = (languages || []).filter(hasLang)
+    const list = (languages || []).filter(hasValidLang)
     if (!list.length) return null
     return (
         <>
-            {list.map((l, i) => (
-                <div key={i} className="a4-lang">
-                    <span className="a4-lang-name">{esc(l.language)}</span>
-                    <span className="a4-lang-level">{esc(l.level)}</span>
+            {list.map((lang, index) => (
+                <div key={index} className="a4-lang">
+                    <span className="a4-lang-name">{escapeText(lang.language)}</span>
+                    <span className="a4-lang-level">{escapeText(lang.level)}</span>
                 </div>
             ))}
         </>
@@ -51,17 +51,17 @@ function LangList({ languages }) {
 
 function LinksList({ links }) {
     const items = Object.entries(links || {})
-        .map(([k, v]) => [k, cleanUrl(v)])
-        .filter(([, v]) => v)
+        .map(([key, val]) => [key, cleanUrl(val)])
+        .filter(([, val]) => val)
     if (!items.length) return null
     const labels = { github: 'GitHub', website: 'Сайт', telegram: 'Telegram' }
     return (
         <>
-            {items.map(([k, v]) => (
-                <div key={k} className="a4-link-item">
-                    <span className="a4-link-label">{labels[k] || k}</span>
-                    <a className="a4-link-url" href={linkHref(v)} target="_blank" rel="noreferrer">
-                        {v}
+            {items.map(([key, val]) => (
+                <div key={key} className="a4-link-item">
+                    <span className="a4-link-label">{labels[key] || key}</span>
+                    <a className="a4-link-url" href={linkHref(val)} target="_blank" rel="noreferrer">
+                        {val}
                     </a>
                 </div>
             ))}
@@ -70,24 +70,24 @@ function LinksList({ links }) {
 }
 
 function ExpList({ experience }) {
-    const list = (experience || []).filter(hasExp)
+    const list = (experience || []).filter(hasValidExp)
     if (!list.length) return null
     return (
         <>
-            {list.map((e, i) => {
-                const period = [e.startDate, e.current ? 'тепер' : e.endDate].filter(Boolean).join(' — ')
-                const bullets = (e.description || '').split('\n').filter(l => l.trim()).slice(0, 5)
+            {list.map((exp, index) => {
+                const period = [exp.startDate, exp.current ? 'тепер' : exp.endDate].filter(Boolean).join(' — ')
+                const bullets = (exp.description || '').split('\n').filter((line) => line.trim()).slice(0, 5)
                 return (
-                    <div key={i} className="a4-exp">
+                    <div key={index} className="a4-exp">
                         <div className="a4-exp-head">
-                            <span className="a4-exp-title">{esc(e.position)}</span>
+                            <span className="a4-exp-title">{escapeText(exp.position)}</span>
                             {period && <span className="a4-exp-period">{period}</span>}
                         </div>
-                        {e.company && <div className="a4-exp-company">{esc(e.company)}</div>}
+                        {exp.company && <div className="a4-exp-company">{escapeText(exp.company)}</div>}
                         {bullets.length > 0 && (
                             <ul className="a4-exp-list">
-                                {bullets.map((b, bi) => (
-                                    <li key={bi}>{esc(b.replace(/^[•\-–▸]\s*/, ''))}</li>
+                                {bullets.map((bullet, bulletIndex) => (
+                                    <li key={bulletIndex}>{escapeText(bullet.replace(/^[•\-–▸]\s*/, ''))}</li>
                                 ))}
                             </ul>
                         )}
@@ -99,19 +99,19 @@ function ExpList({ experience }) {
 }
 
 function EduList({ education }) {
-    const list = (education || []).filter(hasEdu)
+    const list = (education || []).filter(hasValidEdu)
     if (!list.length) return null
     return (
         <>
-            {list.map((e, i) => {
-                const period = [e.startYear, e.endYear].filter(Boolean).join(' – ')
+            {list.map((edu, index) => {
+                const period = [edu.startYear, edu.endYear].filter(Boolean).join(' – ')
                 return (
-                    <div key={i} className="a4-edu">
+                    <div key={index} className="a4-edu">
                         <div className="a4-edu-head">
                             <div className="a4-edu-main">
-                                {e.degree && <div className="a4-edu-deg">{esc(e.degree)}</div>}
-                                {e.institution && <div className="a4-edu-school">{esc(e.institution)}</div>}
-                                {e.field && <div className="a4-edu-field">{esc(e.field)}</div>}
+                                {edu.degree && <div className="a4-edu-deg">{escapeText(edu.degree)}</div>}
+                                {edu.institution && <div className="a4-edu-school">{escapeText(edu.institution)}</div>}
+                                {edu.field && <div className="a4-edu-field">{escapeText(edu.field)}</div>}
                             </div>
                             {period && <span className="a4-exp-period">{period}</span>}
                         </div>
@@ -123,24 +123,23 @@ function EduList({ education }) {
 }
 
 function ProjectsList({ projects }) {
-    const list = (projects || []).filter(hasProj)
+    const list = (projects || []).filter(hasValidProj)
     if (!list.length) return null
     return (
         <>
-            {list.map((pr, i) => {
-                const url = cleanUrl(pr.url)
-
+            {list.map((proj, index) => {
+                const url = cleanUrl(proj.url)
                 return (
-                    <div key={i} className="a4-proj">
+                    <div key={index} className="a4-proj">
                         <div className="a4-proj-head">
-                            <span className="a4-proj-name">{esc(pr.name)}</span>
+                            <span className="a4-proj-name">{escapeText(proj.name)}</span>
                             {url && (
                                 <a className="a4-proj-url" href={linkHref(url)} target="_blank" rel="noreferrer">
                                     {url}
                                 </a>
                             )}
                         </div>
-                        {pr.description && <div className="a4-proj-desc">{esc(pr.description)}</div>}
+                        {proj.description && <div className="a4-proj-desc">{escapeText(proj.description)}</div>}
                     </div>
                 )
             })}
@@ -150,24 +149,24 @@ function ProjectsList({ projects }) {
 
 const A4Preview = forwardRef(function A4Preview(_, ref) {
     const { data, photo, template } = useResumeStore()
-    const p = data.personal
+    const personal = data.personal
 
-    const experience = (data.experience || []).filter(hasExp)
-    const education = (data.education || []).filter(hasEdu)
-    const projects = (data.projects || []).filter(hasProj)
-    const skills = (data.skills || []).filter(s => s?.trim())
-    const languages = (data.languages || []).filter(hasLang)
+    const experience = (data.experience || []).filter(hasValidExp)
+    const education = (data.education || []).filter(hasValidEdu)
+    const projects = (data.projects || []).filter(hasValidProj)
+    const skills = (data.skills || []).filter((skill) => skill?.trim())
+    const languages = (data.languages || []).filter(hasValidLang)
     const links = data.links || {}
-    const hasLinks = Object.values(links).some(v => v?.trim())
+    const hasLinks = Object.values(links).some((val) => val?.trim())
 
     const contactItems = [
-        p.email && { icon: '✉', val: p.email },
-        p.phone && { icon: '☎', val: p.phone },
-        p.city && { icon: '·', val: p.city },
-        p.linkedin && { icon: 'in', val: p.linkedin },
+        personal.email && { icon: '✉', val: personal.email },
+        personal.phone && { icon: '☎', val: personal.phone },
+        personal.city && { icon: '·', val: personal.city },
+        personal.linkedin && { icon: 'in', val: personal.linkedin },
     ].filter(Boolean)
 
-    const hasName = p.firstName || p.lastName
+    const hasName = personal.firstName || personal.lastName
     const showLeft = !!photo || skills.length > 0 || languages.length > 0 || hasLinks
 
     return (
@@ -178,16 +177,18 @@ const A4Preview = forwardRef(function A4Preview(_, ref) {
                 <div className="a4-head-info">
                     {hasName && (
                         <div className="a4-name">
-                            {esc(p.firstName)}{p.firstName && p.lastName ? ' ' : ''}{esc(p.lastName)}
+                            {escapeText(personal.firstName)}
+                            {personal.firstName && personal.lastName ? ' ' : ''}
+                            {escapeText(personal.lastName)}
                         </div>
                     )}
-                    {p.jobTitle && <div className="a4-title">{esc(p.jobTitle)}</div>}
+                    {personal.jobTitle && <div className="a4-title">{escapeText(personal.jobTitle)}</div>}
                     {contactItems.length > 0 && (
                         <div className="a4-contacts">
-                            {contactItems.map((c, i) => (
-                                <span key={i} className="a4-contact">
-                                    <span className="a4-contact-icon">{c.icon}</span>
-                                    {c.val}
+                            {contactItems.map((contact, index) => (
+                                <span key={index} className="a4-contact">
+                                    <span className="a4-contact-icon">{contact.icon}</span>
+                                    {contact.val}
                                 </span>
                             ))}
                         </div>
@@ -196,7 +197,6 @@ const A4Preview = forwardRef(function A4Preview(_, ref) {
             </div>
 
             <div className="a4-body">
-
                 {showLeft && (
                     <div className="a4-left">
                         {photo && (

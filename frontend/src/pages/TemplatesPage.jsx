@@ -39,19 +39,23 @@ export default function TemplatesPage() {
         if (!token) { openLogin(); return }
         setLoading(true)
         try {
+            const selectedTemplate = TEMPLATES.find((tmpl) => tmpl.id === selected)
             if (currentId) {
                 await updateResume(currentId, { template: selected })
                 setTemplate(selected)
                 navigate(`/editor/${currentId}`)
-                toast(`Шаблон «${TEMPLATES.find(t => t.id === selected)?.name}» застосовано`, 'ok')
+                toast(`Шаблон «${selectedTemplate?.name}» застосовано`, 'ok')
             } else {
-                const r = await createResume({ title: 'Нове резюме', template: selected, data: {} })
-                setResume(r)
-                navigate(`/editor/${r.id}`)
-                toast(`Шаблон «${TEMPLATES.find(t => t.id === selected)?.name}» застосовано!`, 'ok')
+                const newResume = await createResume({ title: 'Нове резюме', template: selected, data: {} })
+                setResume(newResume)
+                navigate(`/editor/${newResume.id}`)
+                toast(`Шаблон «${selectedTemplate?.name}» застосовано!`, 'ok')
             }
-        } catch (e) { toast(e.message, 'bad') }
-        finally { setLoading(false) }
+        } catch (error) {
+            toast(error.message, 'bad')
+        } finally {
+            setLoading(false)
+        }
     }
 
     return (
@@ -63,23 +67,23 @@ export default function TemplatesPage() {
                 </div>
 
                 <div className="tmpl-grid">
-                    {TEMPLATES.map(t => (
+                    {TEMPLATES.map((tmpl) => (
                         <div
-                            key={t.id}
-                            className={`tmpl-card ${selected === t.id ? 'selected' : ''}`}
-                            onClick={() => setSelected(t.id)}
+                            key={tmpl.id}
+                            className={`tmpl-card ${selected === tmpl.id ? 'selected' : ''}`}
+                            onClick={() => setSelected(tmpl.id)}
                             tabIndex={0}
                             role="button"
-                            aria-pressed={selected === t.id}
-                            onKeyDown={e => e.key === 'Enter' && setSelected(t.id)}
+                            aria-pressed={selected === tmpl.id}
+                            onKeyDown={(e) => e.key === 'Enter' && setSelected(tmpl.id)}
                         >
-                            <div className={`tmpl-thumb ct-${t.id}`}>
+                            <div className={`tmpl-thumb ct-${tmpl.id}`}>
                                 <div className="tmpl-badge">✓</div>
-                                <TemplateMini id={t.id} />
+                                <TemplateMini id={tmpl.id} />
                             </div>
                             <div className="tmpl-info">
-                                <div className="tmpl-name">{t.name}</div>
-                                <div className="tmpl-desc">{t.desc}</div>
+                                <div className="tmpl-name">{tmpl.name}</div>
+                                <div className="tmpl-desc">{tmpl.desc}</div>
                             </div>
                         </div>
                     ))}

@@ -2,37 +2,32 @@ import { useMemo } from 'react'
 import { useResumeStore } from '../store/resumeStore'
 
 export function useProgress() {
-    const { data, photo } = useResumeStore()
+    const data = useResumeStore((s) => s.data)
+    const photo = useResumeStore((s) => s.photo)
 
     return useMemo(() => {
-        const p = data
+        const personal = data.personal
 
-        const hasName = Boolean(p.personal.firstName?.trim() && p.personal.lastName?.trim())
-        const hasEmail = Boolean(p.personal.email?.trim())
-        const hasSummary = Boolean(p.summary?.trim())
-        const hasExperience = p.experience.some(e =>
-            e.position?.trim() || e.company?.trim() || e.description?.trim()
+        const hasName = Boolean(personal.firstName?.trim() && personal.lastName?.trim())
+        const hasEmail = Boolean(personal.email?.trim())
+        const hasSummary = Boolean(data.summary?.trim())
+        const hasExperience = data.experience.some(
+            (exp) => exp.position?.trim() || exp.company?.trim() || exp.description?.trim()
         )
-        const hasEducation = p.education.some(e =>
-            e.institution?.trim() || e.degree?.trim() || e.field?.trim()
+        const hasEducation = data.education.some(
+            (edu) => edu.institution?.trim() || edu.degree?.trim() || edu.field?.trim()
         )
-        const hasSkills = p.skills.some(skill => String(skill).trim())
-        const hasLanguages = p.languages.some(lang =>
-            lang.language?.trim?.() || String(lang).trim?.()
+        const hasSkills = data.skills.some((skill) => String(skill).trim())
+        const hasLanguages = data.languages.some(
+            (lang) => lang.language?.trim?.() || String(lang).trim?.()
         )
         const hasPhoto = Boolean(photo)
 
-        const checks = [
-            hasName,
-            hasEmail,
-            hasSummary,
-            hasExperience,
-            hasEducation,
-            hasSkills,
-            hasLanguages,
-            hasPhoto,
+        const completionChecks = [
+            hasName, hasEmail, hasSummary, hasExperience,
+            hasEducation, hasSkills, hasLanguages, hasPhoto,
         ]
-        const pct = Math.round(checks.filter(Boolean).length / checks.length * 100)
+        const pct = Math.round(completionChecks.filter(Boolean).length / completionChecks.length * 100)
 
         const hints = []
         if (!hasName) hints.push("ім'я")
@@ -51,8 +46,8 @@ export function useProgress() {
             education: hasEducation,
             skills: hasSkills,
             languages: hasLanguages,
-            projects: p.projects.some(pr => pr.name?.trim() || pr.description?.trim()),
-            links: Object.values(p.links).some(v => String(v).trim()),
+            projects: data.projects.some((proj) => proj.name?.trim() || proj.description?.trim()),
+            links: Object.values(data.links).some((val) => String(val).trim()),
         }
 
         return { pct, hints, sections }

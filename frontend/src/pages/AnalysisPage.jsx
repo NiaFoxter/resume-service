@@ -28,21 +28,21 @@ function ScoreRing({ score }) {
     )
 }
 
-function Results({ r }) {
-    const found = r.found || []
-    const missing = r.missing || []
-    const recs = r.recommendations || []
+function Results({ analysisResult }) {
+    const found = analysisResult.found || []
+    const missing = analysisResult.missing || []
+    const recs = analysisResult.recommendations || []
     const levelColor = { red: '#C94040', yellow: '#D97706', green: '#2A7A5E' }
 
     return (
         <div className="analysis-results-wrap">
             <div className="score-hero">
-                <div className="score-visual"><ScoreRing score={r.score || 0} /></div>
+                <div className="score-visual"><ScoreRing score={analysisResult.score || 0} /></div>
                 <div className="score-info">
-                    <div className="score-verdict">{r.verdict || 'Аналіз завершено'}</div>
+                    <div className="score-verdict">{analysisResult.verdict || 'Аналіз завершено'}</div>
                     <div className="score-meta">
                         <span className="meta-badge">
-                            {r.method?.startsWith('gemini') ? '🤖 Gemini AI' : '📊 Статистичний'}
+                            {analysisResult.method?.startsWith('gemini') ? '🤖 Gemini AI' : '📊 Статистичний'}
                         </span>
                     </div>
                 </div>
@@ -53,7 +53,7 @@ function Results({ r }) {
                     <h3>✅ У резюме</h3>
                     <div className="skills-cloud">
                         {found.length > 0
-                            ? found.map((f, i) => <span key={i} className="skill-tag found">{f.word}</span>)
+                            ? found.map((item, index) => <span key={index} className="skill-tag found">{item.word}</span>)
                             : <span style={{ color: 'var(--ink-3)', fontSize: 13 }}>Ключових слів не знайдено</span>
                         }
                     </div>
@@ -62,7 +62,7 @@ function Results({ r }) {
                     <h3>❌ Відсутні</h3>
                     <div className="skills-cloud">
                         {missing.length > 0
-                            ? missing.map((m, i) => <span key={i} className="skill-tag missing">{m.word}</span>)
+                            ? missing.map((item, index) => <span key={index} className="skill-tag missing">{item.word}</span>)
                             : <span style={{ color: 'var(--ink-3)', fontSize: 13 }}>Усі ключові слова знайдено 🎉</span>
                         }
                     </div>
@@ -73,9 +73,9 @@ function Results({ r }) {
                 <div className="advice-section">
                     <h3>💡 Як покращити резюме</h3>
                     <div className="advice-list">
-                        {recs.map((rec, i) => (
+                        {recs.map((rec, index) => (
                             <div
-                                key={i}
+                                key={index}
                                 className={`advice-item advice-${rec.level}`}
                                 style={{ borderLeftColor: levelColor[rec.level] }}
                             >
@@ -117,18 +117,18 @@ export default function AnalysisPage() {
 
         setLoading(true); setResult(null); setError('')
         try {
-            const r = await analyzeGemini(selectedId, jobText)
-            setResult(r)
-            toast(`Аналіз завершено (${r.score}%)`, 'ok')
+            const analysisResult = await analyzeGemini(selectedId, jobText)
+            setResult(analysisResult)
+            toast(`Аналіз завершено (${analysisResult.score}%)`, 'ok')
         } catch {
             toast('Gemini недоступний — використовуємо локальний аналіз', 'warn')
             try {
-                const r = await analyzeLocal(selectedId, jobText)
-                setResult(r)
+                const analysisResult = await analyzeLocal(selectedId, jobText)
+                setResult(analysisResult)
                 toast('Локальний аналіз завершено', 'ok')
-            } catch (e2) {
-                setError(e2.message)
-                toast(e2.message, 'bad')
+            } catch (fallbackError) {
+                setError(fallbackError.message)
+                toast(fallbackError.message, 'bad')
             }
         } finally {
             setLoading(false)
@@ -153,13 +153,10 @@ export default function AnalysisPage() {
                     <>
                         <div className="fg">
                             <label>Оберіть резюме</label>
-                            <select
-                                value={selectedId}
-                                onChange={(e) => setSelectedId(e.target.value)}
-                            >
+                            <select value={selectedId} onChange={(e) => setSelectedId(e.target.value)}>
                                 <option value="">— оберіть резюме —</option>
-                                {resumes.map((r) => (
-                                    <option key={r.id} value={r.id}>{r.title}</option>
+                                {resumes.map((resume) => (
+                                    <option key={resume.id} value={resume.id}>{resume.title}</option>
                                 ))}
                             </select>
                         </div>
@@ -201,7 +198,7 @@ export default function AnalysisPage() {
                         <button onClick={runAnalysis} className="btn btn-sm">🔄 Спробувати ще</button>
                     </div>
                 )}
-                {result && <Results r={result} />}
+                {result && <Results analysisResult={result} />}
             </div>
         </main>
     )
