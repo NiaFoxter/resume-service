@@ -44,15 +44,19 @@ const FORM_MAP = {
 export default function EditorPage() {
     const { id } = useParams()
     const navigate = useNavigate()
-    const currentId = useResumeStore((s) => s.currentId)
+
     const title = useResumeStore((s) => s.title)
     const template = useResumeStore((s) => s.template)
     const setResume = useResumeStore((s) => s.setResume)
     const setTitle = useResumeStore((s) => s.setTitle)
 
+    const numericId = Number(id)
+
     const [activeSection, setActiveSection] = useState('personal')
     const [saveStatus, setSaveStatus] = useState('')
     const [pdfLoading, setPdfLoading] = useState(false)
+    const [loadingResume, setLoadingResume] = useState(true)
+    const [loadedResumeId, setLoadedResumeId] = useState(null)
 
     const previewRef = useRef(null)
     const shellRef = useRef(null)
@@ -63,13 +67,33 @@ export default function EditorPage() {
     const { downloadPDF } = usePDF(previewRef)
 
     useEffect(() => {
-        if (!id) return
-        const numericId = Number(id)
-        if (currentId === numericId) return
+        if (!id || Number.isNaN(numericId)) {
+            navigate('/dashboard')
+            return
+        }
+
+        let cancelled = false
+        setLoadingResume(true)
+        setLoadedResumeId(null)
+        setSaveStatus('')
+
         getResume(id)
-            .then(setResume)
-            .catch((error) => { toast(error.message, 'bad'); navigate('/dashboard') })
-    }, [id])
+            .then((resume) => {
+                if (cancelled) return
+                setResume(resume)
+                setLoadedResumeId(Number(resume.id))
+                setLoadingResume(false)
+            })
+            .catch((error) => {
+                if (cancelled) return
+                toast(error.message, 'bad')
+                navigate('/dashboard')
+            })
+
+        return () => {
+            cancelled = true
+        }
+    }, [id, numericId, setResume, navigate])
 
     async function handlePDF() {
         setPdfLoading(true)
@@ -125,6 +149,17 @@ export default function EditorPage() {
     }, [])
 
     const ActiveForm = FORM_MAP[activeSection]
+    const resumeReady = !loadingResume && loadedResumeId === numericId
+
+    if (!resumeReady) {
+        return (
+            <main className="page active editor-page" id="page-editor">
+                <div className="dash-loading">
+                    <div className="spinner-large" />
+                </div>
+            </main>
+        )
+    }
 
     return (
         <main className="page active editor-page" id="page-editor">
