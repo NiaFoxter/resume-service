@@ -37,8 +37,7 @@ export default function DashboardPage() {
 
     useEffect(() => { load() }, [])
 
-    async function openResume(resume) {
-        setResume(resume)
+    function openResume(resume) {
         navigate(`/editor/${resume.id}`)
     }
 
@@ -75,54 +74,54 @@ export default function DashboardPage() {
             </div>
 
             {loading ? (<div className="dash-loading"><div className="spinner-large" /></div>)
-            : resumes.length === 0 ? (
-                <div className="empty-state">
-                    <div className="empty-state-icon">📄</div>
-                    <h3>Ще немає резюме</h3>
-                    <p>Створіть перше резюме, щоб почати</p>
-                    <button className="btn btn-copper" onClick={() => navigate('/templates')}>Створити резюме</button>
-                </div>
-            ) : (
-                <div className="resume-grid" id="resumeGrid">
-                    {resumes.map((resume, index) => {
-                        const thumbClass = THUMB_CLASSES[index % THUMB_CLASSES.length]
-                        const updatedAt = new Date(resume.updated_at).toLocaleDateString('uk-UA', {
-                            day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
-                        })
-                        const templateName = TEMPLATE_NAMES[resume.template] || resume.template || 'Класичний'
-                        return (
-                            <div key={resume.id} className="resume-card" onClick={() => openResume(resume)}>
-                                <div className={`card-thumb ${thumbClass}`}>
-                                    <div className="card-thumb-pattern" />
-                                    <div className="card-thumb-doc">
-                                        <div className="doc-bar" /><div className="doc-bar sm" />
-                                        <div className="doc-sep" />
-                                        <div className="doc-line" /><div className="doc-line sm" /><div className="doc-line" />
+                : resumes.length === 0 ? (
+                    <div className="empty-state">
+                        <div className="empty-state-icon">📄</div>
+                        <h3>Ще немає резюме</h3>
+                        <p>Створіть перше резюме, щоб почати</p>
+                        <button className="btn btn-copper" onClick={() => navigate('/templates')}>Створити резюме</button>
+                    </div>
+                ) : (
+                    <div className="resume-grid" id="resumeGrid">
+                        {resumes.map((resume, index) => {
+                            const thumbClass = THUMB_CLASSES[index % THUMB_CLASSES.length]
+                            const updatedAt = new Date(resume.updated_at).toLocaleDateString('uk-UA', {
+                                day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit',
+                            })
+                            const templateName = TEMPLATE_NAMES[resume.template] || resume.template || 'Класичний'
+                            return (
+                                <div key={resume.id} className="resume-card" onClick={() => openResume(resume)}>
+                                    <div className={`card-thumb ${thumbClass}`}>
+                                        <div className="card-thumb-pattern" />
+                                        <div className="card-thumb-doc">
+                                            <div className="doc-bar" /><div className="doc-bar sm" />
+                                            <div className="doc-sep" />
+                                            <div className="doc-line" /><div className="doc-line sm" /><div className="doc-line" />
+                                        </div>
+                                    </div>
+                                    <div className="card-body">
+                                        <div className="card-name">{resume.title}</div>
+                                        <div className="card-meta">{templateName} · {updatedAt}</div>
+                                    </div>
+                                    <div className="card-actions">
+                                        <button className="btn btn-ghost btn-sm" style={{ flex: 1 }}
+                                            onClick={(e) => { e.stopPropagation(); openResume(resume) }}>
+                                            Редагувати
+                                        </button>
+                                        <button className="btn btn-danger btn-sm btn-icon"
+                                            onClick={(e) => { e.stopPropagation(); handleDelete(resume.id, resume.title) }}>
+                                            ✕
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="card-body">
-                                    <div className="card-name">{resume.title}</div>
-                                    <div className="card-meta">{templateName} · {updatedAt}</div>
-                                </div>
-                                <div className="card-actions">
-                                    <button className="btn btn-ghost btn-sm" style={{ flex: 1 }}
-                                        onClick={(e) => { e.stopPropagation(); openResume(resume) }}>
-                                        Редагувати
-                                    </button>
-                                    <button className="btn btn-danger btn-sm btn-icon" 
-                                        onClick={(e) => { e.stopPropagation(); handleDelete(resume.id, resume.title) }}>
-                                        ✕
-                                    </button>
-                                </div>
-                            </div>
-                        )
-                    })}
-                    <div className="new-card" onClick={() => navigate('/templates')}>
-                        <div className="new-card-icon">＋</div>
-                        <div className="new-card-label">Нове резюме</div>
+                            )
+                        })}
+                        <div className="new-card" onClick={() => navigate('/templates')}>
+                            <div className="new-card-icon">＋</div>
+                            <div className="new-card-label">Нове резюме</div>
+                        </div>
                     </div>
-                </div>
-            )}
+                )}
         </main>
     )
 }
