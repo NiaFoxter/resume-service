@@ -199,11 +199,6 @@ const A4Preview = forwardRef(function A4Preview(_, ref) {
             <div className="a4-body">
                 {showLeft && (
                     <div className="a4-left">
-                        {photo && (
-                            <div className="a4-photo-wrap">
-                                <img className="a4-photo" src={photo} alt="Фото" />
-                            </div>
-                        )}
                         {skills.length > 0 && (
                             <div className="a4-sec a4-sec--left">
                                 <div className="a4-sec-title">Навички</div>
