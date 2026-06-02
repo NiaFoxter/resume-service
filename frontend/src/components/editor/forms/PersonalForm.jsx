@@ -31,7 +31,7 @@ export default function PersonalForm({ onChange }) {
                 <div className="fg"><label>Місто</label>
                     <input id="f-city" value={personal.city} onChange={(e) => set('city', e.target.value)} /></div>
                 <div className="fg"><label>LinkedIn</label>
-                    <input id="f-linkedin" value={personal.linkedin} onChange={(e) => set('linkedin', e.target.value)} /></div>
+                    <input id="f-linkedin" value={personal.linkedin} onChange={(e) => set('linkedin', e.target.value)} placeholder="linkedin.com/in/username або username" /></div>
             </div>
         </div>
     )

@@ -10,11 +10,82 @@ function cleanUrl(value) {
     return String(value || '').trim()
 }
 
-function linkHref(value) {
+function stripLeadingAt(value) {
+    return cleanUrl(value).replace(/^@+/, '')
+}
+
+function hasProtocol(value) {
+    return /^(https?:\/\/|mailto:|tel:)/i.test(value)
+}
+
+function normalizeWebUrl(value) {
     const url = cleanUrl(value)
     if (!url) return ''
-    if (/^(https?:\/\/|mailto:|tel:)/i.test(url)) return url
+    if (hasProtocol(url)) return url
     return `https://${url}`
+}
+
+function normalizeGitHubUrl(value) {
+    const url = stripLeadingAt(value)
+    if (!url) return ''
+    if (hasProtocol(url)) return url
+    if (/^(www\.)?github\.com\//i.test(url)) return `https://${url}`
+    if (/^[A-Za-z0-9-]+$/i.test(url)) return `https://github.com/${url}`
+    return normalizeWebUrl(url)
+}
+
+function normalizeTelegramUrl(value) {
+    const raw = cleanUrl(value)
+    if (!raw) return ''
+    if (hasProtocol(raw)) return raw
+    if (/^(www\.)?t\.me\//i.test(raw)) return `https://${raw}`
+
+    const username = stripLeadingAt(raw).replace(/^t\.me\//i, '')
+    if (/^[A-Za-z0-9_]{5,32}$/i.test(username)) return `https://t.me/${username}`
+    return normalizeWebUrl(raw)
+}
+
+function normalizeLinkedInUrl(value) {
+    const raw = cleanUrl(value)
+    if (!raw) return ''
+    if (hasProtocol(raw)) return raw
+    if (/^(www\.)?linkedin\.com\//i.test(raw)) return `https://${raw}`
+
+    const profile = stripLeadingAt(raw).replace(/^in\//i, '')
+    if (profile && !profile.includes('.') && !profile.includes('/')) {
+        return `https://www.linkedin.com/in/${profile}`
+    }
+
+    if (/^in\//i.test(raw)) return `https://www.linkedin.com/${raw}`
+    return normalizeWebUrl(raw)
+}
+
+function normalizeEmailHref(value) {
+    const email = cleanUrl(value)
+    if (!email) return ''
+    if (/^mailto:/i.test(email)) return email
+    return `mailto:${email}`
+}
+
+function normalizePhoneHref(value) {
+    const phone = cleanUrl(value)
+    if (!phone) return ''
+    if (/^tel:/i.test(phone)) return phone
+    const normalized = phone.replace(/[^+\d]/g, '')
+    return normalized ? `tel:${normalized}` : ''
+}
+
+function linkHref(value, type = 'website') {
+    if (type === 'email') return normalizeEmailHref(value)
+    if (type === 'phone') return normalizePhoneHref(value)
+    if (type === 'github') return normalizeGitHubUrl(value)
+    if (type === 'telegram') return normalizeTelegramUrl(value)
+    if (type === 'linkedin') return normalizeLinkedInUrl(value)
+    return normalizeWebUrl(value)
+}
+
+function anchorProps(href) {
+    return /^https?:\/\//i.test(href) ? { target: '_blank', rel: 'noreferrer' } : {}
 }
 
 const hasValidExp = (exp) => exp.position?.trim() || exp.company?.trim()
@@ -51,16 +122,16 @@ function LangList({ languages }) {
 
 function LinksList({ links }) {
     const items = Object.entries(links || {})
-        .map(([key, val]) => [key, cleanUrl(val)])
-        .filter(([, val]) => val)
+        .map(([key, val]) => [key, cleanUrl(val), linkHref(val, key)])
+        .filter(([, val, href]) => val && href)
     if (!items.length) return null
     const labels = { github: 'GitHub', website: 'Сайт', telegram: 'Telegram' }
     return (
         <>
-            {items.map(([key, val]) => (
+            {items.map(([key, val, href]) => (
                 <div key={key} className="a4-link-item">
                     <span className="a4-link-label">{labels[key] || key}</span>
-                    <a className="a4-link-url" href={linkHref(val)} target="_blank" rel="noreferrer">
+                    <a className="a4-link-url" href={href} {...anchorProps(href)}>
                         {val}
                     </a>
                 </div>
@@ -129,12 +200,13 @@ function ProjectsList({ projects }) {
         <>
             {list.map((proj, index) => {
                 const url = cleanUrl(proj.url)
+                const href = linkHref(url)
                 return (
                     <div key={index} className="a4-proj">
                         <div className="a4-proj-head">
                             <span className="a4-proj-name">{escapeText(proj.name)}</span>
-                            {url && (
-                                <a className="a4-proj-url" href={linkHref(url)} target="_blank" rel="noreferrer">
+                            {url && href && (
+                                <a className="a4-proj-url" href={href} {...anchorProps(href)}>
                                     {url}
                                 </a>
                             )}
@@ -160,10 +232,10 @@ const A4Preview = forwardRef(function A4Preview(_, ref) {
     const hasLinks = Object.values(links).some((val) => val?.trim())
 
     const contactItems = [
-        personal.email && { icon: '✉', val: personal.email },
-        personal.phone && { icon: '☎', val: personal.phone },
+        personal.email && { icon: '✉', val: personal.email, href: linkHref(personal.email, 'email') },
+        personal.phone && { icon: '☎', val: personal.phone, href: linkHref(personal.phone, 'phone') },
         personal.city && { icon: '·', val: personal.city },
-        personal.linkedin && { icon: 'in', val: personal.linkedin },
+        personal.linkedin && { icon: 'in', val: personal.linkedin, href: linkHref(personal.linkedin, 'linkedin') },
     ].filter(Boolean)
 
     const hasName = personal.firstName || personal.lastName
@@ -185,12 +257,24 @@ const A4Preview = forwardRef(function A4Preview(_, ref) {
                     {personal.jobTitle && <div className="a4-title">{escapeText(personal.jobTitle)}</div>}
                     {contactItems.length > 0 && (
                         <div className="a4-contacts">
-                            {contactItems.map((contact, index) => (
-                                <span key={index} className="a4-contact">
-                                    <span className="a4-contact-icon">{contact.icon}</span>
-                                    {contact.val}
-                                </span>
-                            ))}
+                            {contactItems.map((contact, index) => {
+                                const content = (
+                                    <>
+                                        <span className="a4-contact-icon">{contact.icon}</span>
+                                        {escapeText(contact.val)}
+                                    </>
+                                )
+
+                                return contact.href ? (
+                                    <a key={index} className="a4-contact" href={contact.href} {...anchorProps(contact.href)}>
+                                        {content}
+                                    </a>
+                                ) : (
+                                    <span key={index} className="a4-contact">
+                                        {content}
+                                    </span>
+                                )
+                            })}
                         </div>
                     )}
                 </div>

@@ -88,6 +88,11 @@
     align-items: center;
     gap: 3px;
     white-space: nowrap;
+    text-decoration: none;
+
+    &[href]:hover {
+        text-decoration: underline;
+    }
 }
 
 .a4-contact-icon {
