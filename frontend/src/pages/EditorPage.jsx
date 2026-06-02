@@ -59,8 +59,16 @@ export default function EditorPage() {
     const [loadedResumeId, setLoadedResumeId] = useState(null)
 
     const previewRef = useRef(null)
-    const shellRef = useRef(null)
-    const sidebarRef = useRef(null)
+    const dragStateRef = useRef(null)
+
+    const [sidebarWidth, setSidebarWidth] = useState(() => {
+        const savedWidth = typeof window !== 'undefined'
+            ? Number(window.localStorage.getItem('editor-sidebar-width'))
+            : NaN
+        return Number.isFinite(savedWidth) && savedWidth >= 240 && savedWidth <= 540 ? savedWidth : 340
+    })
+    const [isSidebarDragging, setIsSidebarDragging] = useState(false)
+    const sidebarWidthRef = useRef(sidebarWidth)
 
     const onStatus = useCallback((text, isSaved) => setSaveStatus(isSaved ? '✓ ' + text : text), [])
     const { schedule, autosave } = useAutosave(onStatus)
@@ -106,52 +114,65 @@ export default function EditorPage() {
         finally { setPdfLoading(false) }
     }
 
-    useEffect(() => {
-        const sidebar = sidebarRef.current
-        const shell = shellRef.current
-        if (!sidebar || !shell) return
+    const stopSidebarDrag = useCallback(() => {
+        if (!dragStateRef.current) return
 
-        const handle = document.createElement('div')
-        handle.className = 'sidebar-resizer'
-        sidebar.appendChild(handle)
-
-        const MIN_WIDTH = 240, MAX_WIDTH = 540
-        let isDragging = false, startX = 0, startWidth = 0
-
-        const onMouseDown = (mouseEvent) => {
-            mouseEvent.preventDefault()
-            isDragging = true
-            startX = mouseEvent.clientX
-            startWidth = sidebar.getBoundingClientRect().width
-            handle.classList.add('active')
-            document.documentElement.style.cursor = 'col-resize'
-            document.documentElement.style.userSelect = 'none'
-        }
-        const onMouseMove = (mouseEvent) => {
-            if (!isDragging) return
-            const newWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startWidth + (mouseEvent.clientX - startX)))
-            shell.style.gridTemplateColumns = `${newWidth}px 1fr`
-        }
-        const onMouseUp = () => {
-            if (!isDragging) return
-            isDragging = false
-            handle.classList.remove('active')
-            document.documentElement.style.cursor = ''
-            document.documentElement.style.userSelect = ''
-        }
-
-        handle.addEventListener('mousedown', onMouseDown)
-        document.addEventListener('mousemove', onMouseMove)
-        document.addEventListener('mouseup', onMouseUp)
-        return () => {
-            handle.removeEventListener('mousedown', onMouseDown)
-            document.removeEventListener('mousemove', onMouseMove)
-            document.removeEventListener('mouseup', onMouseUp)
-            document.documentElement.style.cursor = ''
-            document.documentElement.style.userSelect = ''
-            sidebar.contains(handle) && sidebar.removeChild(handle)
-        }
+        dragStateRef.current = null
+        setIsSidebarDragging(false)
+        document.documentElement.classList.remove('sidebar-dragging')
     }, [])
+
+    const handleSidebarPointerDown = useCallback((event) => {
+        if (window.matchMedia('(max-width: 768px)').matches) return
+
+        event.preventDefault()
+        dragStateRef.current = {
+            pointerId: event.pointerId,
+            startX: event.clientX,
+            startWidth: sidebarWidthRef.current,
+        }
+        setIsSidebarDragging(true)
+        document.documentElement.classList.add('sidebar-dragging')
+    }, [])
+
+    useEffect(() => {
+        if (!isSidebarDragging) return undefined
+
+        const MIN_WIDTH = 240
+        const MAX_WIDTH = 540
+
+        const handlePointerMove = (event) => {
+            const dragState = dragStateRef.current
+            if (!dragState) return
+
+            const nextWidth = Math.min(
+                MAX_WIDTH,
+                Math.max(MIN_WIDTH, dragState.startWidth + event.clientX - dragState.startX)
+            )
+
+            setSidebarWidth(nextWidth)
+        }
+
+        const handlePointerUp = () => stopSidebarDrag()
+
+        const handlePointerCancel = () => stopSidebarDrag()
+
+        document.addEventListener('pointermove', handlePointerMove)
+        document.addEventListener('pointerup', handlePointerUp)
+        document.addEventListener('pointercancel', handlePointerCancel)
+
+        return () => {
+            document.removeEventListener('pointermove', handlePointerMove)
+            document.removeEventListener('pointerup', handlePointerUp)
+            document.removeEventListener('pointercancel', handlePointerCancel)
+            stopSidebarDrag()
+        }
+    }, [isSidebarDragging, stopSidebarDrag])
+
+    useEffect(() => {
+        sidebarWidthRef.current = sidebarWidth
+        window.localStorage.setItem('editor-sidebar-width', String(Math.round(sidebarWidth)))
+    }, [sidebarWidth])
 
     const ActiveForm = FORM_MAP[activeSection]
     const resumeReady = !loadingResume && loadedResumeId === numericId
@@ -183,13 +204,23 @@ export default function EditorPage() {
                 </div>
             </div>
 
-            <div className="editor-shell" ref={shellRef}>
-                <div className="editor-sidebar" ref={sidebarRef}>
+            <div
+                className={`editor-shell ${isSidebarDragging ? 'is-resizing' : ''}`}
+                style={{ gridTemplateColumns: `${sidebarWidth}px 1fr` }}
+            >
+                <div className="editor-sidebar">
                     <ProgressRing />
                     <SectionNav active={activeSection} onChange={setActiveSection} />
                     <div className="editor-forms">
                         {ActiveForm && <ActiveForm onChange={handleFormChange} />}
                     </div>
+                    <button
+                        type="button"
+                        className={`sidebar-resizer ${isSidebarDragging ? 'active' : ''}`}
+                        aria-label="Змінити ширину бокової панелі"
+                        title="Потягніть, щоб змінити ширину панелі"
+                        onPointerDown={handleSidebarPointerDown}
+                    />
                 </div>
                 <div className="editor-preview">
                     <A4Preview ref={previewRef} />

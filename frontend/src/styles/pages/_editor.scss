@@ -3,11 +3,20 @@
   &-shell {
     display: grid;
     grid-template-columns: $sidebar-w 1fr;
-    height: calc(100vh - $navbar-h - 46px); // 46px = toolbar height
+    height: calc(100vh - $navbar-h - 46px);
     overflow: hidden;
 
+    &.is-resizing {
+      cursor: col-resize;
+
+      .editor-preview {
+        pointer-events: none;
+        user-select: none;
+      }
+    }
+
     @media (max-width: 768px) {
-      grid-template-columns: 1fr;
+      grid-template-columns: 1fr !important;
       height: auto;
     }
   }
@@ -34,20 +43,44 @@
 .sidebar-resizer {
   position: absolute;
   top: 0;
-  right: -3px;
-  width: 6px;
+  right: 0;
+  width: 12px;
   height: 100%;
+  padding: 0;
+  border: 0;
+  appearance: none;
   cursor: col-resize;
-  z-index: 10;
+  z-index: 30;
   background: transparent;
+  touch-action: none;
 
-  &:hover,
-  &.active {
-    background: rgba($copper, .3);
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 2px;
+    height: 100%;
+    background: transparent;
+    transition: background $transition;
+  }
+
+  &:hover::after,
+  &.active::after {
+    background: rgba($copper, .75);
   }
 
   @media (max-width: 768px) {
     display: none;
+  }
+}
+
+.sidebar-dragging {
+  cursor: col-resize;
+  user-select: none;
+
+  * {
+    cursor: col-resize !important;
   }
 }
 
@@ -118,7 +151,7 @@
 // Форми
 .form {
   &-sec {
-    display: block; // In React we conditionally render instead of show/hide
+    display: block;
   }
 
   &-row {
@@ -289,7 +322,7 @@
   }
 }
 
-// Редактор на телефоні: без обрізання контенту і з горизонтальною навігацією секцій
+// Редактор на телефоні
 @media (max-width: 768px) {
   .editor-shell {
     display: block;
@@ -341,7 +374,7 @@
   .fg input,
   .fg textarea,
   .fg select {
-    font-size: 16px; // прибирає автозум iOS під час фокуса
+    font-size: 16px;
   }
 
   #photoField>div {
