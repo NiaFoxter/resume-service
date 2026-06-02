@@ -60,7 +60,7 @@ export function usePDF(previewRef) {
                 .from(pdfTarget)
                 .save()
 
-            toast('PDF завантажено ✓', 'ok')
+            toast('PDF завантажено', 'ok')
             return true
         } catch (error) {
             toast('Помилка PDF: ' + error.message, 'bad')
