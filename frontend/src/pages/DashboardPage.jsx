@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getResumes, deleteResume as apiDelete, createResume } from '../api/resumes'
+import { getResumes, deleteResume as apiDelete } from '../api/resumes'
 import { useResumeStore } from '../store/resumeStore'
 import { useAuthStore } from '../store/authStore'
 import { toast } from '../store/toastStore'
@@ -25,7 +25,7 @@ const THUMB_CLASSES = [
 export default function DashboardPage() {
     const [resumes, setResumes] = useState([])
     const [loading, setLoading] = useState(true)
-    const { setResume } = useResumeStore()
+    const { reset } = useResumeStore()
     const { user } = useAuthStore()
     const navigate = useNavigate()
 
@@ -53,14 +53,9 @@ export default function DashboardPage() {
         })
     }
 
-    async function handleCreate() {
-        try {
-            const newResume = await createResume({ title: 'Нове резюме', template: 'classic', data: {} })
-            setResume(newResume)
-            navigate(`/editor/${newResume.id}`)
-        } catch (error) {
-            toast(error.message, 'bad')
-        }
+    function startNewResume() {
+        reset()
+        navigate('/templates', { state: { mode: 'new' } })
     }
 
     return (
@@ -70,7 +65,7 @@ export default function DashboardPage() {
                     <h1 className="dash-title">Мої резюме</h1>
                     {user && <p className="dash-sub">Вітаємо, <span id="greetName">{user.firstName}</span>!</p>}
                 </div>
-                <button className="btn btn-copper" onClick={() => navigate('/templates')}>+ Нове резюме</button>
+                <button className="btn btn-copper" onClick={startNewResume}>+ Нове резюме</button>
             </div>
 
             {loading ? (<div className="dash-loading"><div className="spinner-large" /></div>)
@@ -79,7 +74,7 @@ export default function DashboardPage() {
                         <div className="empty-state-icon">📄</div>
                         <h3>Ще немає резюме</h3>
                         <p>Створіть перше резюме, щоб почати</p>
-                        <button className="btn btn-copper" onClick={() => navigate('/templates')}>Створити резюме</button>
+                        <button className="btn btn-copper" onClick={startNewResume}>Створити резюме</button>
                     </div>
                 ) : (
                     <div className="resume-grid" id="resumeGrid">
@@ -116,7 +111,7 @@ export default function DashboardPage() {
                                 </div>
                             )
                         })}
-                        <div className="new-card" onClick={() => navigate('/templates')}>
+                        <div className="new-card" onClick={startNewResume}>
                             <div className="new-card-icon">＋</div>
                             <div className="new-card-label">Нове резюме</div>
                         </div>

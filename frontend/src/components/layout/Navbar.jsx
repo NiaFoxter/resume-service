@@ -2,10 +2,12 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { useAuth } from '../../hooks/useAuth'
+import { useResumeStore } from '../../store/resumeStore'
 
 export default function Navbar() {
     const { user, token, openLogin, openRegister } = useAuthStore()
     const { logout } = useAuth()
+    const resetResume = useResumeStore((s) => s.reset)
     const [menuOpen, setMenuOpen] = useState(false)
     const navigate = useNavigate()
 
@@ -19,7 +21,12 @@ export default function Navbar() {
 
     function handleNav(navLink) {
         if (navLink.auth && !token) { openLogin(); close(); return }
-        navigate(navLink.to)
+        if (navLink.to === '/templates') {
+            resetResume()
+            navigate('/templates', { state: { mode: 'new' } })
+        } else {
+            navigate(navLink.to)
+        }
         close()
     }
 

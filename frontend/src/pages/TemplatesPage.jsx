@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useResumeStore } from '../store/resumeStore'
 import { useAuthStore } from '../store/authStore'
 import { createResume, updateResume } from '../api/resumes'
@@ -34,13 +34,15 @@ export default function TemplatesPage() {
     const [selected, setSelected] = useState(currentTemplate || 'classic')
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
+    const location = useLocation()
+    const isEditMode = location.state?.mode === 'edit' && currentId
 
     async function applyTemplate() {
         if (!token) { openLogin(); return }
         setLoading(true)
         try {
             const selectedTemplate = TEMPLATES.find((tmpl) => tmpl.id === selected)
-            if (currentId) {
+            if (isEditMode) {
                 await updateResume(currentId, { template: selected })
                 setTemplate(selected)
                 navigate(`/editor/${currentId}`)
@@ -49,7 +51,7 @@ export default function TemplatesPage() {
                 const newResume = await createResume({ title: 'Нове резюме', template: selected, data: {} })
                 setResume(newResume)
                 navigate(`/editor/${newResume.id}`)
-                toast(`Шаблон «${selectedTemplate?.name}» застосовано!`, 'ok')
+                toast(`Резюме з шаблоном «${selectedTemplate?.name}» створено`, 'ok')
             }
         } catch (error) {
             toast(error.message, 'bad')
@@ -91,7 +93,7 @@ export default function TemplatesPage() {
 
                 <div className="templates-action">
                     <button className="btn btn-copper btn-lg" onClick={applyTemplate} disabled={loading}>
-                        {loading ? <span className="spinner" /> : 'Застосувати шаблон →'}
+                        {loading ? <span className="spinner" /> : (isEditMode ? 'Застосувати шаблон →' : 'Створити резюме →')}
                     </button>
                 </div>
             </div>

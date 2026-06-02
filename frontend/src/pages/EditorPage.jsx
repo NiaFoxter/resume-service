@@ -63,7 +63,7 @@ export default function EditorPage() {
     const sidebarRef = useRef(null)
 
     const onStatus = useCallback((text, isSaved) => setSaveStatus(isSaved ? '✓ ' + text : text), [])
-    const { schedule } = useAutosave(onStatus)
+    const { schedule, autosave } = useAutosave(onStatus)
     const { downloadPDF } = usePDF(previewRef)
 
     useEffect(() => {
@@ -94,6 +94,11 @@ export default function EditorPage() {
             cancelled = true
         }
     }, [id, numericId, setResume, navigate])
+
+    const handleFormChange = useCallback((immediate = false) => {
+        if (immediate) autosave()
+        else schedule()
+    }, [autosave, schedule])
 
     async function handlePDF() {
         setPdfLoading(true)
@@ -169,7 +174,7 @@ export default function EditorPage() {
                     <span className={`save-status ${saveStatus.startsWith('✓') ? 'saved' : ''}`}>
                         {saveStatus}
                     </span>
-                    <button className="btn btn-ghost btn-sm" onClick={() => navigate('/templates')}>
+                    <button className="btn btn-ghost btn-sm" onClick={() => navigate('/templates', { state: { mode: 'edit' } })}>
                         {TEMPLATE_NAMES[template] || template} ▾
                     </button>
                     <button id="pdfBtn" className="btn btn-copper btn-sm" onClick={handlePDF} disabled={pdfLoading}>
@@ -183,7 +188,7 @@ export default function EditorPage() {
                     <ProgressRing />
                     <SectionNav active={activeSection} onChange={setActiveSection} />
                     <div className="editor-forms">
-                        {ActiveForm && <ActiveForm onChange={schedule} />}
+                        {ActiveForm && <ActiveForm onChange={handleFormChange} />}
                     </div>
                 </div>
                 <div className="editor-preview">

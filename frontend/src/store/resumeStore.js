@@ -24,11 +24,13 @@ export const useResumeStore = create((set, get) => ({
 
     setResume: (r) => {
         const rdata = r.data || {}
+        const photo = Object.prototype.hasOwnProperty.call(rdata, 'photo') ? rdata.photo : r.photo
+
         set({
             currentId: r.id,
             template: r.template || 'classic',
             title: r.title || 'Нове резюме',
-            photo: rdata.photo || r.photo || null,
+            photo: photo || null,
             data: {
                 personal: { ...EMPTY_DATA().personal, ...(rdata.personal || {}) },
                 summary: rdata.summary || '',
@@ -59,9 +61,7 @@ export const useResumeStore = create((set, get) => ({
 
     getPayload: () => {
         const { title, template, data, photo } = get()
-        const payload = { ...data }
-        if (photo) payload.photo = photo
-        else delete payload.photo
+        const payload = { ...data, photo: photo || null }
         return { title, template, data: payload }
     },
 }))

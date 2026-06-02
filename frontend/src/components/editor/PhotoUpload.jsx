@@ -12,14 +12,14 @@ export default function PhotoUpload({ onChange }) {
         if (file.size > 2 * 1024 * 1024) { toast('Фото завелике. Максимум 2MB', 'warn'); e.target.value = ''; return }
         if (!file.type.startsWith('image/')) { toast('Тільки зображення', 'warn'); e.target.value = ''; return }
         const reader = new FileReader()
-        reader.onload = ev => { setPhoto(ev.target.result); onChange?.() }
+        reader.onload = ev => { setPhoto(ev.target.result); onChange?.(true) }
         reader.readAsDataURL(file)
     }
 
     function removePhoto() {
         setPhoto(null)
         if (inputRef.current) inputRef.current.value = ''
-        onChange?.()
+        onChange?.(true)
     }
 
     return (
@@ -31,7 +31,7 @@ export default function PhotoUpload({ onChange }) {
                 )}
                 <input ref={inputRef} type="file" accept="image/*" id="f-photo" onChange={handleFile} />
                 {photo && (
-                    <button className="btn btn-danger btn-sm" id="removePhotoBtn" onClick={removePhoto}>Видалити</button>
+                    <button type="button" className="btn btn-danger btn-sm" id="removePhotoBtn" onClick={removePhoto}>Видалити</button>
                 )}
             </div>
         </div>
