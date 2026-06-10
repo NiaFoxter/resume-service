@@ -46,7 +46,7 @@
   }
 }
 
-// Десктоп-посилання — в центрі
+// посилання
 .nav-links {
   display: flex;
   gap: 4px;
@@ -54,11 +54,10 @@
   justify-content: center;
 
   @media (max-width: 920px) {
-    display: none; // приховуємо на мобільному, є в nav-menu
+    display: none;
   }
 }
 
-// Права частина — auth + бургер
 .nav-auth {
   display: flex;
   align-items: center;
@@ -67,8 +66,6 @@
   flex-shrink: 0;
 
   @media (max-width: 920px) {
-
-    // на мобільному показуємо тільки бургер, кнопки auth — в меню
     .btn:not(.nav-burger) {
       display: none;
     }
@@ -155,7 +152,7 @@
   }
 }
 
-// Мобільне меню (overlay + панель)
+// Мобільне меню
 .nav-overlay {
   display: none;
   position: fixed;
@@ -209,7 +206,7 @@
     gap: 6px;
 
     .btn {
-      display: flex !important; // показуємо кнопки auth у мобільному меню
+      display: flex !important;
       justify-content: center;
     }
   }
@@ -428,7 +425,7 @@
   }
 }
 
-// Адаптація спільних компонентів для телефону
+// Mobile
 @media (max-width: 600px) {
   .navbar {
     min-height: $navbar-h;
