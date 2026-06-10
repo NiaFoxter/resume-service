@@ -1,6 +1,7 @@
 import { useRef, useCallback, useEffect } from 'react'
 import { useResumeStore } from '../store/resumeStore'
 import { updateResume } from '../api/resumes'
+import { useAuthStore } from '../store/authStore'
 
 export function useAutosave(onStatus) {
     const timerRef = useRef(null)
@@ -46,11 +47,19 @@ export function useAutosave(onStatus) {
         const handleBeforeUnload = (e) => {
             if (!pendingRef.current) return
             if (currentId) {
-                const payload = JSON.stringify(getPayload())
-                navigator.sendBeacon?.(
-                    `/resumes/${currentId}`,
-                    new Blob([payload], { type: 'application/json' })
-                )
+                const token = useAuthStore.getState().token
+                const headers = { 'Content-Type': 'application/json' }
+
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`
+                }
+
+                fetch(`/resumes/${currentId}`, {
+                    method: 'PATCH',
+                    headers,
+                    body: JSON.stringify(getPayload()),
+                    keepalive: true,
+                }).catch(() => { })
             }
             e.preventDefault()
             e.returnValue = ''

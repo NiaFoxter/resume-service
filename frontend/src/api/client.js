@@ -22,7 +22,9 @@ client.interceptors.response.use(
         }
 
         const msg = err.response?.data?.error || err.message || 'Помилка сервера'
-        throw new Error(msg)
+        const error = new Error(msg)
+        error.status = err.response?.status
+        throw error
     }
 )
 
