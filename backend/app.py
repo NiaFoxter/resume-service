@@ -2,6 +2,7 @@ import json, os, re, sqlite3
 from datetime import datetime, timedelta, timezone
 from functools import wraps
 from collections import Counter
+from typing import NamedTuple
 
 from dotenv import load_dotenv
 load_dotenv()
