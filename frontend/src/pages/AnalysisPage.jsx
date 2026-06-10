@@ -4,18 +4,18 @@ import { useResumeStore } from '../store/resumeStore'
 import { toast } from '../store/toastStore'
 
 function ScoreRing({ score }) {
-    const R = 60
-    const circ = 2 * Math.PI * R
-    const offset = circ - (circ * score) / 100
+    const radius = 60
+    const circleLength = 2 * Math.PI * radius
+    const offset = circleLength - (circleLength * score) / 100
     const color = score >= 65 ? '#2A7A5E' : score >= 40 ? '#D97706' : '#C94040'
     return (
         <svg width="150" height="150" viewBox="0 0 150 150">
-            <circle cx="75" cy="75" r={R} fill="none" stroke="#F0F0EC" strokeWidth="10" />
+            <circle cx="75" cy="75" r={radius} fill="none" stroke="#F0F0EC" strokeWidth="10" />
             <circle
-                cx="75" cy="75" r={R} fill="none"
+                cx="75" cy="75" r={radius} fill="none"
                 stroke={color} strokeWidth="10"
                 strokeLinecap="round"
-                strokeDasharray={circ}
+                strokeDasharray={circleLength}
                 strokeDashoffset={offset}
                 transform="rotate(-90 75 75)"
                 style={{ transition: 'stroke-dashoffset .6s ease' }}
@@ -42,7 +42,7 @@ function Results({ analysisResult }) {
                     <div className="score-verdict">{analysisResult.verdict || 'Аналіз завершено'}</div>
                     <div className="score-meta">
                         <span className="meta-badge">
-                            {analysisResult.method?.startsWith('gemini') ? '🤖 Gemini AI' : '📊 Статистичний'}
+                            {analysisResult.method?.startsWith('gemini') ? '🤖 Gemini AI' : '📊 Локальний аналіз'}
                         </span>
                     </div>
                 </div>
@@ -90,8 +90,20 @@ function Results({ analysisResult }) {
     )
 }
 
+function isGeminiUnavailable(error) {
+    const msg = (error?.message || '').toLowerCase()
+    return (
+        error?.status === 503 ||
+        msg.includes('недоступн') ||
+        msg.includes('network') ||
+        msg.includes('failed to fetch') ||
+        msg.includes('etimedout') ||
+        msg.includes('econnrefused')
+    )
+}
+
 export default function AnalysisPage() {
-    const currentId = useResumeStore((s) => s.currentId)
+    const currentId = useResumeStore((state) => state.currentId)
 
     const [resumes, setResumes] = useState([])
     const [selectedId, setSelectedId] = useState(currentId ? String(currentId) : '')
@@ -112,24 +124,45 @@ export default function AnalysisPage() {
     const canAnalyze = selectedId && jobText.trim().length >= 20
 
     async function runAnalysis() {
-        if (!selectedId) { toast('Оберіть резюме', 'warn'); return }
-        if (jobText.trim().length < 20) { toast('Текст вакансії занадто короткий', 'warn'); return }
+        if (!selectedId) {
+            toast('Оберіть резюме', 'warn')
+            return
+        }
 
-        setLoading(true); setResult(null); setError('')
+        if (jobText.trim().length < 20) {
+            toast('Текст вакансії занадто короткий', 'warn')
+            return
+        }
+
+        setLoading(true)
+        setResult(null)
+        setError('')
+
         try {
             const analysisResult = await analyzeGemini(selectedId, jobText)
             setResult(analysisResult)
-            toast(`Аналіз завершено (${analysisResult.score}%)`, 'ok')
-        } catch {
-            toast('Gemini недоступний — використовуємо локальний аналіз', 'warn')
-            try {
-                const analysisResult = await analyzeLocal(selectedId, jobText)
-                setResult(analysisResult)
-                toast('Локальний аналіз завершено', 'ok')
-            } catch (fallbackError) {
-                setError(fallbackError.message)
-                toast(fallbackError.message, 'bad')
+            toast(`Аналіз завершено — ${analysisResult.score}% (Gemini AI)`, 'ok')
+            setLoading(false)
+            return
+        } catch (geminiError) {
+            const errMsg = geminiError?.message || ''
+
+            if (isGeminiUnavailable(geminiError)) {
+                toast('Gemini недоступний — використовується локальний аналіз', 'warn')
+            } else {
+                console.warn('[Gemini] помилка відповіді:', errMsg)
+                toast(`Gemini: ${errMsg.slice(0, 80)} — переходимо на локальний`, 'warn')
             }
+        }
+
+        try {
+            const analysisResult = await analyzeLocal(selectedId, jobText)
+            setResult(analysisResult)
+            toast('Локальний аналіз завершено', 'ok')
+        } catch (localError) {
+            const msg = localError?.message || 'Невідома помилка'
+            setError(msg)
+            toast(msg, 'bad')
         } finally {
             setLoading(false)
         }
@@ -175,7 +208,7 @@ export default function AnalysisPage() {
                             disabled={loading || !canAnalyze}
                         >
                             {loading
-                                ? <><span className="spinner" /><span>Аналіз ШІ...</span></>
+                                ? <><span className="spinner" /><span>Аналіз...</span></>
                                 : '🔍 Проаналізувати'
                             }
                         </button>
