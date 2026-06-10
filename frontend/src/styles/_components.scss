@@ -419,6 +419,36 @@
   flex-shrink: 0;
 }
 
+.site-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 18px 16px 24px;
+  color: $ink-3;
+  @include font-body(12px, 400);
+
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  a {
+    color: $ink-2;
+    text-decoration: none;
+
+    &:hover {
+      color: $copper;
+    }
+  }
+
+  @media (max-width: 600px) {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
