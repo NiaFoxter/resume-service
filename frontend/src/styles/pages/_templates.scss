@@ -543,54 +543,126 @@
 // 6. Compact
 .a4.tmpl-compact {
   @include tmpl-sans;
+  font-size: 8.5px;
 
   .a4-head {
-    padding: 14px 18px;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px 10px;
+    background: #f6f1ea;
+    color: $ink;
+    border-bottom: 2px solid $copper;
+  }
+
+  .a4-photo-head {
+    width: 46px;
+    height: 46px;
+    border-radius: 8px;
   }
 
   .a4-name {
-    font-size: 15px;
+    font-size: 17px;
+    line-height: 1.05;
+    letter-spacing: .02em;
   }
 
   .a4-title {
-    font-size: 9px;
+    margin-top: 2px;
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: .16em;
+  }
+
+  .a4-contacts {
+    gap: 4px 10px;
+    margin-top: 6px;
   }
 
   .a4-contact {
-    font-size: 7.5px;
+    font-size: 7px;
+  }
+
+  .a4-body {
+    display: block;
+    padding: 14px 16px 18px;
   }
 
   .a4-left {
-    width: 148px;
-    min-width: 148px;
-    max-width: 148px;
-    padding: 14px 11px;
+    display: grid;
+    grid-template-columns: 1.1fr .9fr 1fr;
+    gap: 8px;
+    width: auto;
+    min-width: 0;
+    max-width: none;
+    padding: 0 0 10px;
+    margin-bottom: 10px;
+    background: transparent;
+    border-right: 0;
+    border-bottom: 1px solid $line;
   }
 
-  .a4-skill-pill {
-    font-size: 7.5px;
-    padding: 2px 5px;
-  }
-
-  .a4-sec-title {
-    font-size: 7px;
-    margin-bottom: 5px;
-  }
-
-  .a4-exp {
-    margin-bottom: 8px;
-  }
-
-  .a4-exp-title {
-    font-size: 9.5px;
-  }
-
-  .a4-exp-company {
-    font-size: 8px;
+  .a4-right {
+    padding: 0;
   }
 
   .a4-sec {
-    margin-top: 10px;
+    margin-top: 9px;
+  }
+
+  .a4-left .a4-sec {
+    margin-top: 0;
+  }
+
+  .a4-sec-title {
+    margin-bottom: 4px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid rgba($copper, .45);
+    color: $copper-dk;
+    font-size: 7px;
+    letter-spacing: .16em;
+  }
+
+  .a4-skills-wrap {
+    gap: 3px;
+  }
+
+  .a4-skill-pill {
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: #fff;
+    border-color: rgba($copper, .3);
+    font-size: 7px;
+  }
+
+  .a4-exp,
+  .a4-edu,
+  .a4-proj {
+    margin-bottom: 7px;
+  }
+
+  .a4-exp-head,
+  .a4-edu-head,
+  .a4-proj-head {
+    align-items: baseline;
+  }
+
+  .a4-exp-title,
+  .a4-proj-name,
+  .a4-edu-deg {
+    font-size: 9.5px;
+  }
+
+  .a4-exp-company,
+  .a4-edu-school,
+  .a4-proj-desc,
+  .a4-about {
+    font-size: 8px;
+    line-height: 1.35;
+  }
+
+  .a4-exp-list {
+    margin-top: 3px;
+    padding-left: 13px;
   }
 }
 
