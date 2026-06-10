@@ -27,24 +27,24 @@ app = Flask(__name__, static_folder=None)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-change-in-prod')
 app.config['JWT_EXPIRE_HOURS'] = int(os.environ.get('JWT_EXPIRE_HOURS', '24'))
 
-DB_PATH        = os.path.join(os.path.dirname(__file__), 'resume.db')
-FRONTEND_DIR   = os.path.join(os.path.dirname(__file__), '..', 'dist')
-GEMINI_KEY     = os.environ.get('GEMINI_KEY', '')
-GEMINI_MODELS  = [
+DB_PATH = os.path.join(os.path.dirname(__file__), 'resume.db')
+FRONTEND_DIR = os.path.join(os.path.dirname(__file__), '..', 'dist')
+GEMINI_KEY = os.environ.get('GEMINI_KEY', '')
+GEMINI_MODELS = [
     'gemini-2.5-flash',
     'gemini-2.5-flash-lite',
     'gemini-3.5-flash',
     'gemini-3-flash',
     'gemini-3.1-flash-lite',
-
 ]
+
 GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models'
 
 # Semantic model (lazy)
-_model         = None
+_model = None
 _model_loading = False
-_model_loaded  = False
-_MODEL_NAME    = 'paraphrase-multilingual-MiniLM-L12-v2'
+_model_loaded = False
+_MODEL_NAME = 'paraphrase-multilingual-MiniLM-L12-v2'
 
 
 def get_semantic_model():
@@ -84,11 +84,10 @@ def serve_frontend(path):
 
 # CORS & MIME
 @app.after_request
-def add_cors_and_mime(r: Response):
-    r.headers['Access-Control-Allow-Origin']  = '*'
-    r.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
-    r.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,PATCH,DELETE,OPTIONS'
-
+def add_cors_and_mime(resp: Response):
+    resp.headers['Access-Control-Allow-Origin']  = '*'
+    resp.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization'
+    resp.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT,PATCH,DELETE,OPTIONS'
     ext_mime = {
         '.js': 'application/javascript', '.mjs': 'application/javascript',
         '.css': 'text/css', '.wasm': 'application/wasm',
@@ -96,9 +95,9 @@ def add_cors_and_mime(r: Response):
     }
     for ext, mime in ext_mime.items():
         if request.path.endswith(ext):
-            r.headers['Content-Type'] = mime
+            resp.headers['Content-Type'] = mime
             break
-    return r
+    return resp
 
 
 @app.route('/api', defaults={'path': ''}, methods=['OPTIONS'])
@@ -176,7 +175,7 @@ def require_auth(f):
         try:
             payload = jwt.decode(auth[7:], app.config['SECRET_KEY'], algorithms=['HS256'])
             g.user_id = int(payload['sub'])
-            g.email   = payload['email']
+            g.email = payload['email']
         except jwt.ExpiredSignatureError:
             return err('Токен прострочено', 401)
         except jwt.InvalidTokenError:
@@ -226,11 +225,11 @@ _EMAIL_RE = re.compile(r'^[^\s@]+@[^\s@]+\.[^\s@]+$')
 
 @app.route('/auth/register', methods=['POST'])
 def register():
-    b          = request.get_json(silent=True) or {}
-    email      = (b.get('email') or '').strip().lower()
-    password   = (b.get('password') or '').strip()
+    b = request.get_json(silent=True) or {}
+    email = (b.get('email') or '').strip().lower()
+    password = (b.get('password') or '').strip()
     first_name = (b.get('firstName') or '').strip()
-    last_name  = (b.get('lastName') or '').strip()
+    last_name = (b.get('lastName') or '').strip()
 
     if not email or not _EMAIL_RE.match(email):
         return err('Некоректна електронна пошта')
@@ -244,23 +243,23 @@ def register():
         return err('Користувач із такою поштою вже існує', 409)
 
     cur = db.execute(
-        'INSERT INTO users (email,password,first_name,last_name) VALUES (?,?,?,?)',
+        'INSERT INTO users (email, password, first_name, last_name) VALUES (?, ?, ?, ?)',
         (email, generate_password_hash(password), first_name, last_name),
     )
     db.commit()
     uid = cur.lastrowid
     return ok({
-        'token':     make_token(uid, email),
-        'userId':    uid,
+        'token': make_token(uid, email),
+        'userId': uid,
         'firstName': first_name,
-        'lastName':  last_name,
+        'lastName': last_name,
     }), 201
 
 
 @app.route('/auth/login', methods=['POST'])
 def login():
-    b        = request.get_json(silent=True) or {}
-    email    = (b.get('email') or '').strip().lower()
+    b = request.get_json(silent=True) or {}
+    email = (b.get('email') or '').strip().lower()
     password = (b.get('password') or '').strip()
 
     if not email or not password:
@@ -272,19 +271,19 @@ def login():
         return err('Невірна пошта або пароль', 401)
 
     return ok({
-        'token':     make_token(user['id'], email),
-        'userId':    user['id'],
+        'token': make_token(user['id'], email),
+        'userId': user['id'],
         'firstName': user['first_name'],
-        'lastName':  user['last_name'],
+        'lastName': user['last_name'],
     })
 
 
 @app.route('/auth/me', methods=['GET'])
 @require_auth
 def me():
-    db   = get_db()
+    db = get_db()
     user = db.execute(
-        'SELECT id,email,first_name,last_name,created_at FROM users WHERE id=?',
+        'SELECT id, email, first_name, last_name, created_at FROM users WHERE id=?',
         (g.user_id,),
     ).fetchone()
     if not user:
@@ -296,9 +295,9 @@ def me():
 @app.route('/resumes', methods=['GET'])
 @require_auth
 def list_resumes():
-    db   = get_db()
+    db = get_db()
     rows = db.execute(
-        'SELECT id,title,template,updated_at,created_at FROM resumes'
+        'SELECT id, title, template, updated_at, created_at FROM resumes'
         ' WHERE user_id=? ORDER BY updated_at DESC',
         (g.user_id,),
     ).fetchall()
@@ -308,14 +307,14 @@ def list_resumes():
 @app.route('/resumes', methods=['POST'])
 @require_auth
 def create_resume():
-    b        = request.get_json(silent=True) or {}
-    title    = (b.get('title') or 'Нове резюме').strip()
+    b = request.get_json(silent=True) or {}
+    title = (b.get('title') or 'Нове резюме').strip()
     template = (b.get('template') or 'classic').strip()
-    data     = json.dumps(b.get('data') or {}, ensure_ascii=False)
+    data = json.dumps(b.get('data') or {}, ensure_ascii=False)
 
-    db  = get_db()
+    db = get_db()
     cur = db.execute(
-        'INSERT INTO resumes (user_id,title,template,data) VALUES (?,?,?,?)',
+        'INSERT INTO resumes (user_id, title, template, data) VALUES (?, ?, ?, ?)',
         (g.user_id, title, template, data),
     )
     db.commit()
@@ -326,7 +325,7 @@ def create_resume():
 @app.route('/resumes/<int:rid>', methods=['GET'])
 @require_auth
 def get_resume(rid):
-    db  = get_db()
+    db = get_db()
     row = db.execute(
         'SELECT * FROM resumes WHERE id=? AND user_id=?', (rid, g.user_id)
     ).fetchone()
@@ -338,15 +337,15 @@ def get_resume(rid):
 @app.route('/resumes/<int:rid>', methods=['PUT', 'PATCH'])
 @require_auth
 def update_resume(rid):
-    db  = get_db()
+    db = get_db()
     row = db.execute(
         'SELECT * FROM resumes WHERE id=? AND user_id=?', (rid, g.user_id)
     ).fetchone()
     if not row:
         return err('Не знайдено', 404)
 
-    b        = request.get_json(silent=True) or {}
-    title    = b.get('title', row['title'])
+    b = request.get_json(silent=True) or {}
+    title = b.get('title', row['title'])
     template = b.get('template', row['template'])
 
     if 'data' in b and isinstance(b['data'], dict):
@@ -377,7 +376,7 @@ def update_resume(rid):
 @app.route('/resumes/<int:rid>', methods=['DELETE'])
 @require_auth
 def delete_resume(rid):
-    db  = get_db()
+    db = get_db()
     row = db.execute(
         'SELECT id FROM resumes WHERE id=? AND user_id=?', (rid, g.user_id)
     ).fetchone()
@@ -388,7 +387,7 @@ def delete_resume(rid):
     return ok({'deleted': rid})
 
 
-# NLP helpers
+# NLP
 def tokenize(text):
     tokens = re.findall(r'[a-zа-яіїєґ][a-zа-яіїєґ0-9+#.\-]*', text.lower())
     result = []
