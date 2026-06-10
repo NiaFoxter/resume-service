@@ -1,6 +1,4 @@
-"""
-Лінгвістичні дані для NLP аналізу резюме.
-"""
+# NLP data
 
 import re
 from collections import Counter
@@ -91,6 +89,23 @@ STOPWORDS_EN = {
 }
 
 STOPWORDS_ALL = STOPWORDS_UK | STOPWORDS_EN
+
+JOB_NOISE = {
+    'шукаємо', 'запрошуємо', 'приймаємо', 'розглядаємо',
+    'senior', 'junior', 'middle', 'lead', 'developer', 'engineer',
+    'розробник', 'розробниця', 'спеціаліст', 'фахівець', 'кандидат', 'претендент',
+    'роботи', 'роботу', 'місця', 'посади', 'позиції',
+    'знання', 'вміння', 'навички', 'навичок', 'розуміння',
+    'вимоги', 'вимог', "обов'язки",
+    'процесів', 'процес', 'підходів',
+    'мова', 'мови', 'мовою',
+    'upper', 'intermediate', 'advanced', 'fluent', 'native',
+    'years', 'year', 'months', 'month',
+    'least', 'more', 'than',
+    'буде', 'плюсом', 'перевагою', 'бажано', 'бажаним',
+    'офіційне', 'офіційний',
+}
+
 
 SYNONYMS: dict[str, str] = {
     'js': 'javascript', 'ts': 'typescript',
@@ -284,17 +299,25 @@ BUSINESS_SKILLS: set[str] = {
 
 _ALL_SKILLS = TECH_SKILLS | SOFT_SKILLS | BUSINESS_SKILLS
 
-def tokenize(text: str) -> list[str]:
+def tokenize(text: str, extra_stopwords: set[str] | None = None) -> list[str]:
     tokens = re.findall(r'[a-zа-яіїєґ][a-zа-яіїєґ0-9+#.\-]*', text.lower())
+    blocked_words = STOPWORDS_ALL | (extra_stopwords or set())
     result = []
-    for t in tokens:
-        t = t.strip('.-_')
-        if len(t) < 2:
+
+    for token in tokens:
+        token = token.strip('.-_')
+        if len(token) < 2:
             continue
-        t = SYNONYMS.get(t, t)
-        if t not in STOPWORDS_ALL:
-            result.append(t)
+
+        token = SYNONYMS.get(token, token)
+        if token not in blocked_words:
+            result.append(token)
+
     return result
+
+
+def normalize_keyword(keyword: str) -> str:
+    return ' '.join(tokenize(keyword)) or keyword.lower().strip()
 
 
 def normalize_word(word: str) -> str:
