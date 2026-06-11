@@ -1,6 +1,6 @@
 import { useResumeStore } from '../../../store/resumeStore'
 
-const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'Рідна']
+const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 
 export default function LanguagesForm({ onChange }) {
     const { data, setLanguages } = useResumeStore()
