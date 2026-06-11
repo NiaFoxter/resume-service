@@ -65,7 +65,7 @@ export default function EditorPage() {
         const savedWidth = typeof window !== 'undefined'
             ? Number(window.localStorage.getItem('editor-sidebar-width'))
             : NaN
-        return Number.isFinite(savedWidth) && savedWidth >= 240 && savedWidth <= 540 ? savedWidth : 340
+        return Number.isFinite(savedWidth) && savedWidth >= 240 && savedWidth <= 720 ? savedWidth : 340
     })
     const [isSidebarDragging, setIsSidebarDragging] = useState(false)
     const sidebarWidthRef = useRef(sidebarWidth)
@@ -139,7 +139,7 @@ export default function EditorPage() {
         if (!isSidebarDragging) return undefined
 
         const MIN_WIDTH = 240
-        const MAX_WIDTH = 540
+        const MAX_WIDTH = 720
 
         const handlePointerMove = (event) => {
             const dragState = dragStateRef.current
