@@ -920,24 +920,24 @@ def analyze_resume(rid):
 
     # Weighted score
     score = compute_weighted_score(
-        keywords        = keywords,
-        found_items     = found_items,
-        missing_items   = missing_items,
-        tfidf_cosine    = tfidf_cosine,
+        keywords = keywords,
+        found_items = found_items,
+        missing_items = missing_items,
+        tfidf_cosine = tfidf_cosine,
         semantic_cosine = semantic_cosine,
-        resume          = resume,
-        resume_data     = resume_data,
-        job_text        = job_text,
+        resume = resume,
+        resume_data = resume_data,
+        job_text = job_text,
     )
 
     # Recommendations
     recs = build_recommendations(
-        score         = score,
-        found_items   = found_items,
+        score = score,
+        found_items = found_items,
         missing_items = missing_items,
-        keywords      = keywords,
-        resume_data   = resume_data,
-        job_text      = job_text,
+        keywords = keywords,
+        resume_data = resume_data,
+        job_text = job_text,
     )
 
     found_cat   = classify_keywords(found_items)
