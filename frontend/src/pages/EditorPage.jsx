@@ -60,15 +60,25 @@ export default function EditorPage() {
 
     const previewRef = useRef(null)
     const dragStateRef = useRef(null)
+    const splitStateRef = useRef(null)
 
     const [sidebarWidth, setSidebarWidth] = useState(() => {
         const savedWidth = typeof window !== 'undefined'
             ? Number(window.localStorage.getItem('editor-sidebar-width'))
             : NaN
-        return Number.isFinite(savedWidth) && savedWidth >= 240 && savedWidth <= 720 ? savedWidth : 340
+        return Number.isFinite(savedWidth) && savedWidth >= 240 && savedWidth <= 540 ? savedWidth : 340
     })
     const [isSidebarDragging, setIsSidebarDragging] = useState(false)
     const sidebarWidthRef = useRef(sidebarWidth)
+
+    const [topPanelHeight, setTopPanelHeight] = useState(() => {
+        const savedHeight = typeof window !== 'undefined'
+            ? Number(window.localStorage.getItem('editor-sidebar-top-height'))
+            : NaN
+        return Number.isFinite(savedHeight) && savedHeight >= 0 && savedHeight <= 360 ? savedHeight : 220
+    })
+    const [isTopPanelDragging, setIsTopPanelDragging] = useState(false)
+    const topPanelHeightRef = useRef(topPanelHeight)
 
     const onStatus = useCallback((text, isSaved) => setSaveStatus(isSaved ? '✓ ' + text : text), [])
     const { schedule, autosave } = useAutosave(onStatus)
@@ -139,7 +149,7 @@ export default function EditorPage() {
         if (!isSidebarDragging) return undefined
 
         const MIN_WIDTH = 240
-        const MAX_WIDTH = 720
+        const MAX_WIDTH = 540
 
         const handlePointerMove = (event) => {
             const dragState = dragStateRef.current
@@ -174,6 +184,66 @@ export default function EditorPage() {
         window.localStorage.setItem('editor-sidebar-width', String(Math.round(sidebarWidth)))
     }, [sidebarWidth])
 
+
+    const stopTopPanelDrag = useCallback(() => {
+        if (!splitStateRef.current) return
+
+        splitStateRef.current = null
+        setIsTopPanelDragging(false)
+        document.documentElement.classList.remove('sidebar-split-dragging')
+    }, [])
+
+    const handleTopPanelPointerDown = useCallback((event) => {
+        if (window.matchMedia('(max-width: 768px)').matches) return
+
+        event.preventDefault()
+        splitStateRef.current = {
+            pointerId: event.pointerId,
+            startY: event.clientY,
+            startHeight: topPanelHeightRef.current,
+        }
+        setIsTopPanelDragging(true)
+        document.documentElement.classList.add('sidebar-split-dragging')
+    }, [])
+
+    useEffect(() => {
+        if (!isTopPanelDragging) return undefined
+
+        const MIN_HEIGHT = 0
+        const MAX_HEIGHT = 360
+
+        const handlePointerMove = (event) => {
+            const dragState = splitStateRef.current
+            if (!dragState) return
+
+            const nextHeight = Math.min(
+                MAX_HEIGHT,
+                Math.max(MIN_HEIGHT, dragState.startHeight + event.clientY - dragState.startY)
+            )
+
+            setTopPanelHeight(nextHeight)
+        }
+
+        const handlePointerUp = () => stopTopPanelDrag()
+        const handlePointerCancel = () => stopTopPanelDrag()
+
+        document.addEventListener('pointermove', handlePointerMove)
+        document.addEventListener('pointerup', handlePointerUp)
+        document.addEventListener('pointercancel', handlePointerCancel)
+
+        return () => {
+            document.removeEventListener('pointermove', handlePointerMove)
+            document.removeEventListener('pointerup', handlePointerUp)
+            document.removeEventListener('pointercancel', handlePointerCancel)
+            stopTopPanelDrag()
+        }
+    }, [isTopPanelDragging, stopTopPanelDrag])
+
+    useEffect(() => {
+        topPanelHeightRef.current = topPanelHeight
+        window.localStorage.setItem('editor-sidebar-top-height', String(Math.round(topPanelHeight)))
+    }, [topPanelHeight])
+
     const ActiveForm = FORM_MAP[activeSection]
     const resumeReady = !loadingResume && loadedResumeId === numericId
 
@@ -205,12 +275,24 @@ export default function EditorPage() {
             </div>
 
             <div
-                className={`editor-shell ${isSidebarDragging ? 'is-resizing' : ''}`}
+                className={`editor-shell ${isSidebarDragging ? 'is-resizing' : ''} ${isTopPanelDragging ? 'is-split-resizing' : ''}`}
                 style={{ gridTemplateColumns: `${sidebarWidth}px 1fr` }}
             >
-                <div className="editor-sidebar">
-                    <ProgressRing />
-                    <SectionNav active={activeSection} onChange={setActiveSection} />
+                <div
+                    className="editor-sidebar"
+                    style={{ gridTemplateRows: `${topPanelHeight}px 7px minmax(0, 1fr)` }}
+                >
+                    <div className={`editor-sidebar-top ${topPanelHeight < 24 ? 'is-collapsed' : ''}`}>
+                        <ProgressRing />
+                        <SectionNav active={activeSection} onChange={setActiveSection} />
+                    </div>
+                    <button
+                        type="button"
+                        className={`sidebar-split-resizer ${isTopPanelDragging ? 'active' : ''}`}
+                        aria-label="Змінити висоту верхньої частини панелі"
+                        title="Потягніть, щоб сховати або відкрити верхню частину панелі"
+                        onPointerDown={handleTopPanelPointerDown}
+                    />
                     <div className="editor-forms">
                         {ActiveForm && <ActiveForm onChange={handleFormChange} />}
                     </div>
