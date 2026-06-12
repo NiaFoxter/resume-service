@@ -98,9 +98,6 @@ function getPhotoStyle(position) {
         objectPosition: `${x}% ${y}%`,
         transform: `scale(${scale})`,
         transformOrigin: `${x}% ${y}%`,
-        '--photo-position': `${x}% ${y}%`,
-        '--photo-origin': `${x}% ${y}%`,
-        '--photo-transform': `scale(${scale})`,
     }
 }
 

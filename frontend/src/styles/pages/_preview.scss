@@ -45,6 +45,7 @@
 }
 
 .a4-photo-head-wrap {
+    position: relative;
     width: 64px;
     height: 64px;
     border-radius: 50%;
@@ -52,7 +53,6 @@
     border: 2px solid rgba(#fff, .3);
     flex-shrink: 0;
     background: rgba(#fff, .12);
-    position: relative;
 }
 
 .a4-photo-head {
@@ -61,10 +61,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: var(--photo-position, 50% 50%);
     display: block;
-    transform: var(--photo-transform, none);
-    transform-origin: var(--photo-origin, 50% 50%);
 }
 
 .a4-head-info {
@@ -409,9 +406,6 @@
     height: 70px;
     border-radius: 50%;
     object-fit: cover;
-    object-position: var(--photo-position, 50% 50%);
-    transform: var(--photo-transform, none);
-    transform-origin: var(--photo-origin, 50% 50%);
     border: 2px solid rgba(#fff, .3);
     flex-shrink: 0;
 }
