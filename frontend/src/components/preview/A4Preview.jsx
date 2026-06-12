@@ -88,6 +88,22 @@ function anchorProps(href) {
     return /^https?:\/\//i.test(href) ? { target: '_blank', rel: 'noreferrer' } : {}
 }
 
+
+function getPhotoStyle(position) {
+    const x = Math.max(0, Math.min(100, Number(position?.x ?? 50)))
+    const y = Math.max(0, Math.min(100, Number(position?.y ?? 50)))
+    const scale = Math.max(1, Math.min(3, Number(position?.scale ?? 1)))
+
+    return {
+        objectPosition: `${x}% ${y}%`,
+        transform: `scale(${scale})`,
+        transformOrigin: `${x}% ${y}%`,
+        '--photo-position': `${x}% ${y}%`,
+        '--photo-origin': `${x}% ${y}%`,
+        '--photo-transform': `scale(${scale})`,
+    }
+}
+
 const hasValidExp = (exp) => exp.position?.trim() || exp.company?.trim()
 const hasValidEdu = (edu) => edu.institution?.trim() || edu.degree?.trim()
 const hasValidProj = (proj) => proj.name?.trim()
@@ -220,7 +236,7 @@ function ProjectsList({ projects }) {
 }
 
 const A4Preview = forwardRef(function A4Preview(_, ref) {
-    const { data, photo, template } = useResumeStore()
+    const { data, photo, photoPosition, template } = useResumeStore()
     const personal = data.personal
 
     const experience = (data.experience || []).filter(hasValidExp)
@@ -239,13 +255,17 @@ const A4Preview = forwardRef(function A4Preview(_, ref) {
     ].filter(Boolean)
 
     const hasName = personal.firstName || personal.lastName
-    const showLeft = !!photo || skills.length > 0 || languages.length > 0 || hasLinks
+    const showLeft = skills.length > 0 || languages.length > 0 || hasLinks
 
     return (
         <div ref={ref} className={`a4 tmpl-${template}`} id="a4Preview">
 
             <div className="a4-head">
-                {photo && <img className="a4-photo-head" src={photo} alt="Фото" />}
+                {photo && (
+                    <span className="a4-photo-head-wrap">
+                        <img className="a4-photo-head" src={photo} alt="Фото" style={getPhotoStyle(photoPosition)} />
+                    </span>
+                )}
                 <div className="a4-head-info">
                     {hasName && (
                         <div className="a4-name">

@@ -15,6 +15,7 @@ const EMPTY_STATE = () => ({
     currentId: null,
     template: 'classic',
     photo: null,
+    photoPosition: { x: 50, y: 50, scale: 1 },
     title: 'Нове резюме',
     data: EMPTY_DATA(),
 })
@@ -25,12 +26,14 @@ export const useResumeStore = create((set, get) => ({
     setResume: (r) => {
         const rdata = r.data || {}
         const photo = Object.prototype.hasOwnProperty.call(rdata, 'photo') ? rdata.photo : r.photo
+        const photoPosition = rdata.photoPosition || r.photoPosition || { x: 50, y: 50, scale: 1 }
 
         set({
             currentId: r.id,
             template: r.template || 'classic',
             title: r.title || 'Нове резюме',
             photo: photo || null,
+            photoPosition,
             data: {
                 personal: { ...EMPTY_DATA().personal, ...(rdata.personal || {}) },
                 summary: rdata.summary || '',
@@ -49,6 +52,7 @@ export const useResumeStore = create((set, get) => ({
     setTemplate: (template) => set({ template }),
     setTitle: (title) => set({ title }),
     setPhoto: (photo) => set({ photo }),
+    setPhotoPosition: (photoPosition) => set({ photoPosition }),
 
     setPersonal: (personal) => set((s) => ({ data: { ...s.data, personal } })),
     setSummary: (summary) => set((s) => ({ data: { ...s.data, summary } })),
@@ -60,8 +64,8 @@ export const useResumeStore = create((set, get) => ({
     setProjects: (projects) => set((s) => ({ data: { ...s.data, projects } })),
 
     getPayload: () => {
-        const { title, template, data, photo } = get()
-        const payload = { ...data, photo: photo || null }
+        const { title, template, data, photo, photoPosition } = get()
+        const payload = { ...data, photo: photo || null, photoPosition: photoPosition || { x: 50, y: 50, scale: 1 } }
         return { title, template, data: payload }
     },
 }))

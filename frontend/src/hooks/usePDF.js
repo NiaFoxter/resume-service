@@ -36,11 +36,10 @@ export function usePDF(previewRef) {
 
             const pdfOverride = `
                 * { transition: none !important; animation: none !important; }
-                .a4 { box-shadow: none !important; border-radius: 0 !important; width: 794px !important; }
-                .a4-left { min-height: 100vh; }
+                .a4 { box-shadow: none !important; border-radius: 0 !important; width: 794px !important; overflow: visible !important; }
+                .a4-body { align-items: stretch !important; }
+                .a4-left { min-height: auto !important; align-self: stretch !important; }
                 .empty-section { display: none !important; }
-                .pdf-no-left .a4-body { display: block !important; }
-                .pdf-no-left .a4-right { width: 100% !important; max-width: none !important; }
             `
 
             cloneWrapper = document.createElement('div')
@@ -50,13 +49,6 @@ export function usePDF(previewRef) {
 
             const pdfTarget = cloneWrapper.querySelector('.a4')
             if (!pdfTarget) throw new Error("Не знайдено блок прев'ю для PDF")
-
-            const leftPanel = pdfTarget.querySelector('.a4-left')
-            const leftHasContent = leftPanel?.textContent?.trim() || leftPanel?.querySelector('img, a')
-            if (leftPanel && !leftHasContent) {
-                leftPanel.remove()
-                pdfTarget.classList.add('pdf-no-left')
-            }
 
             await window.html2pdf()
                 .set({

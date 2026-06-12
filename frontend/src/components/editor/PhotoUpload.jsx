@@ -1,15 +1,108 @@
-import { useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useResumeStore } from '../../store/resumeStore'
 import { toast } from '../../store/toastStore'
 
 const MAX_FILE_SIZE = 2 * 1024 * 1024
-const CROP_SIZE = 420
+const MIN_SCALE = 1
+const MAX_SCALE = 3
+const SCALE_STEP = 0.12
+const DEFAULT_POSITION = { x: 50, y: 50, scale: 1 }
+
+function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value))
+}
+
+function normalizePosition(position) {
+    return {
+        x: clamp(Number(position?.x ?? DEFAULT_POSITION.x), 0, 100),
+        y: clamp(Number(position?.y ?? DEFAULT_POSITION.y), 0, 100),
+        scale: clamp(Number(position?.scale ?? DEFAULT_POSITION.scale), MIN_SCALE, MAX_SCALE),
+    }
+}
+
+function getPhotoStyle(position) {
+    const pos = normalizePosition(position)
+    return {
+        objectPosition: `${pos.x}% ${pos.y}%`,
+        transform: `scale(${pos.scale})`,
+        transformOrigin: `${pos.x}% ${pos.y}%`,
+    }
+}
 
 export default function PhotoUpload({ onChange }) {
-    const { photo, setPhoto } = useResumeStore()
+    const { photo, photoPosition, setPhoto, setPhotoPosition } = useResumeStore()
     const inputRef = useRef(null)
-    const [sourcePhoto, setSourcePhoto] = useState(null)
-    const [crop, setCrop] = useState({ x: 50, y: 50, zoom: 1 })
+    const dragRef = useRef(null)
+    const [isEditorOpen, setIsEditorOpen] = useState(false)
+    const [draftPosition, setDraftPosition] = useState(normalizePosition(photoPosition))
+
+    const savedPhotoStyle = useMemo(() => getPhotoStyle(photoPosition), [photoPosition])
+    const draftPhotoStyle = useMemo(() => getPhotoStyle(draftPosition), [draftPosition])
+
+    useEffect(() => {
+        if (!isEditorOpen) return undefined
+
+        const previousOverflow = document.body.style.overflow
+        document.body.style.overflow = 'hidden'
+
+        function stopDrag() {
+            dragRef.current = null
+            document.body.classList.remove('photo-dragging')
+        }
+
+        function handlePointerMove(event) {
+            const drag = dragRef.current
+
+            if (!drag) return
+
+            event.preventDefault()
+
+            const dx = ((event.clientX - drag.startX) / drag.width) * 100
+            const dy = ((event.clientY - drag.startY) / drag.height) * 100
+
+            setDraftPosition((current) => ({
+                ...current,
+                x: clamp(drag.x - dx, 0, 100),
+                y: clamp(drag.y - dy, 0, 100),
+            }))
+        }
+
+        function closeOnEscape(event) {
+            if (event.key === 'Escape') closeEditor()
+        }
+
+        function blockPageDrag(event) {
+            if (dragRef.current) event.preventDefault()
+        }
+
+        document.addEventListener('pointermove', handlePointerMove, { passive: false })
+        document.addEventListener('pointerup', stopDrag)
+        document.addEventListener('pointercancel', stopDrag)
+        document.addEventListener('keydown', closeOnEscape)
+        document.addEventListener('dragstart', blockPageDrag, { passive: false })
+        document.addEventListener('selectstart', blockPageDrag, { passive: false })
+
+        return () => {
+            document.body.style.overflow = previousOverflow
+            document.removeEventListener('pointermove', handlePointerMove)
+            document.removeEventListener('pointerup', stopDrag)
+            document.removeEventListener('pointercancel', stopDrag)
+            document.removeEventListener('keydown', closeOnEscape)
+            document.removeEventListener('dragstart', blockPageDrag)
+            document.removeEventListener('selectstart', blockPageDrag)
+            stopDrag()
+        }
+    }, [isEditorOpen])
+
+    function openEditor() {
+        if (!photo) return
+        setDraftPosition(normalizePosition(photoPosition))
+        setIsEditorOpen(true)
+    }
+
+    function closeEditor() {
+        setIsEditorOpen(false)
+    }
 
     function handleFile(e) {
         const file = e.target.files[0]
@@ -29,97 +122,142 @@ export default function PhotoUpload({ onChange }) {
 
         const reader = new FileReader()
         reader.onload = (ev) => {
-            const image = ev.target.result
-            setSourcePhoto(image)
-            setPhoto(image)
-            setCrop({ x: 50, y: 50, zoom: 1 })
+            const nextPosition = { ...DEFAULT_POSITION }
+            setPhoto(ev.target.result)
+            setPhotoPosition(nextPosition)
+            setDraftPosition(nextPosition)
+            setIsEditorOpen(true)
             onChange?.(true)
         }
         reader.readAsDataURL(file)
     }
 
-    function updateCrop(field, value) {
-        setCrop((current) => ({ ...current, [field]: Number(value) }))
+    function startDrag(event) {
+        if (!photo) return
+        event.preventDefault()
+        event.stopPropagation()
+
+        const rect = event.currentTarget.getBoundingClientRect()
+        event.currentTarget.setPointerCapture?.(event.pointerId)
+        dragRef.current = {
+            startX: event.clientX,
+            startY: event.clientY,
+            width: rect.width || 1,
+            height: rect.height || 1,
+            x: draftPosition.x,
+            y: draftPosition.y,
+        }
+        document.body.classList.add('photo-dragging')
     }
 
-    function applyCrop() {
-        const imageSrc = sourcePhoto || photo
-        if (!imageSrc) return
+    function changeScale(delta) {
+        setDraftPosition((current) => ({
+            ...current,
+            scale: clamp(Number((current.scale + delta).toFixed(2)), MIN_SCALE, MAX_SCALE),
+        }))
+    }
 
-        const img = new Image()
-        img.onload = () => {
-            const canvas = document.createElement('canvas')
-            canvas.width = CROP_SIZE
-            canvas.height = CROP_SIZE
+    function handleWheel(event) {
+        event.preventDefault()
+        changeScale(event.deltaY > 0 ? -SCALE_STEP : SCALE_STEP)
+    }
 
-            const ctx = canvas.getContext('2d')
-            const baseScale = Math.max(CROP_SIZE / img.width, CROP_SIZE / img.height)
-            const scale = baseScale * crop.zoom
-            const width = img.width * scale
-            const height = img.height * scale
-            const x = (CROP_SIZE - width) * (crop.x / 100)
-            const y = (CROP_SIZE - height) * (crop.y / 100)
+    function resetPosition() {
+        setDraftPosition({ ...DEFAULT_POSITION })
+    }
 
-            ctx.drawImage(img, x, y, width, height)
-            setPhoto(canvas.toDataURL('image/jpeg', 0.92))
-            onChange?.(true)
-        }
-        img.src = imageSrc
+    function applyPosition() {
+        setPhotoPosition(normalizePosition(draftPosition))
+        setIsEditorOpen(false)
+        onChange?.(true)
     }
 
     function removePhoto() {
         setPhoto(null)
-        setSourcePhoto(null)
-        setCrop({ x: 50, y: 50, zoom: 1 })
+        setPhotoPosition({ ...DEFAULT_POSITION })
+        setDraftPosition({ ...DEFAULT_POSITION })
+        setIsEditorOpen(false)
         if (inputRef.current) inputRef.current.value = ''
         onChange?.(true)
     }
 
-    const previewPhoto = sourcePhoto || photo
-
     return (
         <div className="fg" id="photoField">
             <label>Фото</label>
-
-            <div className="photo-upload-row">
-                {previewPhoto && (
-                    <div className="photo-crop-preview">
-                        <img
-                            src={previewPhoto}
-                            alt="Фото"
-                            style={{
-                                objectPosition: `${crop.x}% ${crop.y}%`,
-                                transform: `scale(${crop.zoom})`,
-                            }}
-                        />
-                    </div>
+            <div className="photo-editor">
+                {photo ? (
+                    <button type="button" className="photo-form-preview" onClick={openEditor}>
+                        <span className="photo-form-circle">
+                            <img src={photo} alt="Фото" draggable="false" style={savedPhotoStyle} />
+                        </span>
+                        <span>Натисніть на фото, щоб налаштувати кадр</span>
+                    </button>
+                ) : (
+                    <label className="photo-empty" htmlFor="f-photo">
+                        Додати фото
+                    </label>
                 )}
 
-                <div className="photo-upload-actions">
+                <div className="photo-actions">
                     <input ref={inputRef} type="file" accept="image/*" id="f-photo" onChange={handleFile} />
-                    {previewPhoto && (
+                    {photo && (
                         <div className="photo-buttons">
-                            <button type="button" className="btn btn-ghost btn-sm" onClick={applyCrop}>Застосувати</button>
-                            <button type="button" className="btn btn-danger btn-sm" id="removePhotoBtn" onClick={removePhoto}>Видалити</button>
+                            <label className="photo-upload-link" htmlFor="f-photo">Завантажити інше фото</label>
+                            <button type="button" className="btn btn-danger btn-sm" onClick={removePhoto}>Видалити</button>
                         </div>
                     )}
                 </div>
             </div>
 
-            {previewPhoto && (
-                <div className="photo-crop-controls">
-                    <label>
-                        Горизонтально
-                        <input type="range" min="0" max="100" value={crop.x} onChange={(e) => updateCrop('x', e.target.value)} />
-                    </label>
-                    <label>
-                        Вертикально
-                        <input type="range" min="0" max="100" value={crop.y} onChange={(e) => updateCrop('y', e.target.value)} />
-                    </label>
-                    <label>
-                        Масштаб
-                        <input type="range" min="1" max="2" step="0.05" value={crop.zoom} onChange={(e) => updateCrop('zoom', e.target.value)} />
-                    </label>
+            {isEditorOpen && photo && (
+                <div
+                    className="photo-modal"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Налаштування фото"
+                    onMouseDown={(event) => {
+                        if (event.target === event.currentTarget) closeEditor()
+                    }}
+                >
+                    <div className="photo-modal-card">
+                        <div className="photo-modal-head">
+                            <div>
+                                <strong>Налаштування фото</strong>
+                                <p>Перетягніть фото або прокрутіть колесо миші, щоб налаштувати кадр.</p>
+                            </div>
+                            <button type="button" className="photo-modal-close" onClick={closeEditor} aria-label="Закрити">×</button>
+                        </div>
+
+                        <div className="photo-modal-workspace">
+                            <div
+                                className="photo-stage"
+                                onPointerDown={startDrag}
+                                onWheel={handleWheel}
+                                onDoubleClick={resetPosition}
+                                onDragStart={(event) => event.preventDefault()}
+                            >
+                                <img src={photo} alt="Фото" className="photo-stage-original" draggable="false" style={draftPhotoStyle} />
+                            </div>
+
+                            <div className="photo-round-preview">
+                                <span>Превʼю</span>
+                                <div onPointerDown={startDrag} onWheel={handleWheel} onDragStart={(event) => event.preventDefault()}>
+                                    <img src={photo} alt="Превʼю фото" draggable="false" style={draftPhotoStyle} />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="photo-crop-tools">
+                            <button type="button" className="btn btn-ghost btn-sm" onClick={() => changeScale(-SCALE_STEP)}>Віддалити</button>
+                            <button type="button" className="btn btn-ghost btn-sm" onClick={() => changeScale(SCALE_STEP)}>Наблизити</button>
+                            <button type="button" className="btn btn-ghost btn-sm" onClick={resetPosition}>Показати повністю</button>
+                        </div>
+
+                        <div className="photo-modal-actions">
+                            <button type="button" className="btn btn-ghost btn-sm" onClick={closeEditor}>Скасувати</button>
+                            <button type="button" className="btn btn-copper btn-sm" onClick={applyPosition}>Застосувати</button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
